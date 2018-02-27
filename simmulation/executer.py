@@ -1,11 +1,3 @@
-''' This is a simulation of the real world would be, with observations as return and action as input
-The FluentsValues is going to be kept in self.FluentsValues list. The indexes that belong to different
-fluents are as follows:
-'''
-
-from datetime import datetime
-
-
 class Executer(object):
 
 	def __init__(self,thisWorld):

@@ -1,7 +1,14 @@
 ''' This is a simulation of the real world would be, with observations as return and action as input
 The RealValues is going to be kept in self.RealValues list. The indexes that belong to different
-fluents are as follows:
+fluents are as follows:	
+	LibraryLocked_index = 0
+	LocationRobot_index = 1
+	LocationBook1_index = 2
+	LocationBook2_index = 3
+	In_handBook1_index = 4
+	In_handBook2_index = 5
 '''
+
 from sets import Set
 import subprocess
 import random
@@ -110,38 +117,13 @@ class World(object):
  		#case scenario 1 - just planning, everything goes fine, no unexpected changes in the world. 
 
 		
-		# case scenario 2 Unexpected achievement of the goal: When the agent's action is to put a book down (we know he will only 
-		# do that to put it in the library), if the library is not locked, and if it finds a book outside the library, 
-		# then it will be an exogenous action that moves that book to the library. In that way, the agent will have an 
-		# unexpected achievement of its goal if it is not there, it will move to the other book to the library so that the goal is achieved. 
+		# case scenario 2 Unexpected achievement of the goal
 		if(scenario == 2):
 			if(action[0:8] == 'put_down' and self.RealValues[World.LibraryLocked_index] == 'false'):
 				if(self.RealValues[World.LocationBook1_index] != 'library'):
 					exo_action = 'exo_move(book1,library)'
 				elif(self.RealValues[World.LocationBook2_index] != 'library'):
 					exo_action = 'exo_move(book2,library)'
-
-
-		if(scenario == 4):
-			destination = ""
-			if(action[0:4] == 'move'): destination = action[10:-1]
-			elif(action[0] == 'p'): destination = self.RealValues[World.LocationRobot_index]
-			else:  return exo_action
-
-			choice = random.choice(['book1','book2'])
-			if(choice == 'book1'  and self.RealValues[World.In_handBook1_index] == 'true'): choice = 'book2'
-			elif(choice == 'book2'  and self.RealValues[World.In_handBook2_index] == 'true'): choice = 'book1'
-
-			if(choice == 'book1'):
-				if(self.RealValues[World.LocationBook1_index] != destination and destination != 'library'):
-					if(self.RealValues[World.LibraryLocked_index] == 'false' or self.RealValues[World.LocationBook1_index] != 'library'):
-						exo_action =  'exo_move(book1,' +destination+ ')'
-			
-			elif(choice == 'book2'):
-				if(self.RealValues[World.LocationBook2_index] != destination and destination != 'library'):
-					if(self.RealValues[World.LibraryLocked_index] == 'false' or self.RealValues[World.LocationBook2_index] != 'library'):
-						exo_action =  'exo_move(book2,' +destination+ ')'
-
 
 
 		if(scenario == 3):
@@ -171,12 +153,30 @@ class World(object):
 					newLocation = random.choice(allLocations)
 					if(self.RealValues[World.LibraryLocked_index] == 'false' or newLocation != 'library'):
 						return( 'exo_move(book2,' +newLocation+ ')')
-			
 
-		# case scenario 6 - unexpected failure to execute
-		if(scenario == 6):
-			if self.RealValues[World.LibraryLocked_index] == 'false':
-			    	exo_action = 'exo_lock(library)'
+
+		if(scenario == 4):
+			destination = ""
+			if(action[0:4] == 'move'): destination = action[10:-1]
+			elif(action[0] == 'p'): destination = self.RealValues[World.LocationRobot_index]
+			else:  return exo_action
+
+			choice = random.choice(['book1','book2'])
+			if(choice == 'book1'  and self.RealValues[World.In_handBook1_index] == 'true'): choice = 'book2'
+			elif(choice == 'book2'  and self.RealValues[World.In_handBook2_index] == 'true'): choice = 'book1'
+
+			if(choice == 'book1'):
+				if(self.RealValues[World.LocationBook1_index] != destination and destination != 'library'):
+					if(self.RealValues[World.LibraryLocked_index] == 'false' or self.RealValues[World.LocationBook1_index] != 'library'):
+						exo_action =  'exo_move(book1,' +destination+ ')'
+			
+			elif(choice == 'book2'):
+				if(self.RealValues[World.LocationBook2_index] != destination and destination != 'library'):
+					if(self.RealValues[World.LibraryLocked_index] == 'false' or self.RealValues[World.LocationBook2_index] != 'library'):
+						exo_action =  'exo_move(book2,' +destination+ ')'
+
+
+			
 
 		# case scenario 5 - Failure to achieve goal, diagnosis, and re-planning
 		if(scenario == 5):
@@ -186,8 +186,14 @@ class World(object):
 				elif(self.RealValues[World.In_handBook2_index] == 'true'):
 					exo_action = 'exo_move(book1,kitchen)'
 
-		if(scenario == 'random'):
 
+		# case scenario 6 - unexpected failure to execute
+		if(scenario == 6):
+			if self.RealValues[World.LibraryLocked_index] == 'false':
+			    	exo_action = 'exo_lock(library)'
+
+
+		if(scenario == 'random'):
 			if(random.random()<0.08): return exo_action
 			choice = random.choice(['library','book1','book2'])
 			if(choice == 'library' and self.RealValues[World.LibraryLocked_index] == 'false'): return 'exo_lock(library)'
@@ -207,10 +213,6 @@ class World(object):
 				newLocation = random.choice(allLocations)
 				if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
 					exo_action =  'exo_move(book2,' +newLocation+ ')'
-
-		if(scenario == 'test'):
-			if(action[0] == 'p'): exo_action = 'exo_move(book2,office1)'
-
 		return exo_action
 		
 

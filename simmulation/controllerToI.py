@@ -31,7 +31,6 @@ toi_current_step_index = None
 
 asp_toi_diagnosing_file = 'ASP_TOI_Diagnosis.sp'
 
-historyDiagnosis = None
 
 executer = None
 goal_correction = None
@@ -47,9 +46,7 @@ def controllerToI(newGoal, maxPlanLen, new_executer):
 	global inputForPlanning
 	global goal_correction
 	global currentDiagnosis
-	global historyDiagnosis
 
-	historyDiagnosis = []
 	numberActivities = 1
 	numberSteps = 4
 	maxPlanLength = maxPlanLen
@@ -67,7 +64,6 @@ def controllerToI(newGoal, maxPlanLen, new_executer):
    	currentStep = 1
 	diagnose()
     	finish = False
-
 	while(finish == False):
 		nextAction = runToIPlanning(inputForPlanning)
 
@@ -105,8 +101,7 @@ def controllerToI(newGoal, maxPlanLen, new_executer):
 			actionObservations = executer.executeAction(nextAction)
 		currentStep += 1
 		relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
-		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))
-					
+		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))				
                 diagnose()
 	
 	if(currentDiagnosis != ''): toi_history.append(currentDiagnosis)
@@ -126,8 +121,7 @@ def runToIPlanning(input):
 	global currentStep
 	global believes_goal_holds
 	nextAction = None	
-	print('running ToI planning '
-)
+	print('running ToI planning ')
 
 
 	current_asp_split = preASP_toi_split[:toi_beginning_history_index +1] + input + preASP_toi_split[toi_beginning_history_index +1:]
@@ -154,7 +148,6 @@ def runToIPlanning(input):
 	
         possibleAnswers = answerSet.rstrip().split('\n\n') 
 
-	#chosenAnswer = random.choice(possibleAnswers)
 	chosenAnswer = possibleAnswers[0]
 	split_answer = chosenAnswer.strip('}').strip('{').split(', ') 
 	toi_history = []
@@ -175,7 +168,6 @@ def diagnose():
 
 	global inputForPlanning
 	global currentDiagnosis
-	global historyDiagnosis
 
 	inputForPlanning = []
 	possibleDiagnosis = []
@@ -247,9 +239,6 @@ def preparePreASP_string_lists():
 	toi_current_step_index = preASP_toi_split.index(toi_current_step_marker)
 
 
-
-
-
 def observations_to_obsList(observations, step):
 	obsList = []
 	for observation in observations:
@@ -273,15 +262,6 @@ def observations_to_obsList(observations, step):
 			obsList.append('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
 	return obsList
 	
-
-#MAIN FILE
-#goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
-#initialConditions_traditional = []
-#initialConditions_traditional.append("obs(loc(rob1, library),true,0).")
-#initialConditions_traditional.append("obs(loc(book1,library),true,0).")
-#initialConditions_traditional.append("obs(loc(book2, library),true,0).")
-#initialConditions_traditional.append("obs(locked(library),false,0).")
-#automatedTraditional(goal, initialConditions_traditional)
 
 
 

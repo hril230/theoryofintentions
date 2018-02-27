@@ -1,26 +1,17 @@
 # -*- coding: utf-8 -*-
-'''Python program to run experimental trials in the tidy robot programs (with toi and traditional planning 
+'''Python program to run experimental trials in the agent reasoning programs (with toi and traditional planning 
 Objectives:
 1. Select all possible valid initial states for the objects in the domain. 
-2. Run two pairwise experiment and count the times spent running all steps of each domain. 
+2. Run two pairwise for each initial state. 
 
 How I model different scenarios in realWorld.py:
 
 # scenario 1 - just planning, everything goes fine, no unexpected changes in the world. 
 # scenario 2 - unexpected achievement of goal. 
-	# when the robot is putting down the first book in the library, if the second book 
-	# is not there, it will moved exogenously to the library so that the goal is achieved
-# scenario 3 - not expected achievement of goal (not diagnosis required) and replan
-	# when the robot is in a location other than the library and one of the books (for example 
-	# book 1) is not there, there will be an exogenous action to move that book1 (to the robot's
-	# location so that the original plan would fail, but the robot (with toi) can observe its 
-	# new location and replan.
-# scenario 4 - abandon. Not recreated
-# scenario 6 - unexpected failure to execute
-	# this will lock a door when it is unlocked
-# scenario 5 - Failure to achieve goal, diagnosis, and re-planning
-	# at the same time as the robot is putting down the second book in the library, 
-	# there will be an exogenous move of the other book so that gets located back to the kitchen
+# scenario 3 - unexpected false observation that leads to not expected achievement of goal, diagnosis and replan.
+# scenario 4 - unexpected true observation that leads to not expected achievement of goal, diagnosis and replan.
+# scenario 5 - Failure to achieve goal, diagnosis, and re-planning.
+# scenario 6 - Failure to execute, diagnosis and replaning.
 '''
 
 
@@ -46,11 +37,8 @@ writer = None
 initial_state = []
 
 locations = ['office1', 'office2', 'kitchen', 'library']
-#locations = ['office', 'kitchen', 'library']
 boolean = ['true', 'false']
 
- 
-my_goal = "holds(loc(book1,library),I), -holds(in_hand(rob1,book1),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book2),I)."
 
 runCount = 0
 
@@ -184,7 +172,7 @@ def run_and_write(scenario, initial_conditions_index):
 	#Writing to txt
 	textfile.write("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"   $$$$$$$$$$$$$$$$$$$\n")
         textfile.write("Running Scenario "+str(scenarioRecreated_toi)+"\n")
-	textfile.write("Goal: "+my_goal+"\n")
+	textfile.write("Goal: "+goal+"\n")
 	textfile.write("Initial Conditions: "+str(initial_state)+"\n")
 	textfile.write("Initial Conditions Index: "+str(initial_conditions_index)+"\n")
 	textfile.write("\n\n")
@@ -297,7 +285,7 @@ if __name__ == "__main__":
 	2. experimental_results.txt: A detailed text file that contains initial state, plans and history. 
 	'''
 	reRuns = 0
-	scenarios = ['random']
+	scenarios = [1,2,3,4,5,6,'random']
 	numberRunsRandomScenario = 1000
 
 	for s in scenarios:

@@ -337,10 +337,6 @@ number_unobserved(N,I) :- current_step(I),
 			explaining(I),
 			N = #count{EX:unobserved(EX,IX)}.
 	
-
-%%(28)
-%:-current_step(I),%number_unobserved(N,I), 
-%explanation(X, I),%N!= X. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rules for determining intended action %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
@@ -469,30 +465,6 @@ occurs(start(AN),I) :- current_step(I),
          	     	activity_goal(AN,G),
 			not impossible(start(AN),I).	
 		  	
-%% The following rule guarantees that candidates that are started by rule (Thesis: 5.31) achieve 
-%% the goal by forbidding all answer sets where there was not projected success. If none are left, 
-%% the the goal is futile and the intended action is defined by rules (Thesis: 5.34) and (Thesis: 5.35)
-				   
-%%  (45)
-%:- current_step(I),  
-%	explanation(N, I), 
-%	no_activity_for_goal(G,I),
-%	occurs(start(AN),I),
-%	-projected_success(AN,I),
-%	not futile_goal(G,I).
-
-%% (46)
-%futile_goal(G,I) :- current_step(I),  
-%	explanation(N, I), 
-%	no_activity_for_goal(G,I),
-%	occurs(start(AN),I),
-%	-projected_success(AN,I).
-
-%% (47)
-%intended_action(finish,I) :- current_step(I),  
-%	explanation(N, I), 
-%	no_activity_for_goal(G,I),
-%	futile_goal(G,I).
 
 %% (48)
 some_action_occurred(I1) :-  current_step(I),  

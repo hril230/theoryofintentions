@@ -121,12 +121,6 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% An exogenous lock cannot be done to a locked room.
 -occurs(exo_lock(L),I) :- holds(locked(L),I).
 
-%%%%%%%%%%%%%%
-%% Defaults %%
-%%%%%%%%%%%%%%
-holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-%%holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inertial axiom + CWA
@@ -179,10 +173,6 @@ occurs(A,I):+ not goal(I), #rob_action(A).
 something_happened(I) :- occurs(A, I), #rob_action(A).
 :- not goal(I),
    not something_happened(I).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Diagnosis
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

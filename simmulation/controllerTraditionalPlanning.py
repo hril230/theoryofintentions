@@ -28,10 +28,9 @@ belief_history_marker = '%% *_*_*'
 asp_belief_file = 'ASP_Believe.sp'
 asp_diagnosing_file = 'ASP_Diagnosis.sp'
 preASP_domain_file = 'preASP_Domain.txt'
+
 preASP_belief_split = None
-
 history_index_domain_asp = None
-
 executer = None
 
 def controllerTraditionalPlanning(newGoal, maxPlanLen, new_executer):
@@ -44,26 +43,22 @@ def controllerTraditionalPlanning(newGoal, maxPlanLen, new_executer):
 	global possibleDiagnosis
 	global currentStep
 	global history
-
 	global 	goal_correction 
 
 	allPlans = []
 	currentPlan = []
 	currentStep = 0
 	goal_correction = 0
-
 	maxPlanLength = maxPlanLen
 	executer = new_executer 
 	goal = newGoal	
-
 	belief = ['unknown']*6
+
 	initialConditions = list(executer.getRealValues())
 	history = observations_to_obsList(initialConditions,0)
 
 	preparePreASP_string_lists()
-		
 	needNewPlan = True
-
 	while(needNewPlan == True):
 		diagnose()
 		updateBeliefWithDiagnosis()
@@ -95,9 +90,6 @@ def controllerTraditionalPlanning(newGoal, maxPlanLen, new_executer):
 	return (history, allPlans, goal_correction) 
 
 
-
-# this function will find  minimal Plan AND update the current belief with inferred observations.
-
 def diagnose():
 	global possibleDiagnosis
 
@@ -111,6 +103,7 @@ def diagnose():
 	output_split = output.rstrip().split('\n\n') 
 	possibleDiagnosis = [a.strip('}').strip('{').split(', ') for a in output_split]
 
+
 def updateBeliefWithDiagnosis():
 	chosenDiagnosis = possibleDiagnosis.pop()
 	fluents = []
@@ -123,9 +116,6 @@ def updateBeliefWithDiagnosis():
 	updateBelief_fromAnswer(', '.join(fluents))
 	
 
-
-
-
 def findPlan():	
 	global currentStep
 	global currentPlan
@@ -134,7 +124,6 @@ def findPlan():
 	
 	newPlan = []
 	numSteps = 4
-
 
 	asp_planning_split = preASP_planning_split[:history_index_planning_asp] + getBelief_as_obsList(0) + preASP_planning_split[history_index_planning_asp+1:]
 
@@ -188,6 +177,7 @@ def updateBelief_fromAction(action, observations):
 		return True
 	else: return False
 
+
 def preparePreASP_string_lists():
     	global preASP_planning_split 
     	global preASP_belief_split 
@@ -213,6 +203,7 @@ def preparePreASP_string_lists():
     	reader.close()
 	preASP_belief_split = preASP_belief.split('\n')
     	history_index_domain_asp = preASP_belief_split.index(belief_history_marker)
+
 
 def updateBelief_fromAnswer(answer):
 	global belief 
@@ -260,7 +251,6 @@ def getBelief_as_obsList(step):
 	return obsList
 
 
-
 def observations_to_obsList(observations, step):
 	obsList = []
 	for observation in observations:
@@ -284,16 +274,3 @@ def observations_to_obsList(observations, step):
 			obsList.append('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
 	return obsList
 
-	
-
-
- 
-
-#MAIN FILE
-#goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
-#initialConditions_traditional = []
-#initialConditions_traditional.append("obs(loc(rob1, library),true,0).")
-#initialConditions_traditional.append("obs(loc(book1,library),true,0).")
-#initialConditions_traditional.append("obs(loc(book2, library),true,0).")
-#initialConditions_traditional.append("obs(locked(library),false,0).")
-#automatedTraditional(goal, initialConditions_traditional)
