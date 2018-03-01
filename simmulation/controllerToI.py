@@ -135,7 +135,7 @@ def runToIPlanning(input):
 	f1.close()
 
 	answerSet = subprocess.check_output('java -jar sparc.jar '+ asp_toi_file +' -A ',shell=True)
-	while( "intended_action" not in answerSet and "goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):	
+	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):	
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 		current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
 		asp = '\n'.join(current_asp_split)
@@ -156,7 +156,7 @@ def runToIPlanning(input):
 		if("intended_action" in line):      		
 			nextAction = line[16:line.rfind(',')] 
 		#elif("number_unobserved" in line): continue	
-		elif("goal_holds" in line): 
+		elif("selected_goal_holds" in line): 
 			believes_goal_holds = True
 		else:
 			toi_history.append(line + '.')	
@@ -205,7 +205,7 @@ def diagnose():
 			newLine = line.replace("unobserved", "occurs") + '.'
 			inputForPlanning.append(newLine)
 			currentDiagnosis = line
-		elif("goal_holds" in line): pass
+		elif("selected_goal_holds" in line): pass
 		elif(line == ""): pass
 		else:
 			inputForPlanning.append(line + '.')

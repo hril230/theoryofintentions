@@ -91,10 +91,8 @@ equal_components(#activity_name,#activity_name).
 different_component(#activity_name,#activity_name).
 
 futile_activity(#activity_name,#step).
-futile_goal(#possible_goal,#step).
-planned_action(#agent_action, #step).
 
-goal_holds(#possible_goal,#step).
+selected_goal_holds(#possible_goal,#step).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rules
@@ -534,7 +532,7 @@ intended_action(start(AN),I) :- current_step(I),
 
 
 %% latest addition
-goal_holds(G,I) :- current_step(I), 
+selected_goal_holds(G,I) :- current_step(I), 
 		holds(G,I),
 		occurs(select(G),I1),
 		I1 <= I.
@@ -543,7 +541,7 @@ goal_holds(G,I) :- current_step(I),
 
 intended_action(finish,I) :- current_step(I),
 			explanation(N,I),
-			goal_holds(G,I). 
+			selected_goal_holds(G,I). 
 
 
 
@@ -603,11 +601,10 @@ attempt.
 activity_goal.
 activity_component.
 futile_activity.
-futile_goal.
 activity_length.
 intended_action.
 number_unobserved.
-goal_holds.
+selected_goal_holds.
 unobserved.
 
 

@@ -113,7 +113,7 @@ def run_and_write(scenario, initial_conditions_index):
 	secondActivity = False
 	firstStop = 0
 	for item in history_toi:
-		if('activity' in item or 'finish' in item or 'goal_holds' in item or 'Goal is futile' in item or 'Goal holds' in item or 'unobserved' in item): 
+		if('activity' in item or 'finish' in item or 'selected_goal_holds' in item or 'Goal is futile' in item or 'Goal holds' in item or 'unobserved' in item): 
 			activityInfo.append(item)
 			if('activity_length(1' in item): firstActivityLength = int(item[item.rfind(',')+1:-2])
 		else:
