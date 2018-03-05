@@ -1,3 +1,19 @@
+'''
+This program represnets the Controller of the agent that uses traidtional planning. 
+It needs three arguments:
+1. The goal to be achieved (in terms of the fluents of the domain description).
+2. The length of the longest possible plan of the domain.
+3. An instance of the Executer that will execute the plan and obtain observations from the world. 
+
+Once the controller has run the simmulation, it will return:
+1. The history of his actions and observations (as he believes them).
+2. All the plans that has created during the run.
+3. A boolean specifiying if it has been rectified for having produced, during diagnosis, the false assumption that the goal has been reached when it was not. 
+
+
+The initial coniditions of the knowledge representation of the domain will be observed and given by the executer. In this simmulations, we create it so that the executer can observe the state of the whole domain, and therefore the knowledge of the initial conditions is alwasy complete and True.
+'''
+
 
 from datetime import datetime
 import subprocess
