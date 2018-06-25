@@ -24,6 +24,7 @@ import subprocess
 import  csv
 import random
 
+sparcPath = "$HOME/work/solverfiles/sparc.jar"
 
 goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
 
@@ -58,9 +59,9 @@ def run_and_write(scenario, initial_conditions_index):
 
 	start_time_trad = datetime.now()
 	randomSeed = runCount
-	world_trad = World(initial_state,scenario,randomSeed)
+	world_trad = World(sparcPath,initial_state,scenario,randomSeed)
 	executer = Executer(world_trad)
-	history_trad, plans_trad, goal_correction_trad = controllerTraditionalPlanning.controllerTraditionalPlanning(goal, maxPlanLength, executer)
+	history_trad, plans_trad, goal_correction_trad = controllerTraditionalPlanning.controllerTraditionalPlanning(sparcPath,goal, maxPlanLength, executer)
 	end_time_trad = datetime.now()
 	time_planning_trad = (end_time_trad - start_time_trad).total_seconds()
 	numberPlans_trad = 0
@@ -73,9 +74,9 @@ def run_and_write(scenario, initial_conditions_index):
 	steps_executed_trad = world_trad.getExecutedSteps()
 
 	start_time_toi = datetime.now()
-	world_toi = World(initial_state,scenario,randomSeed)
+	world_toi = World(sparcPath,initial_state,scenario,randomSeed)
 	executer = Executer(world_toi)
-	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(goal, maxPlanLength, executer)
+	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer)
 	end_time_toi = datetime.now()
 	time_planning_toi = (end_time_toi - start_time_toi).total_seconds()
 	historyWorld_toi = world_toi.getHistory()
@@ -149,14 +150,14 @@ def run_and_write(scenario, initial_conditions_index):
 
 	for i in range (reRuns):
 		start_time_trad = datetime.now()
-		world_toi = World(initial_state,scenario)
+		world_toi = World(sparcPath,initial_state,scenario)
 		executer = Executer(world_toi)
 		history_trad, plans_trad, goal_correction_trad   = controllerTraditionalPlanning.controllerTraditionalPlanning(goal, maxPlanLength, executer)
 		end_time_trad = datetime.now()
 		another_time_planning_trad = (end_time_trad - start_time_trad).total_seconds()
 
 		start_time_toi = datetime.now()
-		world_toi = World(initial_state,scenario)
+		world_toi = World(sparcPath,nitial_state,scenario)
 		executer = Executer(world_toi)
 		history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(goal, maxPlanLength, executer, scenario)
 		end_time_toi = datetime.now()

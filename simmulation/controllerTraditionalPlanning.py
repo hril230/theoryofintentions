@@ -49,7 +49,7 @@ preASP_belief_split = None
 history_index_domain_asp = None
 executer = None
 
-def controllerTraditionalPlanning(newGoal, maxPlanLen, new_executer):
+def controllerTraditionalPlanning(thisPath,newGoal, maxPlanLen, new_executer):
 	global belief
 	global executer
 	global maxPlanLength
@@ -60,6 +60,7 @@ def controllerTraditionalPlanning(newGoal, maxPlanLen, new_executer):
 	global currentStep
 	global history
 	global 	goal_correction 
+	global sparcPath
 
 	allPlans = []
 	currentPlan = []
@@ -69,6 +70,7 @@ def controllerTraditionalPlanning(newGoal, maxPlanLen, new_executer):
 	executer = new_executer 
 	goal = newGoal	
 	belief = ['unknown']*6
+	sparcPath = thisPath
 
 	initialConditions = list(executer.getRealValues())
 	history = observations_to_obsList(initialConditions,0)
@@ -115,7 +117,7 @@ def diagnose():
 	f1 = open(asp_diagnosing_file, 'w')
 	f1.write(asp) 
 	f1.close()
-	output = subprocess.check_output('java -jar sparc.jar '+ asp_diagnosing_file +' -A',shell=True)	
+	output = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_diagnosing_file +' -A',shell=True)	
 	output_split = output.rstrip().split('\n\n') 
 	possibleDiagnosis = [a.strip('}').strip('{').split(', ') for a in output_split]
 
@@ -151,7 +153,7 @@ def findPlan():
 		f1.write(asp_planning) 
 		f1.close()
 		print('Looking for next plan (Trad) - numberSteps ' + str(numSteps))
-	        answerSet = subprocess.check_output('java -jar sparc.jar '+asp_planning_file+' -A ',shell=True)
+	        answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' +asp_planning_file+' -A ',shell=True)
 		numSteps +=1
 	
 	if(answerSet == "\n"):
@@ -186,7 +188,7 @@ def updateBelief_fromAction(action, observations):
 	f1.write(asp) 
 	f1.close()
 	print('Next, checking belief-observations consistency ')
-	output = subprocess.check_output('java -jar sparc.jar '+ asp_belief_file +' -A',shell=True)
+	output = subprocess.check_output('java -jar '+ sparcPath + ' ' + asp_belief_file +' -A',shell=True)
 	output = output.strip('}').strip('{')
 	if 'holds' in output:
 		updateBelief_fromAnswer(output)

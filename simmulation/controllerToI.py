@@ -35,7 +35,8 @@ asp_toi_diagnosing_file = 'ASP_TOI_Diagnosis.sp'
 executer = None
 goal_correction = None
 
-def controllerToI(newGoal, maxPlanLen, new_executer):
+
+def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	global executer
 	global maxPlanLength
 	global numberSteps
@@ -46,7 +47,9 @@ def controllerToI(newGoal, maxPlanLen, new_executer):
 	global inputForPlanning
 	global goal_correction
 	global currentDiagnosis
+	global sparcPath
 
+	sparcPath = thisPath
 	numberActivities = 1
 	numberSteps = 4
 	maxPlanLength = maxPlanLen
@@ -134,7 +137,7 @@ def runToIPlanning(input):
 	f1.write(asp) 
 	f1.close()
 
-	answerSet = subprocess.check_output('java -jar sparc.jar '+ asp_toi_file +' -A ',shell=True)
+	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
 	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):	
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 		current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
@@ -143,7 +146,7 @@ def runToIPlanning(input):
 		f1.write(asp) 
 		f1.close()
 		print('Looking for next action (ToI) - numberSteps ' + str(numberSteps))
-		answerSet = subprocess.check_output('java -jar sparc.jar '+ asp_toi_file +' -A ',shell=True)
+		answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
 		numberSteps +=1
 	
         possibleAnswers = answerSet.rstrip().split('\n\n') 
@@ -186,7 +189,7 @@ def diagnose():
 	f1.close()
 
 	# running only diagnosis
-	answerSet = subprocess.check_output('java -jar sparc.jar '+ asp_toi_diagnosing_file +' -A ',shell=True)
+	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_diagnosing_file +' -A ',shell=True)
        	answers = answerSet.rstrip().split('\n\n') 
 
 

@@ -16,6 +16,8 @@ preASP_domain_file = 'preASP_Domain.txt'
 asp_World_file = 'ASP_World.sp'
 history_marker = '%% *_*_*' 
 display_marker = 'display'
+
+
 class World(object):
 	LibraryLocked_index = 0
 	LocationRobot_index = 1
@@ -25,7 +27,7 @@ class World(object):
 	In_handBook2_index = 5
 	DomainLocations = ['office1', 'office2' ,'kitchen','library']
 
-	def __init__(self,initialConditionsWorld, scenario, this_seed):
+	def __init__(self,thisPath,initialConditionsWorld, scenario, this_seed):
 
 		self.RealValues = list(initialConditionsWorld)
 		reader = open(preASP_domain_file, 'r')
@@ -39,6 +41,7 @@ class World(object):
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
+		self.sparcPath = thisPath
 		random.seed(this_seed)
 
 	def __updateRealValues(self,answerSet):
@@ -231,7 +234,7 @@ class World(object):
 		f1 = open(asp_World_file, 'w')
 		f1.write(asp) 
 		f1.close()
-		answer = subprocess.check_output('java -jar sparc.jar '+asp_World_file+' -A',shell=True)
+		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_World_file+' -A',shell=True)
 		self.executionTimeUnits += self.__getexecutionTimeUnits(action)
 		self.executedSteps += 1
 
