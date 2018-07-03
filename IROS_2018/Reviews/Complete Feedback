@@ -1,0 +1,315 @@
+Reviewer 2 of IROS 2018 submission 1571
+
+Comments to the author
+======================
+
+The paper presents an architecture for robots for 
+representing and reasoning of what the authors call
+intentional actions.  Two different resolutions of
+transition diagrams are used: (i) coarse-resolution for
+computing a plan with abstract action for any given goal,
+and (ii) fine-resolution for implementing a sequence of
+concrete actions for each abstract action in (i).  The
+architecture is applied in (1) simulation, (2) a
+manipulating physical robot (Baxter), and (3) in a wheeled
+robot (Turtlebot).
+
+The paper belongs to what appears to be an interesting line
+work, based on the use of logical systems to address
+problems in cognitive robotics. Unfortunately, the current
+manuscript suffers from several serious drawbacks.
+
+First, the authors claim that the proposed architecture
+improves reliability, efficiency and accuracy.	However,
+the way they prove this claim is not rigorous and it is
+therefore far from being conclusive. Several key terms used
+in their evaluation are not clearly defined, like
+"intentional action", "coarse-/fine-grained resolution
+diagrams" and "accuracy".  The baseline method used for
+comparison (the traditional planner TP) is likewise not
+defined: it is not enough to know that this is "an
+ASP-based reasoner that does not include ATI".	What
+reasoner is that? Is it something that other authors have
+access too? Without knowing the details of the algorithm
+and the implementation used as baseline one cannot make
+much sense
+of the comparison, and even less reporoduce the results. 
+Even if we accept the lack of clarity about the baseline,
+the simulation results shown in Table I do not strike me as
+being particularly positive. In addition, the real robot
+experiments are underspecified (what are the set-up, the
+goals, the scenarios?) and no results for them are given
+beside the vague statement that "the performance is similar
+to that observed in the simulation trials".
+
+Second, the authors claim their work contributes to the
+important and difficult problem of how to deal with
+uncertain or incomplete data and how to decrease
+computational
+complexity and increase reliability in automated reasoning
+with this kind of data.  However, it appears that the
+proposed framework is based on crisp logic and it does not
+accommodate uncertainty, but uncertainty is simply
+thresholded away -- as the authors put it,
+"high-probability outcomes ... are elevated to statements
+associated with complete certainty".  This, in my opinion,
+is a way to factor uncertainty out, not a way to deal with
+uncertainty. Dropping the uncertainty seems to be one of
+the
+differences from the authors' previous work [2]. Not
+surprisingly this does reduce computational cost, but of
+course this will come at the price of brittleness.
+
+Third, the presentation should be improved. It is positive
+that the authors base their work on solid previous
+findings, and aim to address weak points in it in the
+current work. However, it is often hard to understand what
+of the presented work was achieved previously and what is
+the novel contribution in the current paper. In fact, the
+authors often presents bits of the framework in terms of
+differences from their previous paper [2], and it is
+difficult for the reader to put all the patches together to
+form a clear mental picture of the whole framework used in
+this paper.
+
+I am confused by Scenario 5: this seems to rely on a strong
+interpretation of the given conjunctive goal, one in which
+both goals must be true at the same time. But this is not
+clear in the way the goal is stated -- which, incidentally,
+is given in terms of tasks, not of states.
+
+There are some classical cognitive architecture references
+missing in the related work, and a clear positioning how
+the presented work relates to them, to planning, goal
+reasoning and action execution. 
+
+The rest of this review provides some fine-grained
+comments, including suggestions for missing references.
+
+---
+
+Sec 1, bulletpoints:
+"Each intended abstract action is implemented as a sequence
+of concrete actions by automatically zooming to the
+relevant part of the fine-resolution system description
+that is defined as a refinement of a coarse-resolution
+system description."
+-->> How is the automatically zooming to the relevant part
+done?
+"The outcomes of executing the concrete actions
+probabilistically are added to the coarse-resolution
+history"
+-->> Probabilistically - how?
+
+Sec 2
+-->> Position your work and add references to planning,
+goal reasoning.
+-->> Look at the work of Tenorth et al. "Knowledge-based
+Specification of Robot Motions." (2014)
+-->> Add references to classical cognitive architectures:
+Anderson et al. "An integrated theory of the mind." (2004),
+Ingrand and Georgeff "An architecture for real-time
+reasoning and system control" (1992), Laird et al. "Soar:
+An architecture for general intelligence" (1987), Rao and
+Georgeff "Modeling rational agents within a
+{BDI}-architecture" (1991)
+
+
+Clarify, add reference:
+-->> Sec 1, last par
+"...probabilistic execution of each concrete action is
+achieved using existing algorithms." -> reference!
+-->> Sec 2, par 2: 
+"However, this architecture did not support the modeling of
+agents that desire to achieve specific goals." -> Why is it
+good to have agents with desires?
+-->> Sec 3, C., bullet-points
+"In this paper, CR-Prolog is used to compute a plan of
+concrete actions from D_f (T ); each concrete action is
+executed using probabilistic algorithms that use the
+corresponding models of uncertainty, significantly reducing
+the computational costs of fine-resolution planning and
+execution." -> What probabilistic algorithms? How to they
+reduce computational cost?
+-->> Sec 3, B., Scenario 5
+How long should the intention persist? Until new goals
+arrive?
+-->> Sec 3, B., par after scenarios
+"As the robot attempts to implement each such action, it
+obtains all observations relevant to this action and the
+intended goal, and adds these observations to history." ->
+How do you determine what are relevant observations?
+-->> Sec 4, C.
+"In fact, as the domain becomes more complex, i.e., there
+are many objects and achieving the desired goal requires
+plans with several steps, there are instances when the
+planning starts becoming computationally intractable. All
+these results provide evidence in support of hypothesis
+H3." -> H3 in Sec 4, p.5 tells the opposite!
+
+
+Minor issues:
+-->> Sec 1
+ASP: Answer Set Prolog (?) -> What is meant assumably is
+Answer Set Programming
+-->> Sec 3
+Fig 3. a unknown -> an unknown
+-->> Sec 3, par 2
+only door between ... -> only the door between...
+-->> Sec 4, B., Execution Example 2:
+With ATI, the robot observes book 1 in [in -> is] not in
+the library , ...
+-->> Sec 4, C.
+Also, if we do not include zooming, the robot takes a
+[REMOVE 'a'] significantly longer to plan...
+-->> Sec 5
+The long-term goal will be [to] enable robots to represent
+and reason reliably...
+
+
+Comments on the Video Attachment
+================================
+
+Text appears and disappears too quickly to be read; hard to
+understand the set-up, the goals, and the course of the
+experiment.
+
+Reviewer 3 of IROS 2018 submission 1571
+
+Comments to the author
+======================
+
+The paper presents an approach to model intentional actions
+in a planning context, in order to allow a robotic system
+to more robustly and flexibly handle unexpected
+observations and plan changes. The authors present this as
+part of a "cognitive architecture" (I challenge the authors
+to define what their definition of a cognitive architecture
+actually is and why they believe theirs is one), and
+evaluate their architecture in a set of relatively pick and
+place operations, mostly in simulation, but with some real
+robot experiments to underpin the suitability of their
+approach.
+The paper is well written and technically sound, however,
+relatively difficult to digest for the reader. I think it
+would help the reader if the main differences between TI
+and ATI would be explained earlier on and the contribution
+to be made clearer. Overall, the work has practical
+implications, as it is not trying to solve a likely
+intractable probabilistic planning problem, but instead
+uses a hierarchical planning approach of refinement and
+zooming. This is good, but I would expect the authors to
+discuss scalability more. The results and the system
+presented at the moment are only discussing very simple
+problems, and I would like to see a discussion of more
+realistic scenarios, e.g. what if there are 100 places to
+consider. Real-world robot experiments are only discussed
+very briefly, mostly because the problems are the very same
+from a planning perspective as the simulated on as they are
+currently used. However, real-world experiments with
+planning only become truly interesting if perception and
+action failures are coming into play. But these are not
+discussed at all and the approach does not seem to have a
+clear methodology to deal with these. The authors state
+that "~50" experiments have been done with the real robot.
+First, why do they only know the approximate number?
+Doesn't look like the did some systematic evaluation.
+Secondly, there is NO discussion of the actual insights
+from these real-world experiments. Did it work on all these
+runs? The authors only state that the results are similar.
+I am a little disappointed that the authors carried out
+real-world experiments but completely forego any more
+substantive discussion of it. How many objects were there?
+What is the state space? Why might it not have worked? How
+did the create "surprises" in the experiments? Many
+questions are unanswered here, the section looks
+suspiciously "added-on" just to have some more credibility
+from putting robot images in the paper, without having
+evaluated this seriously. I like that the authors shared a
+link to their code, however, to be useful, they would have
+to include documentation. I was unable to replicate their
+experiment with the little information given there. 
+A few other issues:
+* The paper contrasts TI and ATI, but TI is only explained
+superficially, as the paper is already 7.5 pages long, it's
+no harm to use the .5 page to help the reader understand
+the differences better.
+* section III.B introduces "attempt" and "-hpd" but it is
+unclear what roles these predicates play for the system (I
+may have missed it).
+* Table I is a little counterintuitive. Why did the authors
+decide to present meaures of ratios TI/ATI. As TI is
+considered a baseline for the comparison, wouldn't ATI/TI
+be much more suited and easier to grasp for the reader?
+Also, "accuracy" needs to be defined. 
+
+Comments on the Video Attachment
+================================
+
+The video helps, but it would have been nicer to also
+include the turtlebot scenario which is very difficult to
+assess practically from the text alone.
+
+Reviewer 5 of IROS 2018 submission 1571
+
+Comments to the author
+======================
+
+The authors show in this paper an approach to determine an
+action sequence which achieves a set of goal. This action
+sequence considers the current state of the world and
+ensures that the goal will be reached even when the
+environment changes. Additionally, the approach allows to
+plan on a coarse level and afterward refine this action to
+ensure proper execution of the robot.
+
+The authors address an important topic in the robotics
+community which is the execution and the planning of action
+sequences which achieve a goal even under changing
+conditions. The approach is also pragmatic enough as it
+does not create a plan which considers every possibility
+beforehand which often does not scale in practices.
+
+Unfortunately, the theoretical background of the idea was
+only scratched thus it is often not clearly defined how the
+planning problem is created. This problem is evident in
+case of a contradicting sensing information. It is not
+clearly defined how the belief of the robot changes after
+the sensing indicates a contradiction to its internal
+belief. The paper mentioned that defaults are used to
+express some rules but do not explain which rules are
+considered for default. Is every action effect a default
+rule or only some action effects a default rule? This
+difference is of importance as it can cause different
+result after the detection of a changed world.
+Furthermore, it is not explained in detail how the
+execution cycle looks like. Is a sense, plan, act cycle? Is
+the refinement done every time a plan is created? Is this
+done after every sensing result is received? Is the sensing
+passive, thus happens this actions without actively
+triggering the actions, or are the planned in each cycle?
+It is also not explained what means different explanations
+are considered if a change in the world is detected. Are
+different explanations calculated and all considered or are
+only specific once considered for further reasoning.
+
+In the experimental section, a more detailed explanation
+what the traditional planer is would be of interest. Thus,
+is plan only once, thus is consider sensing and performs a
+replanning  Also, the runtime for planning and the number
+of executed action would be of interest for the real
+robotic experiments.
+
+Finally, in the relation of the approach to
+belief/knowledge management based method are of interested.
+Also, the relation to hierarchical task networks is of
+interest.
+
+
+Comments on the Video Attachment
+================================
+
+The video shows how the planning and execution of the
+proposed method works. It would be of interest to see how
+the robot recovers from the fault it detects at the end of
+the video.

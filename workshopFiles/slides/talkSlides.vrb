@@ -1,0 +1,20 @@
+\frametitle{Action Language $AL_d$}
+\begin{itemize}
+  \item Formal models of parts of natural language used for describing
+    transition diagrams.
+
+    \ \\
+  \item Hierarchy of basic \textcolor{red}{sorts},
+    \textcolor{red}{statics}, \textcolor{red}{fluents} (basic and
+    defined) and \textcolor{red}{actions}.
+
+    \ \\
+  \item Five types of \textcolor{red}{statements}:
+    \begin{itemize}
+    \item Deterministic causal law.
+    \item Non-deterministic causal law.
+    \item State constraint.
+    \item Definition.
+    \item Executability condition.
+    \end{itemize}
+  \end{itemize}

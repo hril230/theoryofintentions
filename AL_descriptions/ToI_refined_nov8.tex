@@ -1,0 +1,721 @@
+\documentclass[11pt, oneside]{article}   
+\usepackage{geometry}   
+\geometry{a4paper}                   		
+\usepackage{graphicx}				
+\usepackage{float}
+\usepackage{comment}
+\usepackage{amssymb, amsmath,mathtools}
+\usepackage{wrapfig}
+\graphicspath{ {pics/} }
+
+\title{An Intentional Robot - Extending with a Refinement-Based Architecture}
+\author{Rocio Gomez and Heather Riley}
+
+%\allowdisplaybreaks
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+
+\begin{document}
+\maketitle
+
+
+\section{Adding Non-Determinism to our Model}
+In this section we describe a preliminary architecture to add non-determinism to an Intentional Agent. This addition is based on the Refinement-Based Architecture presented in \cite{sridharan2017refinement}. The purpose of this work is to have a domain represented in two different granularities (one at coarse resolution, and another one at a fine resolution) and an architecture for an agent to be able to reason at two different levels. At this stage we are only going to focus on creating a fine-grain resolution model of our original domain. 
+
+
+\section{Adding Refinement}
+The fine-resolution description is written in $\mathcal(AL_d)$.  The $\mathcal(AL_d)$ language is an extension of the $\mathcal(AL)$ language that allows non-boolean fluents and non-deterministic causal laws. This concept has been introduced in \cite{sridharan2017refinement}.
+
+When we look at our initial physical domain (at coarse resolution) we identify three rooms. Looking at the same environment at a fine-grained resolution we observe that each room has four cells in it. 
+
+\subsection{Statics and Static Relations}
+
+These static relations refer to the layout seen in Fig. 1.
+\begin{figure}[t]
+\centering
+\includegraphics[scale = 0.3]{roomCells}\par
+\caption{The layout cells in rooms}
+\end{figure}
+
+Following the steps of the proposed methodology, the static sorts and relations on the $\mathcal(AL)$ that will change or be added are:
+ \begin{align*}
+  &secure\_room^* = \{library\}.\\
+  &room^* = secure\_room^* +\{kitchen, office\}.
+\end{align*}
+
+We add the newly discovered cells in the rooms. 
+ \begin{align*}
+  &cell = \{c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12\}.
+\end{align*}
+
+ Another static added to the description is
+ \begin{align*}
+  &outcome = \{true, false, undet\}.
+\end{align*}
+
+The static relation $next\_to(room, room)$ will adopt the name $next\_to^*(room^*, room^*)$, and we add the new static relations between cells as $next\_to(cell, cell)$. So we have:
+\begin{align*}
+&next\_to^*(library, kitchen).\ next\_to^*(kitchen, office).\\
+ & next\_to(c1,c2).\ next\_to(c1,c3).\ next\_to(c2,c4).\ next\_to(c3,c4).\\
+ &next\_to(c5,c6).\ next\_to(c5,c7).\ next\_to(c6,c8).\ next\_to(c7,c8).\\
+ &next\_to(c9,c10).\ next\_to(c9,c11).\ next\_to(c10,c12).\ next\_to(c11,c12).\\
+ &next\_to(c4,c7).\ next\_to(c8,c11).\\
+\end{align*}
+
+We add a static relation $comp(o_i, o)$ which holds iff object $o_i$ is an newly discovered component of $o$.
+\begin{align*}
+&comp(c1, office).\ comp(c2, office).\ comp(c3, office).\ comp(c4, office).\\
+&comp(c5, kitchen).\ comp(c6, kitchen).\ comp(c7, kitchen).\ comp(c8, kitchen).\\
+&comp(c9, library).\ comp(c10, library).\ comp(c11, library).\ comp(c12, library).
+\end{align*}
+
+We add a static relation $next\_to\_door(C, R)$ which holds iff cell C is next to the door of room R.
+\begin{align*}
+&next\_do\_door(c8, library).\\
+&next\_to\_door(c11, library).
+\end{align*}
+
+
+
+\subsection{Fluents}
+The physical fluents that will be modified are $loc^*(thing, room^*)$ and $locked^*(secure\_room^*)$. They both will become physical defined fluents.  We also include new inertial fluents $loc(thing,cell)$. Physical inertial fluent $in\_hand(robot,object)$ as well as all other mental fluents remain the same.
+
+We add two new types of fluents called knowledge\ inertial\ fluents:
+ \begin{align*} 
+ &knowledge\_inertial\_fluent\ =\\
+ &\hspace{50pt}can\_be\_tested(my\_agent, physical\_inertial\_fluent)\ +\\
+ &\hspace{50pt}directly\_observed(my\_agent, physical\_inertial\_fluent, outcome)\ +\\
+ &\hspace{50pt}indirectly\_observed(my\_agent, physical\_defined\_fluent, outcome)
+ \end{align*}
+ 
+ and knowledge\ defined\ fluents:
+\begin{align*}
+&knowledge\_defined\_fluent\ =\\
+&\hspace{50pt}may\_discover(my\_agent, physical\_defined\_fluent)\ +\\
+&\hspace{50pt}observed(my\_agent,physical\_fluent)
+\end{align*}
+
+The definition of the set of inertial fluents, defined fluents includes the new fluent subsets: 
+\begin{align*}
+Inertial\ fluents\ =\ &physical\ inertial\ fluents\ +\\ &mental\ inertial\ fluents\ +\\ &knowledge\ inertial\ fluents.\\
+Defined\ fluents\ =\ &physical\ defined\ fluents\ +\\ &mental\ defined\ fluents\ +\\ &knowledge\ defined\ fluents.
+\end{align*}
+
+
+
+\subsection{Actions}
+We modify some physical actions: $move(robot,cell)$ and $exo\_move(object,cell)$.
+
+There is a new action called the knowledge-producing action: $test(robot,physical\_inertial\_fluent, boolean)$
+
+\subsection{Axioms}
+Most axioms are syntactically identical to the axioms in the coarse-resolution model. Those that are changed or added are listed below.
+
+We change four executability conditions related to the constraints of moving to a cell in a locked room, or moving an object to a cell in a locked room.
+
+ The original executability conditions were:
+ \begin{align*}
+   \mathbf{impossible}\quad move(rob1,R2)~~\mathbf{if}&\quad loc(rob1,R1),\ locked(R1). \\
+  \mathbf{impossible}\quad move(rob1,R)~~\mathbf{if}&\quad locked(R). \\
+  \mathbf{impossible}\quad exo\_move(O,R)~~\mathbf{if}&\quad locked(R).\\
+  \mathbf{impossible}\quad exo\_move(O,R2)~~\mathbf{if}&\quad loc(O,R1), locked(R1).
+\end{align*}
+
+and now we have:
+\begin{align*}
+   \mathbf{impossible}\quad move(rob1,C2)~~\mathbf{if}&\quad loc(rob1,C1), comp(C1,R1), comp(C2,R2), locked^*(R1), R1 != R2. \\ 
+  \mathbf{impossible}\quad move(ro1,C1)~~\mathbf{if}&\quad loc(rob1,C2), comp(C1,R1), comp(C2,R2), locked^*(R1), R1 != R2. \\
+  \mathbf{impossible}\quad exo\_move(O,C1)~~\mathbf{if}&\quad loc(O, C2), comp(C1, R1), comp(C2, R2), locked^*(R1), R1 != R2.\\
+  \mathbf{impossible}\quad exo\_move(O,C2)~~\mathbf{if}&\quad loc(O,C1), comp(C1, R1), comp(C2, R2), locked^*(R1), R1 != R2.
+\end{align*}
+
+We also add an executability condition to ensure that a room can only be unlocked when a robot is in a cell next to the door.
+\begin{align*}
+  \mathbf{impossible}\quad unlock^*(rob1, R)~~\mathbf{if}&\quad loc(rob1, C),~\neg next\_to\_door(C, R).\\
+\end{align*}
+
+We also add an axiom that defines fluent $loc^*(thing, room)$ in terms of $loc(thing, cell)$. 
+
+\begin{align*}
+loc^*(T,R)\quad \mathbf{if}&\quad loc(T,C),~comp(C,R).\\
+\end{align*}
+
+We aslo add a definition of the static relation $next\_to^*$
+\begin{align*}
+next\_to^*(R1,R2)\quad \mathbf{if}~&next\_to^*(C1,C2),~comp(C1,R1),~comp(C2,R2).\\
+\end{align*}
+
+
+\section{$AL_d$ of the fine-resolution version of our model.}
+
+Sorts:
+\begin{allowdisplaybreaks}
+\begin{align*}
+  &secure\_room^* = \{library\}.\\
+  &room^* = secure\_room^* +\{kitchen, office\}.\\
+    &cell = \{c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12\}.\\
+  &robot = \{rob1\}.\\
+  &book = \{book1, book2\}.\\
+  &object = book.\\
+  &thing = object\ +\ robot.\\
+  &index = \{-1,\dots ,max\_len\}.\\
+  &activity\_name = \{1, \dots, max\_name\}.\\
+  &boolean = \{true, false\}.\\
+  &outcome = \{true, false, undet\}
+  \\
+  &physical\_inertial\_fluent =  loc(thing, cell) +\\
+  &\hspace{50pt} in\_hand(robot,object) +\\
+  &\hspace{50pt} locked^*(secure\_room^*). \\
+  &possible\_goal = my\_goal.\\
+  &physical\_defined\_fluent = possible\_goal + {loc^*(thing, room^*)}.\\
+  \\
+  &mental\_inertial\_fluent =  active\_goal(possible\_goal) +\\
+&\hspace{50pt} next\_available\_name(activity\_name) +\\
+&\hspace{50pt} current\_action\_index(activity\_name, index).\\
+&mental\_defined\_fluent = active\_activity(activity\_name)+\\
+&\hspace{50pt} next\_action(activity\_name, action)+\\
+&\hspace{50pt} in\_progress\_activity(activity\_name)+\\
+&\hspace{50pt} in\_progress\_goal(possible\_goal).\\
+\\
+ &knowledge\_inertial\_fluent\ =\\
+ &\hspace{50pt}can\_be\_tested(my\_agent, physical\_inertial\_fluent)\ +\\
+ &\hspace{50pt}directly\_observed(my\_agent, physical\_inertial\_fluent, outcome)\ +\\
+ &\hspace{50pt}indirectly\_observed(my\_agent, physical\_defined\_fluent, outcome).\\
+&knowledge\_defined\_fluent\ =\\
+&\hspace{50pt}may\_discover(my\_agent, physical\_defined\_fluent)\ +\\
+&\hspace{50pt}observed(my\_agent,physical\_fluent).\\
+\\
+&defined\_fluent = physical\_defined\_fluent +\\ 
+&\hspace{50pt}mental\_defined\_fluent +\\
+&\hspace{50pt}knowledge\_defined\_fluent.\\
+\\
+&inertial\_fluent = physical\_inertial\_fluent + \\
+&\hspace{50pt}mental\_inertial\_fluent +\\
+&\hspace{50pt}knowledge\_inertial\_fluent.\\
+\\
+&physical\_agent\_action =   move(robot, cell) +\\
+  &\hspace{50pt} pickup(robot,object) +\\
+  &\hspace{50pt}\quad put\_down(robot,object) +\\
+  &\hspace{50pt}\quad unlock^*(robot,secute\_room^*).\\
+&mental\_agent\_action =   start(activity\_name) +\\
+  &\hspace{50pt}\; stop(activity\_name).\\
+  &agent\_action = mental\_agent\_action + physical\_agent\_action + \{finish\}.\\
+\\
+&physical\_exogenous\_action = exo\_move(object, cell) + \\
+  &\hspace{50pt}\quad exo\_lock^*(secure\_room^*).\\
+  &mental\_exogenous\_actions = select(possible\_goal) + \\
+&\hspace{50pt}\quad  abandon(possible\_goal).\\
+\\
+&exogenous\_action = physical\_exogenous\_action + mental\_exogenous\_action.
+\end{align*}
+\end{allowdisplaybreaks}
+ 
+ Static relations:
+\begin{align*}
+ & next\_to(c1,c2).\ next\_to(c1,c3).\ next\_to(c2,c4).\ next\_to(c3,c4).\\
+ &next\_to(c5,c6).\ next\_to(c5,c7).\ next\_to(c6,c8).\ next\_to(c7,c8).\\
+ &next\_to(c9,c10).\ next\_to(c9,c11).\ next\_to(c10,c12).\ next\_to(c11,c12).\\
+ &next\_to(c4,c7).\ next\_to(c8,c11).\\
+ \\
+&comp(c1, office).\ comp(c2, office).\ comp(c3, office).\ comp(c4, office).\\
+&comp(c5, kitchen).\ comp(c6, kitchen).\ comp(c7, kitchen).\ comp(c8, kitchen).\\
+&comp(c9, library).\ comp(c10, library).\ comp(c11, library).\ comp(c12, library).
+\\
+  &activity\_component(activity\_name, index, physical\_agent\_action).\\
+  &activity\_length(activity\_name, index).\\
+  &activity\_goal(activity\_name, possible\_goal).\\
+\\
+  &next\_to\_door(c8, library).\\
+  &next\_to\_door(c11, library).
+\end{align*}
+
+
+
+Causal Laws:
+\begin{align*}
+  move(rob1,C)\quad \mathbf{causes}&\quad loc(rob1,C)\\
+  pickup(rob1,O)\quad \mathbf{causes}&\quad in\_hand(rob1,O). \\
+  put\_down(rob1,O)\quad \mathbf{causes}&\quad \neg in\_hand(rob1,O).\\
+  unlock^*(rob1,R)\quad \mathbf{causes}&\quad \neg locked^*(R).\\
+  exo\_lock^*(R)\quad \mathbf{causes}&\quad locked^*(R).\\
+  exo\_move(O,C)\quad \mathbf{causes}&\quad loc(O,C).\\
+\end{align*}
+
+
+State Constraints:
+\begin{align*}
+  next\_to(R1,R2)\quad \mathbf{if}&\quad next\_to(R2,R1).\\
+  \neg loc(T, R2)\quad \mathbf{if}&\quad loc(T, R1), ~R1 \neq R2.\\
+  loc(O, R)\quad \mathbf{if}&\quad loc(rob1, R),~in\_hand(rob1,O).\\
+  \neg in\_hand(rob1,O1)\quad \mathbf{if}&\quad in\_hand(rob1,O2),~ O1 \neq O2.\\
+loc^*(T,R)\quad \mathbf{if}&\quad loc(T,C),~comp(C,R).\\
+next\_to^*(R1,R2)\quad \mathbf{if}&\quad next\_to^*(C1,C2),~comp(C1,R1),~comp(C2,R2).
+\end{align*}
+
+
+
+Executability Conditions:
+\begin{align*}
+  \mathbf{impossible}\quad move(rob1, C)~~\mathbf{if}&\quad loc(rob1,C).\\
+  \mathbf{impossible}\quad move(rob1, C2)~~\mathbf{if}&\quad loc(rob1,C1),~\neg next\_to(C1,C2).\\
+   \mathbf{impossible}\quad move(rob1,C2)~~\mathbf{if}&\quad loc(rob1,C1), comp(C1,R1), comp(C2,R2), locked^*(R1), R1 != R2.\\ 
+  \mathbf{impossible}\quad move(rob1,C1)~~\mathbf{if}&\quad loc(rob1,C2), comp(C1,R1), comp(C2,R2), locked^*(R1), R1 != R2.\\
+  \mathbf{impossible}\quad unlock^*(rob1, R)~~\mathbf{if}&\quad \neg locked^*(R).\\
+  \mathbf{impossible}\quad unlock^*(rob1, R1)~~\mathbf{if}&\quad loc^*(rob1,R2),~\neg next\_to^*(R2,R1),~R2\neq R1.\\
+  \mathbf{impossible}\quad unlock^*(rob1, R)~~\mathbf{if}&\quad loc(rob1, C),~\neg next\_to\_door(C, R).\\
+  \mathbf{impossible}\quad put\_down(rob1,O)~~\mathbf{if}&\quad \neg in\_hand(rob1,O).\\
+  \mathbf{impossible}\quad pickup(rob1,O1)~~\mathbf{if}&\quad in\_hand(rob1,O2).\\
+  \mathbf{impossible}\quad pickup(rob1,O)~~\mathbf{if}&\quad loc(rob1,R1),~loc(O,R2),~R1 \neq R2.\\
+  \mathbf{impossible}\quad exo\_move(O,R)~~\mathbf{if}&\quad loc(O,R)\\
+  \mathbf{impossible}\quad exo\_move(O,C1)~~\mathbf{if}&\quad loc(O, C2), comp(C1, R1), comp(C2, R2), locked^*(R1), R1 != R2.\\
+  \mathbf{impossible}\quad exo\_move(O,C2)~~\mathbf{if}&\quad loc(O,C1), comp(C1, R1), comp(C2, R1), locked^*(R1), R1 != R2.\\
+  \mathbf{impossible}\quad exo\_move(O,L)~~\mathbf{if}&\quad in\_hand(rob1,O).\\
+  \mathbf{impossible}\quad exo\_lock^*(R)~~\mathbf{if}&\quad locked^*(R).
+\end{align*}
+
+Defaults:
+\begin{align*}
+  loc(O, library)~~\mathbf{if}&\quad \#book(O),~not~\neg loc(O, library).\\
+  loc(O, office)~~\mathbf{if}&\quad \#book(O),~\neg loc(O, library),~not~\neg loc(O, office).\\
+\end{align*}
+	 			  				 			  	 			             
+
+\subsection{ToI Axioms}
+In the next section we use possible indexed variables $AN$ to represent activity names, and similarly for indices $K$, possible goals $G$, mental agent actions $MAA$, physical agent actions $PAA$,
+agent actions $AA$, physical exogenous actions $PEA$, mental exogenous actions also called mental exogenous actions $MEA$ and exogenous actions $EA$.
+
+The $\mathcal{AL}$ statements of the $\mathcal{TI}$ are:\newline
+Causal Laws:
+\begin{align}\begin{split}
+ start(AN)\quad &\mathbf{causes} \quad current\_action\_index(AN, 0). \\
+ stop(AN)\quad &\mathbf{causes} \quad current\_action\_index(AN, -1). 
+\end{split}\end{align}
+\begin{align}\begin{split}
+select(G)\quad &\mathbf{causes} \quad active\_goal(G). \\
+abandon(G)\quad &\mathbf{causes} \quad \neg active\_goal(G). 
+\end{split}\end{align}
+\begin{align}\begin{split}
+PAA\quad \mathbf{causes} \quad current\_action\_index(AN, K+1)\quad \mathbf{if}\quad &next\_action(AN, PAA), \\
+&current\_action\_index(AN, K),\\
+&activity\_component(AN, K+1, PAA).
+\end{split}\end{align}
+\begin{align}\begin{split}
+start(AN) \quad \mathbf{causes} \quad next\_available\_name(AN+1) \quad \mathbf{if}\quad next\_available\_name(AN). 
+\end{split}\end{align}
+
+State Constraints:
+\begin{align}\begin{split}
+\neg current\_action\_index(AN, K1)  \quad  \mathbf{if}\quad & current\_action\_index(AN, K2), \\
+ \quad & K1\neq K2.
+ \end{split}\end{align}
+\begin{align}\begin{split}
+ active\_activity(AN)\quad  \mathbf{if} \quad & \neg current\_action\_index(AN, -1). 
+\end{split}\end{align}
+\begin{align}\begin{split}
+\neg active\_goal(G) \quad \mathbf{if} \quad G. 
+\end{split}\end{align}
+\begin{align}\begin{split}
+in\_progress\_activity(AN) \quad \mathbf{if}\quad &active\_activity(AN).\\
+&activity\_goal(AN, G),\\
+&active\_goal(G).\\
+in\_progress\_goal(G) \quad \mathbf{if}\quad &active\_activity(AN).\\
+&activity\_goal(AN, G),\\
+&active\_goal(G). 
+\end{split}\end{align}
+\begin{align}\begin{split}
+next\_action(AN, PAA)\quad \mathbf{if}\quad & current\_action\_index(AN, K),\\
+&activity\_component(AN, K+1, PAA),\\
+&in\_progress\_activity(AN).
+\end{split}\end{align}
+\begin{align}\begin{split}
+\neg next\_available\_name(AN) \quad \mathbf{if}\quad & next\_available\_name(AN1), \\
+& AN\neq AN1.
+\end{split}\end{align}
+\begin{align}\begin{split}
+my\_goal \quad \mathbf{if}\quad & \%~definition~added~at~run~time.
+\end{split}\end{align}
+
+
+
+Executability Conditions:
+\begin{align}\begin{split}
+\mathbf{impossible}\quad  start(AN)\quad  & \mathbf{if}\quad active\_activity(AN). \\
+\mathbf{impossible}\quad  stop(AN)\ \quad  & \mathbf{if}\quad  \neg active\_activity(AN). 
+\end{split}\end{align}
+\begin{align}\begin{split}
+&\mathbf{impossible}\quad  PAA, MAA. \\
+&\mathbf{impossible}\quad  MAA1, MAA2\quad \mathbf{if} \quad MAA1\neq MAA2.
+\end{split}\end{align}
+\begin{align}\begin{split}
+&\mathbf{impossible}\quad  PAA, \ finish. \\
+&\mathbf{impossible}\quad  MAA, \ finish.
+\end{split}\end{align}
+\begin{align}\begin{split}
+\mathbf{impossible}\quad select(G)\ \ \ \:\quad &\mathbf{if} \quad active\_goal(G). \\
+\mathbf{impossible}\quad abandon(G) \quad &\mathbf{if} \quad \neg active\_goal(G). 
+\end{split}\end{align}
+\begin{align}\begin{split}
+&\mathbf{impossible}\quad  PAA, MEA. \\
+&\mathbf{impossible}\quad  PEA, MEA. \\
+&\mathbf{impossible}\quad  MAA, MEA. 
+\end{split}\end{align}
+
+\subsection{Rules for past history and observations}
+
+\begin{align}\begin{split}
+holds(F, 0)  \quad \leftarrow \quad\ &obs(F,true,0).\\
+\neg holds(F, 0)  \quad \leftarrow \quad\ &obs(F,false,0).
+\end{split}\end{align}
+
+
+Reality check axioms which guarantee the agent's observations of the past do not contradict his expectations.
+\begin{align}\begin{split}
+\leftarrow \quad\ &current\_step(I1),\\
+&I \leq I1,\\
+&obs(F, false, I),\\
+&holds(F, I).\\
+\leftarrow \quad\ &current\_step(I1),\\
+&I \leq I1,\\
+&obs(F, true, I),\\
+&\neg holds(F, I).
+\end{split}\end{align}
+
+The occurrences of actions that are observed to have happened or not happened did actually occur or not occur.
+\begin{align}\begin{split}
+occurs(A, I)  \quad \leftarrow \quad\ &current\_step(I1),\\
+&I < I1,\\
+&hpd(A, true, I).\\
+\neg occurs(A, I) \quad \leftarrow \quad\ &current\_step(I1),\\
+&I < I1,\\
+&hpd(A, false, I).
+\end{split}\end{align}
+
+If an observation did not occur is due to the violation of an executability condition for that action.
+\begin{align}\begin{split}
+occurs(AA, I)  \quad \leftarrow \quad\ &current\_step(I1),\\
+&I<I1,\\
+&attempt(AA,I),\\
+&not\ impossible(AA,I).\\
+\leftarrow \quad\ &current\_step(I1),\\
+&I<I1,\\
+&occurs(AA,I),\\
+&not\ attempt(AA,I).
+\end{split}\end{align}
+
+The agent's controller does not simultaneously select multiple goals and only selects a goal when the agent has neither an active goal or an active activity.
+\begin{align}\begin{split}
+impossible(select(G),I) \quad \leftarrow \quad\ &current\_step (I1),\\
+&I<I1,\\
+&occurs(select(G1), I),\\
+&G\neq G1.\\
+impossible(select(G),I)  \quad \leftarrow \quad\ &current\_step (I1),\\
+&I<I1,\\
+&holds(active\_activity(AN), I).\\
+impossible(select(G),I)  \quad \leftarrow \quad\ &current\_step (I1),\\
+&I<I1,\\
+&holds(active\_goal(G1), I).
+\end{split}\end{align}
+
+Initial observations must be legal:
+\begin{align}\begin{split}
+holds(current\_action\_index(AN, -1), 0).\\
+\neg holds(active\_goal(G), 0).\\
+holds(next\_available\_name(1), 0).
+\end{split}\end{align}
+
+The agent always observes the results of his attempts to perform actions.
+\begin{align}\begin{split}
+observed\_result(AA,I) \quad \leftarrow \quad\ &current\_step (I1),\\
+&I\leq I1,\\
+&hpd(AA,B,I).\\
+\leftarrow \quad\ &current\_step (I1),\\
+&I\leq I1,\\
+&attempt(AA,I),\\
+&not\ observed\_result(AA,I).
+\end{split}\end{align}
+
+The agent always observes the actions performed by his controller. 
+\begin{align}\begin{split}
+\leftarrow \quad &current\_step(I1),\\
+&I<I1,\\
+&occurs(select(G),I),\\
+&not\ hpd(select(G), true, I).\\
+\leftarrow \quad &current\_step(I1),\\
+&I<I1,\\
+&occurs(abandon(G),I),\\
+&not\ hpd(abandon(G), true, I).
+\end{split}\end{align}
+
+\subsection{Diagnosis of Unexpected Observations}
+This limits the number of unobserved occurrences of exogenous actions to the minimal number of unobserved actions necessary to satisfy the unexpected observations.
+\begin{align}\begin{split}
+occurs(PEA,I)  \quad \stackrel{\mathclap{\normalfont\mbox{+}}}{\leftarrow}  \quad &current\_step(I1),\\
+&I<I1,\\
+&explaining(I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+unobserved(PEA,I) \quad \leftarrow \quad &current\_step(I1), \\
+&I < I1,\\
+&explaining(I),\\
+&occurs(PEA,I),\\
+&not\ hpd(PEA,true,I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+number\_unobserved(N, I) \quad \leftarrow \quad &current\_step(I),\\
+&N = \#count\{EX: unobserved(EX, IX)\},\\
+&explaining(I).
+\end{split}\end{align}
+%\begin{align}\begin{split}
+%\quad \leftarrow \quad &current\_step(I),\\
+%&number\_unobserved(N,I),\\
+%&explanation(X,I),\\
+%&N \neq X.
+%\end{split}\end{align}
+
+\subsection{Rules for Finding Intended Actions}
+Activities must be unique.
+\begin{align}\begin{split}
+different\_component(AN,AN1)\quad \leftarrow \quad &activity\_component(AN,K,AA),\\
+&activity\_component(AN1, K, AA1),\\
+&AA \neq AA1.\\
+\\
+identical\_components(AN,AN1)\quad \leftarrow \quad &activity\_length(AN,L),\\ 
+&activity\_length(AN1,L),\\
+&not\ different\_component(AN,AN1).\\
+\\
+identical\_activities(AN,AN1)\quad \leftarrow \quad &activity\_goal(AN,G), \\ 
+&activity\_goal(AN1,G),\\
+&identical\_components(AN,AN1).\\
+\\
+\leftarrow \quad &identical\_activities(AN,AN1),\\
+&AN\neq AN1.
+\end{split}\end{align}
+
+
+The choice of the intended next action depends on the history and other added observations of the present state. 
+A history can imply three different situations:
+
+
+The situation in which we have an active goal, but no active activity for this goal, so the goal is not in progress. This situation happens at the beginning, just after the goal has been selected but the activity has not been created, or when an activity has  stopped because it is futile and another activity is necessary.
+\begin{align}\begin{split}
+no\_activity\_for\_goal(G,I)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&holds(active\_goal(G),I),\\
+&\neg holds(in\_progress\_goal(G),I).
+\end{split}\end{align}
+
+The situation in which  we have an active activity $AN$, but the goal of the activity is not active any longer. This may be the case because the goal of the activity has been reached, or because  the goal of the activity is futile. \begin{align}\begin{split}
+no\_goal\_for\_activity(AN,I)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&holds(active\_activity(AN),I),\\
+&activity\_goal(AN,G),\\
+&\neg holds(active\_goal(G),I).
+\end{split}\end{align}
+
+The situation in which we have an active activity $AN$, and an active goal, so the goal is in progress.
+\begin{align}\begin{split}
+active\_goal\_activity(AN,I)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&holds(in\_progress\_activity(AN),I).
+\end{split}\end{align}
+
+
+Now we give the rules that describe the agent's intended action for each situation. We start from the end. When the activity is active, but not its goal (because it has been reached or because it is a futile goal), the intended next action is to finish.
+\begin{align}\begin{split}
+intended\_action(finish,I)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_goal\_for\_activity(AN,I).
+\end{split}\end{align}
+
+The following four rules determine the next intended action in the situation in which there is an active goal and an active activity. The first three rules will determine if the active activity $AN$ still has a projected success (i.e. would achieve the goal according to the current situation). The fourth rule gives the intended action if the activity has projected success.  
+\begin{align}\begin{split}
+occurs(AA,I1)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&I \leq I1,\\
+&active\_goal\_activity(AN,I),\\
+&holds(in\_progress\_activity(AN),I1),\\
+&holds(next\_action(AN,AA),I1),\\
+&not\ impossible(AA,I1).
+\end{split}\end{align}
+\begin{align}\begin{split}
+projected\_success(AN,I) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&I < I1,\\     
+&holds(active\_activity(AN),I1),\\
+&activity\_goal(AN,G),\\            
+ &holds(G,I1).
+\end{split}\end{align}
+\begin{align}\begin{split}
+\neg projected\_success(AN,I) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&not\ projected\_success(AN,I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+intended\_action(AA,I)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&active\_goal\_activity(AN,I),\\
+&holds(next\_action(AN,AA),I),\\
+&projected\_success(AN,I).
+\end{split}\end{align}
+
+If the active activity has projected success, the intention is given by the above rule. If the activity does not have projected success, the activity is declared futile (next two rules) and the intended action is to stop.
+\begin{align}\begin{split}
+ \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+	&active\_goal\_activity(AN,I),\\
+	&\neg projected\_success(AN,I),\\
+	&not\ futile\_activity(AN,I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+futile\_activity(AN,I)\quad \stackrel{\mathclap{\normalfont\mbox{+}}}{\leftarrow}  \quad  &current\_step(I),\\
+&explanation(N,I),\\
+	&active\_goal\_activity(AN,I),\\
+	&\neg projected\_success(AN,I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+intended\_action(stop(AN),I) \quad \leftarrow  \quad &current\_step(I),\\
+&explanation(N,I),\\
+	&active\_goal\_activity(AN,I),\\
+	&futile\_activity(AN,I).
+\end{split}\end{align}
+
+The following rules determine the intended action in the situation in which we have an active goal $G$, but not an active activity yet. The intended action in this case is to either $start$ and activity which execution is expected to achieve the goal $G$ in as few occurrences of physical actions as possible, or to $finish$ if there is no such activity. The activity with goal $G$ under consideration is called $candidate$. The first intended action is to $start$ a candidate that has a $total\ execution$ that is $minimal$. There may be more than one candidate with a minimal total execution but the agent will only attempt to perform one of them.
+\begin{align}\begin{split}
+candidate(AN,I) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&holds(next\_available\_name(AN),I).
+\end{split}\end{align}
+
+\begin{align}\begin{split}
+activity\_goal(AN,G) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I).
+\end{split}\end{align}
+
+Only one activity can start at a time.
+\begin{align}\begin{split}
+impossible(start(AN),I) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&activity\_goal(AN1,G),\\
+&occurs(start(AN1),I),\\
+&AN\neq AN1.
+\end{split}\end{align}
+\begin{align}\begin{split}
+occurs(start(AN),I) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&activity\_goal(AN,G),\\
+&not\ impossible(start(AN),I).
+\end{split}\end{align}
+
+
+The following rule guarantees that candidates that have started (by rule given above) are expected to achieve the goal. If there is not a candidate that can achieve the goal (or not have a projected success), the goal is futile and the intended action is to finish. 
+\begin{align}\begin{split}				   
+\leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&occurs(start(AN),I),\\
+&\neg projected\_success(AN,I),\\
+&not\ futile\_goal(G,I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+futile\_goal(G,I)\quad \stackrel{\mathclap{\normalfont\mbox{+}}}{\leftarrow}  \quad  &current\_step(I),\\
+&explanation(N,I),\\
+	&no\_activity\_for\_goal(G,I),\\
+	&occurs(start(AN),I),\\
+	&\neg projected\_success(AN,I).
+		\end{split}\end{align}
+\begin{align}\begin{split}
+intended\_action(finish,I) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+	&no\_activity\_for\_goal(G,I),\\
+	&futile\_goal(G,I).
+\end{split}\end{align}
+
+Auxiliary rule necessary to create candidate activities.
+\begin{align}\begin{split}
+some\_action\_occurred(I1) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&occurs(A,I1),\\
+&I\leq I1.
+\end{split}\end{align}
+
+Creating an candidate: The first rule generates a minimal uninterrupted sequence of occurrences of physical actions. The second rule creates components based on those occurrences. The third rule guarantees that multiple actions do not have the same index. The fourth and fifth rules describe the length of a the candidate activity.
+\begin{align}\begin{split}
+occurs(PAA,I1) \quad \stackrel{\mathclap{\normalfont\mbox{+}}}{\leftarrow}  \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&occurs(start(AN),I),\\
+&I<I1,\\
+&some\_action\_occurred(I1-1).
+\end{split}\end{align}
+\begin{align}\begin{split}
+activity\_component(AN,I1-I, PAA) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&I<I1,\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&occurs(start(AN),I),\\
+&occurs(PAA,I1).
+\end{split}\end{align}
+\begin{align}\begin{split}
+ \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&activity\_component(AN,K,PAA1),\\
+&activity\_component(AN,K,PAA2),\\
+&PAA1\neq PAA2.
+\end{split}\end{align}
+\begin{align}\begin{split}
+has\_component(AN,K)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&occurs(start(AN),I),\\
+&activity\_component(AN,K,C).
+\end{split}\end{align}
+\begin{align}\begin{split}
+activity\_length(AN,K) \quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&occurs(start(AN),I),\\
+&has\_component(AN,K),\\
+&not\ has\_component(AN,K+1).
+\end{split}\end{align}
+And finally, the intended action:
+\begin{align}\begin{split}
+intended\_action(start(AN),I)\quad \leftarrow \quad &current\_step(I),\\
+&explanation(N,I),\\
+&no\_activity\_for\_goal(G,I),\\
+&candidate(AN,I),\\
+&occurs(start(AN),I),\\
+&projected\_success(AN,I).
+\end{split}\end{align}
+
+\subsection{Automatic Behaviour}
+The following rule  forces the model to have an intention in the current state.
+\begin{align}\begin{split}
+has\_intention(I)\quad \leftarrow \quad &intended\_action(AA,I).\\
+\leftarrow \quad &current\_step(I),\\ &explanation(N,I),\\&0<I,\\ &not\ has\_intention(I).
+\end{split}\end{align}
+
+
+\section{Currently not included}
+This Theory of Intentions description differs from that written by Justin Blount in that subgoals and sub-activities are not included.
+ 
+ 
+ %\medskip
+%\bibliographystyle{abbrv}
+%\bibliography{IntentionalAgents}
+ 
+ 
+ 
+\end{document}
