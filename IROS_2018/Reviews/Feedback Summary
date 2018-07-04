@@ -57,7 +57,7 @@ Reviewer 3
 
 
 Reviewer 5 
-    1) The theoretical background of the idea (execution and the planning of action sequences which achieve a goal even under changing onditions) was only scratched thus it is often not clearly defined how the planning problem is created. 
+    1) The theoretical background of the idea (execution and the planning of action sequences which achieve a goal even under changing conditions) was only scratched thus it is often not clearly defined how the planning problem is created. 
     2) It is not clearly defined how the belief of the robot changes after the sensing indicates a contradiction to its internal belief.
     3) The paper mentioned that defaults are used to express some rules but do not explain which rules are considered for default. 
     4) not explained in detail how the execution cycle looks like. Is a sense, plan, act cycle? Is the refinement done every time a plan is created? Is this done after every sensing result is received? Is the sensing passive, thus happens this actions without actively triggering the actions, or are the planned in each cycle?
