@@ -1,54 +1,54 @@
 ﻿Reviewer 2
-1. Proof of claims (architecture improves reliability, efficiency and accuracy) is not rigorous and from being conclusive:
-1. Key terms used in their evaluation are not clearly defined, like "intentional action", "coarse-/fine-grained resolution diagrams" and "accuracy".
-2. The baseline method used for comparison (the traditional planner TP) is not defined:(not enough to know that this is "an ASP-based reasoner without ATI". What reasoner is that? Is it something that other authors have access too? 
-3. Simulation results shown not particularly positive. 
-4. The real robot experiments are underspecified (what are the set-up, the goals, the scenarios?) and no results are given.
-2. Claim(dealing with uncertainty or incomplete data, decrease computational complexity and increase reliability) However,proposed framework is based on crisp logic and it does not accommodate uncertainty, but uncertainty is simply thresholded away ("high-probability outcomes ... are elevated to statements associated with complete certainty".) This, in my opinion, is a way to factor uncertainty out, not a way to deal with uncertainty. Not surprisingly this does reduce computational cost, but of course this will come at the price of brittleness.
-3. Presentation: hard to understand what of the presented work was achieved previously and what is the novel contribution in the current paper. In fact, the authors often presents bits of the framework in terms of differences from their previous paper [2], and it is difficult for the reader to put all the patches together to form a clear mental picture of the whole framework used in this paper.
-4. I am confused by Scenario 5: This is not clear in the way the goal is stated (given in terms of tasks, not of states.)
-5. references missing in the related work, and a clear positioning how the presented work relates to them, to planning, goal reasoning and action execution. 
-6. The rest of this review provides some fine-grained comments, including suggestions for missing references.
-1. Sec 1, bulletpoints:
-1. "Each intended abstract action is implemented ...". How is the automatically zooming to the relevant part done?
-2. "The outcomes of executing the concrete actions probabilistically are added to the coarse-resolution history". Probabilistically – how?
-2. Sec 2, Position your work and add references to planning, goal reasoning. Look at the work of Tenorth et al. "Knowledge-based Specification of Robot Motions." (2014)
-3. Add references to classical cognitive architectures: Anderson et al. "An integrated theory of the mind." (2004), Ingrand and Georgeff "An architecture for real-time reasoning and system control" (1992), Laird et al. "Soar: An architecture for general intelligence" (1987), Rao and Georgeff "Modeling rational agents within a {BDI}-architecture" (1991)
-4. Clarifying, add ref:
-1. Sec 1, last part"...probabilistic execution of each concrete action is achieved using existing algorithms." -> reference!
-2.  Sec 2, par 2:  "However, this architecture did not support the modeling of agents that desire to achieve specific goals."-> Why is it good to have agents with desires?
-3. Sec 3, C., bullet-points "In this paper, CR-Prolog is used to compute a plan of concrete actions from D_f (T ); each concrete action is executed using probabilistic algorithms..." -> What probabilistic algorithms? How to they reduce computational cost?
-4. Sec 3, B., Scenario 5 -> How long should the intention persist? Until new goals arrive?
-5. Sec 3, B., How do you determine what are relevant observations?
-6. Sec 4, C. "In fact, as the domain becomes more complex, i.e., there are many objects and achieving the desired goal requires plans with several steps, there are instances when the planning starts becoming computationally intractable. All these results provide evidence in support of hypothesis H3." -> H3 in Sec 4, p.5 tells the opposite!
-7. Minor issues:
-1. Sec 1 ASP: Answer Set Prolog (?) -> What is meant assumably is Answer Set Programming
-2. Sec 3 Fig 3. a unknown -> an unknown
-3. Sec 3, par 2: only door between ... -> only the door between...
-4. Sec 4, B., Execution Example 2: With ATI, the robot observes book 1 in [in -> is] not in the library , ...
-5. Sec 4, C. Also, if we do not include zooming, the robot takes a[REMOVE 'a'] significantly longer to plan...
-6. Sec 5 The long-term goal will be [to] enable robots to represent and reason reliably...
-8. Comments on the Video Attachment:
-1. Text appears and disappears too quickly to be read; 
-2. hard to understand the set-up, the goals, and the course of the experiment.
+    1) Proof of claims (architecture improves reliability, efficiency and accuracy) is not rigorous and from being conclusive:
+        A) Key terms used in their evaluation are not clearly defined, like "intentional action", "coarse-/fine-grained resolution diagrams" and "accuracy".
+        B) The baseline method used for comparison (the traditional planner TP) is not defined:(not enough to know that this is "an ASP-based reasoner without ATI". What reasoner is that? Is it something that other authors have access too? 
+        C) Simulation results shown not particularly positive.
+        D) The real robot experiments are underspecified (what are the set-up, the goals, the scenarios?) and no results are given.
+    2) Claim(dealing with uncertainty or incomplete data, decrease computational complexity and increase reliability) However,proposed framework is based on crisp logic and it does not accommodate uncertainty, but uncertainty is simply thresholded away ("high-probability outcomes ... are elevated to statements associated with complete certainty".) This, in my opinion, is a way to factor uncertainty out, not a way to deal with uncertainty. Not surprisingly this does reduce computational cost, but of course this will come at the price of brittleness.
+    3) Presentation: hard to understand what of the presented work was achieved previously and what is the novel contribution in the current paper. In fact, the authors often presents bits of the framework in terms of differences from their previous paper [2], and it is difficult for the reader to put all the patches together to form a clear mental picture of the whole framework used in this paper.
+    4) I am confused by Scenario 5: This is not clear in the way the goal is stated (given in terms of tasks, not of states.)
+    5) references missing in the related work, and a clear positioning how the presented work relates to them, to planning, goal reasoning and action execution. 
+    6) The rest of this review provides some fine-grained comments, including suggestions for missing references.
+        A) Sec 1, bulletpoints:
+            I. "Each intended abstract action is implemented ...". How is the automatically zooming to the relevant part done?
+            II. "The outcomes of executing the concrete actions probabilistically are added to the coarse-resolution history". Probabilistically – how?
+        B) Sec 2, Position your work and add references to planning, goal reasoning. Look at the work of Tenorth et al. "Knowledge-based Specification of Robot Motions." (2014)
+        C) Add references to classical cognitive architectures: Anderson et al. "An integrated theory of the mind." (2004), Ingrand and Georgeff "An architecture for real-time reasoning and system control" (1992), Laird et al. "Soar: An architecture for general intelligence" (1987), Rao and Georgeff "Modeling rational agents within a {BDI}-architecture" (1991)
+        D) Clarifying, add ref:
+            I. Sec 1, last part"...probabilistic execution of each concrete action is achieved using existing algorithms." -> reference!
+            II. Sec 2, par 2:  "However, this architecture did not support the modeling of agents that desire to achieve specific goals."-> Why is it good to have agents with desires?
+            III. Sec 3, C., bullet-points "In this paper, CR-Prolog is used to compute a plan of concrete actions from D_f (T ); each concrete action is executed using probabilistic algorithms..." -> What probabilistic algorithms? How to they reduce computational cost?
+            IV. Sec 3, B., Scenario 5 -> How long should the intention persist? Until new goals arrive?
+            V. Sec 3, B., How do you determine what are relevant observations?
+            VI. Sec 4, C. "In fact, as the domain becomes more complex, i.e., there are many objects and achieving the desired goal requires plans with several steps, there are instances when the planning starts becoming computationally intractable. All these results provide evidence in support of hypothesis H3." -> H3 in Sec 4, p.5 tells the opposite!
+    7) Minor issues:
+        A) Sec 1 ASP: Answer Set Prolog (?) -> What is meant assumably is Answer Set Programming
+        B) Sec 3 Fig 3. a unknown -> an unknown
+        C) Sec 3, par 2: only door between ... -> only the door between...
+        D) Sec 4, B., Execution Example 2: With ATI, the robot observes book 1 in [in -> is] not in the library , ...
+        E) Sec 4, C. Also, if we do not include zooming, the robot takes a[REMOVE 'a'] significantly longer to plan...
+        F) Sec 5 The long-term goal will be [to] enable robots to represent and reason reliably...
+    8) 8. Comments on the Video Attachment:
+        A) Text appears and disappears too quickly to be read; 
+        B) hard to understand the set-up, the goals, and the course of the experiment.
 
 
 ===============================================================================
 Reviewer 3
-1. relatively difficult to digest for the reader. I think it would help the reader if the main differences between TI and ATI would be explained earlier on and the contribution to be made clearer. 
-2. I would expect the authors to discuss scalability more. The results and the system presented at the moment are only discussing very simple problems,
-3.  Real-world robot experiments are only discussed very briefly.
-4.  real-world experiments with planning only become truly interesting if perception and action failures are coming into play. 
-5. The authors state that "~50" experiments have been done with the real robot:
-1. Why do they only know the approximate number? Doesn't look like the did some systematic evaluation.
-2. NO discussion of the actual insights from these real-world experiments. Did it work on all these runs? The authors only state that the results are similar.
-3. Needs more substantive discussion of it. How many objects were there?What is the state space? Why might it not have worked? 
-6. Include documentation. I was unable to replicate their experiment with the little information given there.
-7.  The paper contrasts TI and ATI, but TI is only explained superficially, no harm to use the .5 page to help the reader understand the differences better.
-8. section III.B introduces "attempt" and "-hpd" but it is unclear what roles these predicates play for the system (I may have missed it).
-9.  Table I is a little counterintuitive. Why did the authors decide to present meaures of ratios TI/ATI.
-10. Also, "accuracy" needs to be defined. 
-11. Comments on the Video Attachment The video helps, but it would have been nicer to also include the turtlebot scenario which is very difficult to assess practically from the text alone.
+    1) relatively difficult to digest for the reader. I think it would help the reader if the main differences between TI and ATI would be explained earlier on and the contribution to be made clearer. 
+    2) I would expect the authors to discuss scalability more. The results and the system presented at the moment are only discussing very simple problems,
+    3) Real-world robot experiments are only discussed very briefly.
+    4) real-world experiments with planning only become truly interesting if perception and action failures are coming into play. 
+    5) The authors state that "~50" experiments have been done with the real robot:
+        A) Why do they only know the approximate number? Doesn't look like the did some systematic evaluation.
+        B) NO discussion of the actual insights from these real-world experiments. Did it work on all these runs? The authors only state that the results are similar.
+        C) Needs more substantive discussion of it. How many objects were there?What is the state space? Why might it not have worked? 
+    6) Include documentation. I was unable to replicate their experiment with the little information given there.
+    7) The paper contrasts TI and ATI, but TI is only explained superficially, no harm to use the .5 page to help the reader understand the differences better.
+    8) section III.B introduces "attempt" and "-hpd" but it is unclear what roles these predicates play for the system (I may have missed it).
+    9) Table I is a little counterintuitive. Why did the authors decide to present meaures of ratios TI/ATI.
+    10) Also, "accuracy" needs to be defined. 
+    11) Comments on the Video Attachment The video helps, but it would have been nicer to also include the turtlebot scenario which is very difficult to assess practically from the text alone.																	
 
 
 
@@ -57,11 +57,11 @@ Reviewer 3
 
 
 Reviewer 5 
-1. The theoretical background of the idea (execution and the planning of action sequences which achieve a goal even under changing onditions) was only scratched thus it is often not clearly defined how the planning problem is created. 
-2. It is not clearly defined how the belief of the robot changes after the sensing indicates a contradiction to its internal belief.
-3. The paper mentioned that defaults are used to express some rules but do not explain which rules are considered for default. 
-4. not explained in detail how the execution cycle looks like. Is a sense, plan, act cycle? Is the refinement done every time a plan is created? Is this done after every sensing result is received? Is the sensing passive, thus happens this actions without actively triggering the actions, or are the planned in each cycle?
-5. It is also not explained what means different explanations are considered if a change in the world is detected. Are different explanations calculated and all considered or are only specific once considered for further reasoning.
-6. In the experimental section, a more detailed explanation of the traditional planer is would be of interest. Thus, is plan only once, thus is consider sensing and performs a replanning  
-7. Also, the runtime for planning and the number of executed action would be of interest for the real robotic experiments.
-8. Comments on the Video Attachment: It would be of interest to see how the robot recovers from the fault it detects at the end of the video.
+    1) The theoretical background of the idea (execution and the planning of action sequences which achieve a goal even under changing onditions) was only scratched thus it is often not clearly defined how the planning problem is created. 
+    2) It is not clearly defined how the belief of the robot changes after the sensing indicates a contradiction to its internal belief.
+    3) The paper mentioned that defaults are used to express some rules but do not explain which rules are considered for default. 
+    4) not explained in detail how the execution cycle looks like. Is a sense, plan, act cycle? Is the refinement done every time a plan is created? Is this done after every sensing result is received? Is the sensing passive, thus happens this actions without actively triggering the actions, or are the planned in each cycle?
+    5) It is also not explained what means different explanations are considered if a change in the world is detected. Are different explanations calculated and all considered or are only specific once considered for further reasoning.
+    6) In the experimental section, a more detailed explanation of the traditional planer is would be of interest. Thus, is plan only once, thus is consider sensing and performs a replanning  
+    7) Also, the runtime for planning and the number of executed action would be of interest for the real robotic experiments.
+    8) Comments on the Video Attachment: It would be of interest to see how the robot recovers from the fault it detects at the end of the video.
