@@ -1,0 +1,152 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Balai, Gelfond, and
+  Zhang}{2013}]{balai:lpnmr13}
+Balai, E.; Gelfond, M.; and Zhang, Y.
+\newblock 2013.
+\newblock {Towards Answer Set Programming with Sorts}.
+\newblock In {\em {International Conference on Logic Programming and
+  Nonmonotonic Reasoning}}.
+
+\bibitem[\protect\citeauthoryear{Balduccini and
+  Gelfond}{2003}]{balduccini:aaaisymp03}
+Balduccini, M., and Gelfond, M.
+\newblock 2003.
+\newblock {Logic Programs with Consistency-Restoring Rules}.
+\newblock In {\em AAAI Spring Symposium on Logical Formalization of Commonsense
+  Reasoning},  9--18.
+
+\bibitem[\protect\citeauthoryear{Balduccini, Regli, and
+  Nguyen}{2014}]{balduccini:iclp14}
+Balduccini, M.; Regli, W.~C.; and Nguyen, D.~N.
+\newblock 2014.
+\newblock {Towards an ASP-Based Architecture for Autonomous UAVs in Dynamic
+  Environments (Extended Abstract)}.
+\newblock In {\em {International Conference on Logic Programming (ICLP)}}.
+
+\bibitem[\protect\citeauthoryear{Baral and Gelfond}{2005}]{baral2005reasoning}
+Baral, C., and Gelfond, M.
+\newblock 2005.
+\newblock Reasoning about intended actions.
+\newblock In {\em Proceedings of the National Conference on Artificial
+  Intelligence}, volume~20,  689.
+
+\bibitem[\protect\citeauthoryear{Blount, Gelfond, and
+  Balduccini}{2014}]{blount2014towards}
+Blount, J.; Gelfond, M.; and Balduccini, M.
+\newblock 2014.
+\newblock Towards a theory of intentional agents.
+\newblock In {\em Knowledge Representation and Reasoning in Robotics. AAAI
+  Spring Symp. Series},  10--17.
+
+\bibitem[\protect\citeauthoryear{Blount, Gelfond, and
+  Balduccini}{2015}]{blount2015theory}
+Blount, J.; Gelfond, M.; and Balduccini, M.
+\newblock 2015.
+\newblock A theory of intentions for intelligent agents.
+\newblock In {\em International Conference on Logic Programming and
+  Nonmonotonic Reasoning},  134--142.
+\newblock Springer.
+
+\bibitem[\protect\citeauthoryear{Bratman}{1987}]{bratman1987intention}
+Bratman, M.
+\newblock 1987.
+\newblock {\em Intention, Plans, and Practical Reason}.
+\newblock Center for the Study of Language and Information.
+
+\bibitem[\protect\citeauthoryear{Erdem and
+  Patoglu}{2012}]{erdem2012applications}
+Erdem, E., and Patoglu, V.
+\newblock 2012.
+\newblock Applications of action languages in cognitive robotics.
+\newblock In {\em Correct Reasoning}. Springer.
+\newblock  229--246.
+
+\bibitem[\protect\citeauthoryear{Gabaldon}{2009}]{gabaldon2009activity}
+Gabaldon, A.
+\newblock 2009.
+\newblock Activity recognition with intended actions.
+\newblock In {\em IJCAI},  1696--1701.
+
+\bibitem[\protect\citeauthoryear{Gelfond and Inclezan}{2013}]{gelfond:ANCL13}
+Gelfond, M., and Inclezan, D.
+\newblock 2013.
+\newblock {Some Properties of System Descriptions of $AL_d$}.
+\newblock {\em Journal of Applied Non-Classical Logics, Special Issue on
+  Equilibrium Logic and Answer Set Programming} 23(1-2):105--120.
+
+\bibitem[\protect\citeauthoryear{Gelfond and Kahl}{2014}]{gelfond2014knowledge}
+Gelfond, M., and Kahl, Y.
+\newblock 2014.
+\newblock {\em Knowledge Representation, Reasoning, and the Design of
+  Intelligent Agents: The Answer-Set Programming Approach}.
+\newblock Cambridge University Press.
+
+\bibitem[\protect\citeauthoryear{Hanheide \bgroup et al\mbox.\egroup
+  }{2017}]{hanheide:AIJ17}
+Hanheide, M.; Gobelbecker, M.; Horn, G.; Pronobis, A.; Sjoo, K.; Jensfelt, P.;
+  Gretton, C.; Dearden, R.; Janicek, M.; Zender, H.; Kruijff, G.-J.; Hawes, N.;
+  and Wyatt, J.
+\newblock 2017.
+\newblock {Robot Task Planning and Explanation in Open and Uncertain Worlds}.
+\newblock {\em Artificial Intelligence} 247:119--150.
+
+\bibitem[\protect\citeauthoryear{Saribatur and Eiter}{2016}]{zeynep2016logics}
+Saribatur, Z.~G., and Eiter, T.
+\newblock 2016.
+\newblock Reactive policies with planning for action languages.
+\newblock In Michael, L., and Kakas, A., eds., {\em Logics in Artificial
+  Intelligence},  463--480.
+\newblock Springer International Publishing.
+
+\bibitem[\protect\citeauthoryear{Saribatur, Baral, and
+  Eiter}{2017}]{saribatur2017reactive}
+Saribatur, Z.~G.; Baral, C.; and Eiter, T.
+\newblock 2017.
+\newblock Reactive maintenance policies over equalized states in dynamic
+  environments.
+\newblock In Oliveira, E.; Gama, J.; Vale, Z.; and Lopes~Cardoso, H., eds.,
+  {\em Progress in Artificial Intelligence},  709--723.
+\newblock Cham: Springer International Publishing.
+
+\bibitem[\protect\citeauthoryear{Software}{2018}]{code-results}
+2018.
+\newblock {Software and Results for Architecture combining Theory of Intentions
+  and Refinement}.
+\newblock Retrieved March 2018 from
+  \url{https://github.com/hril230/theoryofintentions/tree/master/simmulation}.
+
+\bibitem[\protect\citeauthoryear{Sridharan and
+  Gelfond}{2016}]{sridharan2016using}
+Sridharan, M., and Gelfond, M.
+\newblock 2016.
+\newblock Using knowledge representation and reasoning tools in the design of
+  robots.
+\newblock In {\em IJCAI}.
+
+\bibitem[\protect\citeauthoryear{Sridharan \bgroup et al\mbox.\egroup
+  }{2017}]{sridharan2017refinement}
+Sridharan, M.; Gelfond, M.; Zhang, S.; and Wyatt, J.~L.
+\newblock 2017.
+\newblock A refinement-based architecture for knowledge representation and
+  reasoning in robotics.
+\newblock {\em CoRR} abs/1508.03891.
+
+\bibitem[\protect\citeauthoryear{Zhang and
+  Inclezan}{2017}]{zhang2017application}
+Zhang, Q., and Inclezan, D.
+\newblock 2017.
+\newblock An application of asp theories of intentions to understanding
+  restaurant scenarios.
+\newblock {\em International Workshop on Practical Aspects of Answer Set
+  Programming}.
+
+\bibitem[\protect\citeauthoryear{Zhang, Sridharan, and
+  Wyatt}{2015}]{zhang:TRO15}
+Zhang, S.; Sridharan, M.; and Wyatt, J.
+\newblock 2015.
+\newblock {Mixed Logical Inference and Probabilistic Planning for Robots in
+  Unreliable Worlds}.
+\newblock {\em IEEE Transactions on Robotics} 31(3):699--713.
+
+\end{thebibliography}
