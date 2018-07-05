@@ -12,7 +12,7 @@ fluents are as follows:
 from sets import Set
 import subprocess
 import random
-preASP_domain_file = 'preASP_Domain.txt'
+preASP_domain_file = 'simulation/preASP_Domain.txt'
 asp_World_file = 'ASP_World.sp'
 history_marker = '%% *_*_*' 
 display_marker = 'display'

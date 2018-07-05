@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-'''Python program to run experimental trials in the agent reasoning programs (with toi and traditional planning 
+'''Python program to run experimental trials in the agent reasoning programs (with toi and traditional planning
 Objectives:
-1. Select all possible valid initial states for the objects in the domain. 
-2. Run two pairwise for each initial state. 
+1. Select all possible valid initial states for the objects in the domain.
+2. Run two pairwise for each initial state.
 
 How I model different scenarios in realWorld.py:
 
-# scenario 1 - just planning, everything goes fine, no unexpected changes in the world. 
-# scenario 2 - unexpected achievement of goal. 
+# scenario 1 - just planning, everything goes fine, no unexpected changes in the world.
+# scenario 2 - unexpected achievement of goal.
 # scenario 3 - unexpected false observation that leads to not expected achievement of goal, diagnosis and replan.
 # scenario 4 - unexpected true observation that leads to not expected achievement of goal, diagnosis and replan.
 # scenario 5 - Failure to achieve goal, diagnosis, and re-planning.
@@ -16,13 +16,15 @@ How I model different scenarios in realWorld.py:
 
 
 from datetime import datetime
-from realWorld import World
+from simulation.realWorld import World
 import controllerTraditionalPlanning
 import controllerToI
-from executer import Executer
+from simulation.executer import Executer
 import subprocess
 import  csv
 import random
+
+
 
 sparcPath = "$HOME/work/solverfiles/sparc.jar"
 
@@ -42,9 +44,9 @@ boolean = ['true', 'false']
 
 runCount = 0
 
-def run_and_write(scenario, initial_conditions_index):  
+def run_and_write(scenario, initial_conditions_index):
 	global runCount
-	
+
 	runCount +=1
 	#print("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"    $$$$$$$$$$$$$$$$$$$")
 	history_trad = [""]
@@ -52,8 +54,8 @@ def run_and_write(scenario, initial_conditions_index):
 	time_planning_trad = 0
 	time_planning_toi = 0
 	time_executing_trad = 0
-	time_executing_toi = 0  
-	scenarioRecreated_toi = 0      
+	time_executing_toi = 0
+	scenarioRecreated_toi = 0
         length = 0
 
 	start_time_trad = datetime.now()
@@ -90,7 +92,7 @@ def run_and_write(scenario, initial_conditions_index):
 	toi_exo_move_room = ''
 	toi_exo_lock = ''
 	for item in historyWorld_toi:
-		if('exo' in item): 
+		if('exo' in item):
 			toi_exo_action = item
 			break
 
@@ -98,7 +100,7 @@ def run_and_write(scenario, initial_conditions_index):
 		toi_exo_move_book = item[9:14]
 		toi_exo_move_room = item[15:-1]
 	if('lock' in toi_exo_action): toi_exo_lock = 'true'
-	
+
 	trad_exo_action = ''
 	for item in historyWorld_trad:
 		if('exo' in item): trad_exo_action = item
@@ -113,39 +115,39 @@ def run_and_write(scenario, initial_conditions_index):
 	secondActivity = False
 	firstStop = 0
 	for item in history_toi:
-		if('activity' in item or 'finish' in item or 'selected_goal_holds' in item or 'Goal is futile' in item or 'Goal holds' in item or 'unobserved' in item): 
+		if('activity' in item or 'finish' in item or 'selected_goal_holds' in item or 'Goal is futile' in item or 'Goal holds' in item or 'unobserved' in item):
 			activityInfo.append(item)
 			if('activity_length(1' in item): firstActivityLength = int(item[item.rfind(',')+1:-2])
 		else:
 			if('attempt(stop(1),' in item): firstStop = int(item[16:-2])
-			if('attempt(start(2),' in item): secondActivity = True 
+			if('attempt(start(2),' in item): secondActivity = True
 			split_item = [''] * 2
 
 			split_item[0] = item[:item.rfind(',')]
 			split_item[1] = item[item.rfind(',')+1:-2]
 			historyInfo.append(split_item)
-	if(firstActivityLength + 2 == firstStop): scenarioRecreated_toi = 5 
+	if(firstActivityLength + 2 == firstStop): scenarioRecreated_toi = 5
 	elif(secondActivity == False and steps_executed_toi < firstActivityLength and achieved_goal_toi): scenarioRecreated_toi = 2
 	elif(steps_executed_toi == firstActivityLength and secondActivity == False): scenarioRecreated_toi = 1
 
 	elif(firstStop > 0 and firstStop < firstActivityLength + 2 and secondActivity == True):
 		#print('it has stopped before end of plan, and started a second activity')
-		if(toi_exo_lock == 'true'): 
-			scenarioRecreated_toi = 6		
+		if(toi_exo_lock == 'true'):
+			scenarioRecreated_toi = 6
 		elif(toi_exo_move_book != ''):
-			#print('the exo actio is a move of this book: ' + toi_exo_move_book +  ' to this room: '+ toi_exo_move_room) 
+			#print('the exo actio is a move of this book: ' + toi_exo_move_book +  ' to this room: '+ toi_exo_move_room)
 			#print('looking for observation: ' + str(['obs(loc('+toi_exo_move_book+','+toi_exo_move_room+'),true' , str(firstStop)]))
-			if(['obs(loc('+toi_exo_move_book+','+toi_exo_move_room+'),true' , str(firstStop)] in historyInfo): 
+			if(['obs(loc('+toi_exo_move_book+','+toi_exo_move_room+'),true' , str(firstStop)] in historyInfo):
 				scenarioRecreated_toi = 4
-			else: 
+			else:
 				scenarioRecreated_toi = 3
 
 	historyInfo.sort(key=lambda x:x[0])
 	historyInfo.sort(key=lambda x:int(x[1]))
 	historyInfo = [','.join(item)+')' for item in historyInfo]
 	history_toi = historyInfo + activityInfo
-		
-	
+
+
 
 
 
@@ -164,7 +166,7 @@ def run_and_write(scenario, initial_conditions_index):
                 textfile.write(str(plan) + "\n")
 	textfile.write("History Traditional: " + str(history_trad)+"\n")
  	textfile.write("\n\n")
- 
+
 
         textfile.write("Achieved goal ToI: "+ str(achieved_goal_toi)+"\n")
        	textfile.write("History World: " +str(historyWorld_toi) + "\n")
@@ -192,14 +194,14 @@ def run_and_write(scenario, initial_conditions_index):
 	l.append(firstStop-2)
 
 
-	
+
 
 	if('Goal is futile' in history_toi):
 		textfile.write("Goal is futile\n")
 		l.append("Goal is futile")
 
 	elif('Goal holds' in history_toi):
-		textfile.write("Goal holds\n")	
+		textfile.write("Goal holds\n")
 
 
 
@@ -211,10 +213,10 @@ def run_and_write(scenario, initial_conditions_index):
 
 def createConditionsAndRun(scenario):
 	global initial_state
-	
+
 
 	initial_conditions_index = 0
-	
+
 	controlledRun = False
 	controlledRunConditions = 2
 
@@ -224,10 +226,10 @@ def createConditionsAndRun(scenario):
 
 	#Cases when rob1 is holding book1
 	for locked_or_not in boolean:
-		for robot_location in locations:			
+		for robot_location in locations:
 			for book2_location in locations:
 				initial_conditions_index +=1
-				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue	
+				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
                                 book1_location = robot_location
                                 in_handBook1 = 'true'
                                 in_handBook2 = 'false'
@@ -239,7 +241,7 @@ def createConditionsAndRun(scenario):
 		for robot_location in locations:
 			for book1_location in locations:
 				initial_conditions_index +=1
-				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue	
+				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
                                 book2_location = robot_location
                                 in_handBook1 = 'false'
                                 in_handBook2 = 'true'
@@ -252,7 +254,7 @@ def createConditionsAndRun(scenario):
 			for book1_location in locations:
 			     	for book2_location in locations:
 					initial_conditions_index +=1
-					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue	
+					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
                                 	in_handBook1 = 'false'
                                 	in_handBook2 = 'false'
 	  				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
@@ -260,16 +262,16 @@ def createConditionsAndRun(scenario):
 
 if __name__ == "__main__":
 	'''
-	The main function, creates two results file. 
-	1. experimental_results.csv: A csv that contains the time taken for the reason during running for traditional planing vs theory of intentions . 
-	2. experimental_results.txt: A detailed text file that contains initial state, plans and history. 
+	The main function, creates two results file.
+	1. experimental_results.csv: A csv that contains the time taken for the reason during running for traditional planing vs theory of intentions .
+	2. experimental_results.txt: A detailed text file that contains initial state, plans and history.
 	'''
 	scenarios = ['random']
 	numberRunsRandomScenario = 1
 
 	for s in scenarios:
 		runCount = 0
-		results_file_name = "scenario_" + str(s)
+		results_file_name = "simulation/scenario_" + str(s)
 		textfile = open(results_file_name+'.txt', 'w')
 		csvfile = open(results_file_name+'.csv', 'w')
 		writer = csv.writer(csvfile)
@@ -277,9 +279,5 @@ if __name__ == "__main__":
 
 
 		createConditionsAndRun(s)
-		if(s == 'random'): 
+		if(s == 'random'):
 			for x in range (1,numberRunsRandomScenario): createConditionsAndRun(s)
-			
-
-			
-

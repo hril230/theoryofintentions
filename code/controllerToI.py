@@ -1,7 +1,7 @@
 
 from datetime import datetime
 import subprocess
-from realWorld import World
+from simulation.realWorld import World
 from sets import Set
 
 import re
@@ -22,14 +22,14 @@ toi_goal_marker = '%% @_@_@'
 toi_beginning_history_marker = '%% #_#_# beginning'
 toi_end_history_marker = '%% #_#_# end'
 toi_current_step_marker = '%% *_*_*'
-preASP_toi_file = 'preASP_ToI.txt'
+preASP_toi_file = 'simulation/preASP_ToI.txt'
 
-asp_toi_file = 'ASP_ToI.sp'
+asp_toi_file = 'simulation/ASP_ToI.sp'
 preASP_toi_split = None
 toi_beginning_history_index = None
 toi_current_step_index = None
 
-asp_toi_diagnosing_file = 'ASP_TOI_Diagnosis.sp'
+asp_toi_diagnosing_file = 'simulation/ASP_TOI_Diagnosis.sp'
 
 
 executer = None
@@ -63,14 +63,14 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	numberActivities = 1
 	numberSteps = 4
 	maxPlanLength = maxPlanLen
-	executer = new_executer 
-	goal = newGoal	
-	goal_correction = 0	
+	executer = new_executer
+	goal = newGoal
+	goal_correction = 0
 	initialConditions = list(executer.getRealValues())
 	currentDiagnosis = ''
 	inputForPlanning = []
 
-	preparePreASP_string_lists()	
+	preparePreASP_string_lists()
 	toi_history = observations_to_obsList(initialConditions,0)
     	toi_history.append("hpd(select(my_goal), true,0).")
 
@@ -83,7 +83,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 		#print(' $$$$$$$$$$$$$$$$$    next action with ToI : ' +str(nextAction) +'  at step '+ str(currentStep))
 
 		if(nextAction == 'finish'):
-			if(executer.getGoalFeedback() == True): 
+			if(executer.getGoalFeedback() == True):
 				toi_history.append('finish')
 				finish = True
 				break
@@ -100,13 +100,13 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 			finish = True
 			break
 
-	
-	
+
+
 		actionObservations = []
 		toi_history.append('attempt('+nextAction+','+str(currentStep)+').')
 
 		if(nextAction[0:4] == 'stop'):
-			numberActivities += 1 
+			numberActivities += 1
 			numberSteps += 1
 		elif(nextAction[0:5] == 'start'): pass
 		else:
@@ -123,9 +123,9 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 
 		currentStep += 1
 		relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
-		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))				
+		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))
                 diagnose()
-	
+
 	if(currentDiagnosis != ''): toi_history.append(currentDiagnosis)
 	return (toi_history, numberActivities, goal_correction)
 
@@ -135,14 +135,14 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 def getIndexesRelevantToGoal():
 	return [World.LocationBook1_index, World.LocationBook2_index, World.In_handBook1_index, World.In_handBook2_index]
 
-def runToIPlanning(input):	
+def runToIPlanning(input):
 	global numberSteps
 	global preASP_toi_split
 	global toi_history
 	global maxPlanLength
 	global currentStep
 	global believes_goal_holds
-	nextAction = None	
+	nextAction = None
 	#print('running ToI planning ')
 
 
@@ -153,35 +153,35 @@ def runToIPlanning(input):
 	current_asp_split[2] = "#const max_name = " + str(numberActivities) + "."
 	asp = '\n'.join(current_asp_split)
         f1 = open(asp_toi_file, 'w')
-	f1.write(asp) 
+	f1.write(asp)
 	f1.close()
 
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
-	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):	
+	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 		current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
 		asp = '\n'.join(current_asp_split)
         	f1 = open(asp_toi_file, 'w')
-		f1.write(asp) 
+		f1.write(asp)
 		f1.close()
 		#print('Looking for next action (ToI) - numberSteps ' + str(numberSteps))
 		answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
 		numberSteps +=1
-	
-        possibleAnswers = answerSet.rstrip().split('\n\n') 
+
+        possibleAnswers = answerSet.rstrip().split('\n\n')
 
 	chosenAnswer = possibleAnswers[0]
-	split_answer = chosenAnswer.strip('}').strip('{').split(', ') 
+	split_answer = chosenAnswer.strip('}').strip('{').split(', ')
 	toi_history = []
 	believes_goal_holds = False
-	for line in split_answer:	
-		if("intended_action" in line):      		
-			nextAction = line[16:line.rfind(',')] 
-		#elif("number_unobserved" in line): continue	
-		elif("selected_goal_holds" in line): 
+	for line in split_answer:
+		if("intended_action" in line):
+			nextAction = line[16:line.rfind(',')]
+		#elif("number_unobserved" in line): continue
+		elif("selected_goal_holds" in line):
 			believes_goal_holds = True
 		else:
-			toi_history.append(line + '.')	
+			toi_history.append(line + '.')
 	return nextAction
 
 
@@ -204,12 +204,12 @@ def diagnose():
 
 	asp = '\n'.join(current_asp_split)
         f1 = open(asp_toi_diagnosing_file, 'w')
-	f1.write(asp) 
+	f1.write(asp)
 	f1.close()
 
 	# running only diagnosis
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_diagnosing_file +' -A ',shell=True)
-       	answers = answerSet.rstrip().split('\n\n') 
+       	answers = answerSet.rstrip().split('\n\n')
 
 
 	if currentDiagnosis in answerSet:
@@ -218,11 +218,11 @@ def diagnose():
 	else:
 		chosenAnswer = answers[0]
 
- 	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ') 
+ 	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
 	for line in split_diagnosis:
 		if("number_unobserved" in line):
-			newLine =line.replace("number_unobserved","explanation") 
-			inputForPlanning.append(newLine + '.') 
+			newLine =line.replace("number_unobserved","explanation")
+			inputForPlanning.append(newLine + '.')
 		elif("unobserved" in line):
 			newLine = line.replace("unobserved", "occurs") + '.'
 			inputForPlanning.append(newLine)
@@ -232,7 +232,7 @@ def diagnose():
 		else:
 			inputForPlanning.append(line + '.')
 
-			
+
 	#print('current diagnosis: '+str(currentDiagnosis))
 	return
 
@@ -268,12 +268,12 @@ def observations_to_obsList(observations, step):
 			obsList.append('obs(locked(library),'+ observation[1] + ',' + str(step) +').')
 		if (observation[0] == World.LocationRobot_index and observation[1] != 'unknown'):
 			obsList.append('obs(loc(rob1,'+str(observation[1])+ '),true,'+ str(step) +').')
-		if (observation[0] == World.LocationBook1_index): 
+		if (observation[0] == World.LocationBook1_index):
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(book1,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
 				obsList.append('obs(loc(book1,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.LocationBook2_index): 
+		if (observation[0] == World.LocationBook2_index):
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(book2,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
@@ -283,7 +283,7 @@ def observations_to_obsList(observations, step):
 		if (observation[0] == World.In_handBook2_index and observation[1] != 'unknown'):
 			obsList.append('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
 	return obsList
-	
+
 
 # this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
 def refine(action, history, current_step, version, current_refined_location, currently_holding):
@@ -308,7 +308,7 @@ def refine(action, history, current_step, version, current_refined_location, cur
     print "history_formatted"
     print history_formatted
     print "action"
-    print action 
+    print action
 
     if 'move' in action:
         # get the initial state from step zero
@@ -359,10 +359,10 @@ def refine(action, history, current_step, version, current_refined_location, cur
 
 
     # get refined answer set
-    refined_answer = subprocess.check_output('java -jar '+sparcPath + ' zoomed_domain.sp -A ',shell=True)		
+    refined_answer = subprocess.check_output('java -jar '+sparcPath + ' zoomed_domain.sp -A ',shell=True)
 
     if refined_answer == "" : raw_input()
-    
+
 
 
     # stop running code if refined answer set is empty
@@ -434,7 +434,7 @@ def zoom(initial_state, action, final_state, current_refined_location, currently
         elif ('rob1' in condition) and ('loc' in condition) and ('pickup' in action): # the robot's location is relevant for pickup actions
             rel_initial_conditions.append(condition)
             rel_conditions.append(condition)
-    
+
     # refine initial conditions
     for i in range(len(rel_initial_conditions)):
         if ('loc' in rel_initial_conditions[i]) and ('rob1' in rel_initial_conditions[i]):
@@ -467,7 +467,7 @@ def zoom(initial_state, action, final_state, current_refined_location, currently
         for refinement in refinements:
             if const == refinement.name:
                 for refined_const in refinement.components:
-                    rel_obj_consts.append(refined_const)  
+                    rel_obj_consts.append(refined_const)
                     if refined_const == 'c1':
                         refined_const = 'c1,'
                     if refined_const in irrelevant_obj_consts:
@@ -639,5 +639,3 @@ class Components():
     def __init__(self, name, components):
         self.name = name
         self.components = components
-
-
