@@ -3,7 +3,7 @@ This program represnets the Controller of the agent that uses traidtional planni
 It needs three arguments:
 1. The goal to be achieved (in terms of the fluents of the domain description).
 2. The length of the longest possible plan of the domain.
-3. An instance of the Executer that will execute the plan and obtain observations from the world.
+3. An instance of the Executer that will execute the plan and obtain observations from the DomainInfo.
 
 Once the controller has run the simmulation, it will return:
 1. The history of his actions and observations (as he believes them).
@@ -17,7 +17,7 @@ The initial coniditions of the knowledge representation of the domain will be ob
 
 from datetime import datetime
 import subprocess
-from simulation.realWorld import World
+from simulation.domain_info import DomainInfo
 import re
 import random
 
@@ -232,26 +232,26 @@ def updateBelief_fromAnswer(answer):
 			if(fluent[0:8] == 'in_hand('):
 				fluent = fluent[8:-1]
 				split_fluent = fluent.split(',')
-				if(split_fluent[1] == 'book1'): belief[World.In_handBook1_index] = 'false'
-				if(split_fluent[1] == 'book2'): belief[World.In_handBook2_index] = 'false'
+				if(split_fluent[1] == 'book1'): belief[DomainInfo.In_handBook1_index] = 'false'
+				if(split_fluent[1] == 'book2'): belief[DomainInfo.In_handBook2_index] = 'false'
 			if(fluent[0:7] == 'locked('):
-				belief[World.LibraryLocked_index] = 'false'
+				belief[DomainInfo.LibraryLocked_index] = 'false'
 
 		else:
 			fluent = holds[6:holds.rfind(',')]
 			if(fluent[0:7] == 'locked('):
-				belief[World.LibraryLocked_index] = 'true'
+				belief[DomainInfo.LibraryLocked_index] = 'true'
 			elif(fluent[0:4] == 'loc('):
 				fluent = fluent[4:-1]
 				split_fluent = fluent.split(',')
-				if(split_fluent[0] == 'rob1'): belief[World.LocationRobot_index] = split_fluent[1]
-				elif(split_fluent[0] == 'book1'): belief[World.LocationBook1_index] = split_fluent[1]
-				elif(split_fluent[0] == 'book2'): belief[World.LocationBook2_index] = split_fluent[1]
+				if(split_fluent[0] == 'rob1'): belief[DomainInfo.LocationRobot_index] = split_fluent[1]
+				elif(split_fluent[0] == 'book1'): belief[DomainInfo.LocationBook1_index] = split_fluent[1]
+				elif(split_fluent[0] == 'book2'): belief[DomainInfo.LocationBook2_index] = split_fluent[1]
 			elif(fluent[0:8] == 'in_hand('):
 				fluent = fluent[8:-1]
 				split_fluent = fluent.split(',')
-				if(split_fluent[1] == 'book1'): belief[World.In_handBook1_index] = 'true'
-				if(split_fluent[1] == 'book2'): belief[World.In_handBook2_index] = 'true'
+				if(split_fluent[1] == 'book1'): belief[DomainInfo.In_handBook1_index] = 'true'
+				if(split_fluent[1] == 'book2'): belief[DomainInfo.In_handBook2_index] = 'true'
 
 def getBelief(index):
 	return belief[index]
@@ -260,34 +260,34 @@ def getBelief(index):
 def getBelief_as_obsList(step):
 	obsList = []
 	global belief
-	if(belief[World.LibraryLocked_index] != 'unknown'): obsList.append('obs(locked(library),'+ belief[World.LibraryLocked_index] + ','+str(step)+').')
-	if(belief[World.LocationRobot_index] != 'unknown'): obsList.append('obs(loc(rob1,' +str(belief[World.LocationRobot_index])+ '),true,'+str(step)+').')
-	if(belief[World.LocationBook1_index] != 'unknown'): obsList.append('obs(loc(book1,' +str(belief[World.LocationBook1_index])+ '),true,'+str(step)+').')
-	if(belief[World.LocationBook2_index] != 'unknown'): obsList.append('obs(loc(book2,' +str(belief[World.LocationBook2_index])+ '),true,'+str(step)+').')
-	if(belief[World.In_handBook1_index] != 'unknown'): obsList.append('obs(in_hand(rob1,book1),' + belief[World.In_handBook1_index]+ ','+str(step)+').')
-	if(belief[World.In_handBook2_index] != 'unknown'): obsList.append('obs(in_hand(rob1,book2),' + belief[World.In_handBook2_index]+ ','+str(step)+').')
+	if(belief[DomainInfo.LibraryLocked_index] != 'unknown'): obsList.append('obs(locked(library),'+ belief[DomainInfo.LibraryLocked_index] + ','+str(step)+').')
+	if(belief[DomainInfo.LocationRobot_index] != 'unknown'): obsList.append('obs(loc(rob1,' +str(belief[DomainInfo.LocationRobot_index])+ '),true,'+str(step)+').')
+	if(belief[DomainInfo.LocationBook1_index] != 'unknown'): obsList.append('obs(loc(book1,' +str(belief[DomainInfo.LocationBook1_index])+ '),true,'+str(step)+').')
+	if(belief[DomainInfo.LocationBook2_index] != 'unknown'): obsList.append('obs(loc(book2,' +str(belief[DomainInfo.LocationBook2_index])+ '),true,'+str(step)+').')
+	if(belief[DomainInfo.In_handBook1_index] != 'unknown'): obsList.append('obs(in_hand(rob1,book1),' + belief[DomainInfo.In_handBook1_index]+ ','+str(step)+').')
+	if(belief[DomainInfo.In_handBook2_index] != 'unknown'): obsList.append('obs(in_hand(rob1,book2),' + belief[DomainInfo.In_handBook2_index]+ ','+str(step)+').')
 	return obsList
 
 
 def observations_to_obsList(observations, step):
 	obsList = []
 	for observation in observations:
-		if (observation[0] == World.LibraryLocked_index and observation[1] != 'unknown'):
+		if (observation[0] == DomainInfo.LibraryLocked_index and observation[1] != 'unknown'):
 			obsList.append('obs(locked(library),'+ observation[1] + ',' + str(step) +').')
-		if (observation[0] == World.LocationRobot_index and observation[1] != 'unknown'):
+		if (observation[0] == DomainInfo.LocationRobot_index and observation[1] != 'unknown'):
 			obsList.append('obs(loc(rob1,'+str(observation[1])+ '),true,'+ str(step) +').')
-		if (observation[0] == World.LocationBook1_index):
+		if (observation[0] == DomainInfo.LocationBook1_index):
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(book1,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
 				obsList.append('obs(loc(book1,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.LocationBook2_index):
+		if (observation[0] == DomainInfo.LocationBook2_index):
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(book2,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
 				obsList.append('obs(loc(book2,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.In_handBook1_index and observation[1] != 'unknown'):
+		if (observation[0] == DomainInfo.In_handBook1_index and observation[1] != 'unknown'):
 			obsList.append('obs(in_hand(rob1,book1),' + observation[1]+ ','+ str(step) +').')
-		if (observation[0] == World.In_handBook2_index and observation[1] != 'unknown'):
+		if (observation[0] == DomainInfo.In_handBook2_index and observation[1] != 'unknown'):
 			obsList.append('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
 	return obsList

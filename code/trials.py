@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''Python program to run experimental trials in the agent reasoning programs (with toi and traditional planning
 Objectives:
 1. Select all possible valid initial states for the objects in the domain.
@@ -23,8 +22,8 @@ from simulation.executer import Executer
 import subprocess
 import  csv
 import random
-
-
+from simulation.domain_info import DomainInfo
+files_path = 'simulation/'
 
 sparcPath = "$HOME/work/solverfiles/sparc.jar"
 
@@ -56,7 +55,9 @@ def run_and_write(scenario, initial_conditions_index):
 	time_executing_trad = 0
 	time_executing_toi = 0
 	scenarioRecreated_toi = 0
-        length = 0
+	slength = 0
+
+	my_domain_info = DomainInfo('myInfo')
 
 	start_time_trad = datetime.now()
 	randomSeed = runCount
@@ -77,14 +78,14 @@ def run_and_write(scenario, initial_conditions_index):
 	start_time_toi = datetime.now()
 	world_toi = World(sparcPath,initial_state,scenario,randomSeed)
 	executer = Executer(world_toi)
-	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer)
+	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer,my_domain_info, files_path)
 	end_time_toi = datetime.now()
 	time_planning_toi = (end_time_toi - start_time_toi).total_seconds()
 	historyWorld_toi = world_toi.getHistory()
 	time_executing_toi = world_toi.getExecutionTimeUnits()
 	steps_executed_toi = world_toi.getExecutedSteps()
 	exo_action = str(world_toi.get_exo_action_happened())[0]
-        achieved_goal_toi = (world_toi.achievedGoal()[0]).capitalize()
+	achieved_goal_toi = (world_toi.achievedGoal()[0]).capitalize()
 
 
 	toi_exo_action = ''
@@ -153,35 +154,32 @@ def run_and_write(scenario, initial_conditions_index):
 
 	#Writing to txt
 	textfile.write("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"   $$$$$$$$$$$$$$$$$$$\n")
-        textfile.write("Running Scenario "+str(scenarioRecreated_toi)+"\n")
+	textfile.write("Running Scenario "+str(scenarioRecreated_toi)+"\n")
 	textfile.write("Goal: "+goal+"\n")
 	textfile.write("Initial Conditions: "+str(initial_state)+"\n")
 	textfile.write("Initial Conditions Index: "+str(initial_conditions_index)+"\n")
 	textfile.write("\n\n")
-
-        textfile.write("Achieved goal Traditional: "+ str(achieved_goal_trad)+"\n")
-       	textfile.write("History World: " +str(historyWorld_trad) + "\n")
+	textfile.write("Achieved goal Traditional: "+ str(achieved_goal_trad)+"\n")
+	textfile.write("History World: " +str(historyWorld_trad) + "\n")
 	textfile.write("Plans Traditional: \n")
-        for plan in plans_trad:
-                textfile.write(str(plan) + "\n")
+	for plan in plans_trad:
+		textfile.write(str(plan) + "\n")
 	textfile.write("History Traditional: " + str(history_trad)+"\n")
- 	textfile.write("\n\n")
-
-
-        textfile.write("Achieved goal ToI: "+ str(achieved_goal_toi)+"\n")
-       	textfile.write("History World: " +str(historyWorld_toi) + "\n")
+	textfile.write("\n\n")
+	textfile.write("Achieved goal ToI: "+ str(achieved_goal_toi)+"\n")
+	textfile.write("History World: " +str(historyWorld_toi) + "\n")
 	textfile.write("History ToI: "+ "\n"+ str(history_toi)+"\n")
 
 
 	l=[initial_conditions_index]
 	l.append(round(time_planning_trad+5*time_executing_trad,2))
 	l.append(round(time_planning_toi+5*time_executing_toi,2))
-        l.append(numberPlans_trad)
-        l.append(numberPlans_toi)
+	l.append(numberPlans_trad)
+	l.append(numberPlans_toi)
 	l.append(round(time_planning_trad,2))
 	l.append(round(time_planning_toi,2))
 	l.append(time_executing_trad)
-        l.append(time_executing_toi)
+	l.append(time_executing_toi)
 	l.append(steps_executed_trad)
 	l.append(steps_executed_toi)
 	l.append(achieved_goal_trad)
@@ -230,9 +228,9 @@ def createConditionsAndRun(scenario):
 			for book2_location in locations:
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-                                book1_location = robot_location
-                                in_handBook1 = 'true'
-                                in_handBook2 = 'false'
+				book1_location = robot_location
+				in_handBook1 = 'true'
+				in_handBook2 = 'false'
 				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 				run_and_write(scenario, initial_conditions_index)
 
@@ -242,22 +240,22 @@ def createConditionsAndRun(scenario):
 			for book1_location in locations:
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-                                book2_location = robot_location
-                                in_handBook1 = 'false'
-                                in_handBook2 = 'true'
-  				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+				book2_location = robot_location
+				in_handBook1 = 'false'
+				in_handBook2 = 'true'
+				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 				run_and_write(scenario, initial_conditions_index)
 
 	#Cases when rob1 is not holding any book
 	for locked_or_not in boolean:
 		for robot_location in locations:
 			for book1_location in locations:
-			     	for book2_location in locations:
+				for book2_location in locations:
 					initial_conditions_index +=1
 					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-                                	in_handBook1 = 'false'
-                                	in_handBook2 = 'false'
-	  				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+					in_handBook1 = 'false'
+					in_handBook2 = 'false'
+					initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 					run_and_write(scenario, initial_conditions_index)
 
 if __name__ == "__main__":

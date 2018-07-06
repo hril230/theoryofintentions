@@ -1,7 +1,7 @@
 
 from datetime import datetime
 import subprocess
-from simulation.realWorld import World
+from simulation.domain_info import DomainInfo
 from sets import Set
 
 import re
@@ -22,22 +22,23 @@ toi_goal_marker = '%% @_@_@'
 toi_beginning_history_marker = '%% #_#_# beginning'
 toi_end_history_marker = '%% #_#_# end'
 toi_current_step_marker = '%% *_*_*'
-preASP_toi_file = 'simulation/preASP_ToI.txt'
 
-asp_toi_file = 'simulation/ASP_ToI.sp'
 preASP_toi_split = None
 toi_beginning_history_index = None
 toi_current_step_index = None
 
-asp_toi_diagnosing_file = 'simulation/ASP_TOI_Diagnosis.sp'
-
+preASP_toi_file = None
+asp_toi_file = None
+asp_toi_diagnosing_file = None
+preASP_refined_domain_file = None
+zoomed_domain_file = None
 
 executer = None
 goal_correction = None
 
 
 
-def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
+def controllerToI(thisPath, newGoal, maxPlanLen, new_executer,new_domain_info,files_path):
 	global executer
 	global maxPlanLength
 	global numberSteps
@@ -53,10 +54,20 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	global current_location
 	global current_refined_location
 	global currently_holding
+	global preASP_toi_file
+	global asp_toi_file
+	global asp_toi_diagnosing_file
+	global preASP_refined_domain_file
+	global zoomed_domain_file
 
-    	current_location = 'unknown'
-    	current_refined_location = 'unknown_cell'
-    	currently_holding = 'nothing'
+	preASP_toi_file = files_path+'preASP_ToI.txt'
+	asp_toi_file = files_path+'ASP_ToI.sp'
+	asp_toi_diagnosing_file = files_path + 'ASP_TOI_Diagnosis.sp'
+	preASP_refined_domain_file = files_path + 'preASP_refined_domain.txt'
+	zoomed_domain_file = files_path + 'zoomed_domain.sp'
+	current_location = 'unknown'
+	current_refined_location = 'unknown_cell'
+	currently_holding = 'nothing'
 
 
 	sparcPath = thisPath
@@ -64,6 +75,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	numberSteps = 4
 	maxPlanLength = maxPlanLen
 	executer = new_executer
+	my_domain_info = new_domain_info
 	goal = newGoal
 	goal_correction = 0
 	initialConditions = list(executer.getRealValues())
@@ -71,8 +83,8 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	inputForPlanning = []
 
 	preparePreASP_string_lists()
-	toi_history = observations_to_obsList(initialConditions,0)
-    	toi_history.append("hpd(select(my_goal), true,0).")
+	toi_history = my_domain_info.observations_to_obsList(initialConditions,executer.getRobotLocation(),0)
+	toi_history.append("hpd(select(my_goal), true,0).")
 
    	currentStep = 1
 	diagnose()
@@ -112,19 +124,13 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 		else:
 			print('action : '+ str(nextAction))
 			actionObservations = executer.executeAction(nextAction)
-
-            		answer_sets = refine(nextAction, toi_history, currentStep, 'ToI', current_refined_location, currently_holding)
-            		#refined_plans = answer_sets.split('\n')
-           		#refined_plan = refined_plans[0]
-            		#print 'refined action plan: '
-            		#print refined_plan
-            		#current_refined_location, current_location, currently_holding, relevantObservations, time, happened, objects = executer.execute_refined_plan(refined_plan, objects, cells, arm, limb_object, gripper, current_location, current_refined_location, currently_holding)
-
+			answer_sets = refine(nextAction, toi_history, currentStep, 'ToI', current_refined_location, currently_holding)
 
 		currentStep += 1
 		relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
-		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))
-                diagnose()
+		robotLocation = executer.getRobotLocation()
+		toi_history = toi_history + list(set(my_domain_info.observations_to_obsList(relevantObservations,robotLocation,currentStep)))
+		diagnose()
 
 	if(currentDiagnosis != ''): toi_history.append(currentDiagnosis)
 	return (toi_history, numberActivities, goal_correction)
@@ -133,7 +139,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 
 
 def getIndexesRelevantToGoal():
-	return [World.LocationBook1_index, World.LocationBook2_index, World.In_handBook1_index, World.In_handBook2_index]
+	return [DomainInfo.LocationBook1_index, DomainInfo.LocationBook2_index, DomainInfo.In_handBook1_index, DomainInfo.In_handBook2_index]
 
 def runToIPlanning(input):
 	global numberSteps
@@ -161,7 +167,7 @@ def runToIPlanning(input):
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 		current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
 		asp = '\n'.join(current_asp_split)
-        	f1 = open(asp_toi_file, 'w')
+		f1 = open(asp_toi_file, 'w')
 		f1.write(asp)
 		f1.close()
 		#print('Looking for next action (ToI) - numberSteps ' + str(numberSteps))
@@ -203,7 +209,7 @@ def diagnose():
 
 
 	asp = '\n'.join(current_asp_split)
-        f1 = open(asp_toi_diagnosing_file, 'w')
+	f1 = open(asp_toi_diagnosing_file, 'w')
 	f1.write(asp)
 	f1.close()
 
@@ -243,46 +249,23 @@ def preparePreASP_string_lists():
 	global toi_current_step_marker
 	global preASP_toi_file
 	global goal
-
 	global preASP_toi_split
 	global toi_beginning_history_index
 	global toi_current_step_index
 
 
 	#preparing preASP_toi_split and toi_beginning_history_index
-    	reader = open(preASP_toi_file, 'r')
-    	preASP_toi = reader.read()
-    	reader.close()
+	reader = open(preASP_toi_file, 'r')
+	preASP_toi = reader.read()
+	reader.close()
 	preASP_toi_split = preASP_toi.split('\n')
 
    	index_goal = preASP_toi_split.index(toi_goal_marker)
-    	preASP_toi_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ goal)
-    	toi_beginning_history_index = preASP_toi_split.index(toi_beginning_history_marker)
+	preASP_toi_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ goal)
+	toi_beginning_history_index = preASP_toi_split.index(toi_beginning_history_marker)
 	toi_current_step_index = preASP_toi_split.index(toi_current_step_marker)
 
 
-def observations_to_obsList(observations, step):
-	obsList = []
-	for observation in observations:
-		if (observation[0] == World.LibraryLocked_index and observation[1] != 'unknown'):
-			obsList.append('obs(locked(library),'+ observation[1] + ',' + str(step) +').')
-		if (observation[0] == World.LocationRobot_index and observation[1] != 'unknown'):
-			obsList.append('obs(loc(rob1,'+str(observation[1])+ '),true,'+ str(step) +').')
-		if (observation[0] == World.LocationBook1_index):
-			if(observation[1] != 'unknown'):
-				obsList.append('obs(loc(book1,' +str(observation[1])+ '),true,'+ str(step) +').')
-			else:
-				obsList.append('obs(loc(book1,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.LocationBook2_index):
-			if(observation[1] != 'unknown'):
-				obsList.append('obs(loc(book2,' +str(observation[1])+ '),true,'+ str(step) +').')
-			else:
-				obsList.append('obs(loc(book2,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.In_handBook1_index and observation[1] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,book1),' + observation[1]+ ','+ str(step) +').')
-		if (observation[0] == World.In_handBook2_index and observation[1] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
-	return obsList
 
 
 # this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
@@ -360,14 +343,13 @@ def refine(action, history, current_step, version, current_refined_location, cur
 
     # get refined answer set
     refined_answer = subprocess.check_output('java -jar '+sparcPath + ' zoomed_domain.sp -A ',shell=True)
-
     if refined_answer == "" : raw_input()
 
 
 
     # stop running code if refined answer set is empty
     if refined_answer == '\n':
-        raw_input('No refined answer set, press enter if you wish to continue.\n')
+		raw_input('No refined answer set, press enter if you wish to continue.\n')
 
     # refined_plan = parse answer set
     refined_plan = refined_answer
@@ -555,8 +537,8 @@ def zoom(initial_state, action, final_state, current_refined_location, currently
     goal = goal[0:len(goal)-2] + '.\n'
 
     # make temporary copy of refined ASP file that can be edited
-    original_asp = open('preASP_refined_domain.txt', 'r')
-    zoomed_asp = open('zoomed_domain.sp', 'w')
+    original_asp = open(preASP_refined_domain_file, 'r')
+    zoomed_asp = open(zoomed_domain_file, 'w')
 
     for line in original_asp:
         if line == '%% GOAL GOES HERE\n': # put goal in
