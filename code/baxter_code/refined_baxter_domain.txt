@@ -4,7 +4,7 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ZOOM THIS SORT: #coarse_place = {zoneR, zoneG, zoneY, unknown}.
+ZOOM THIS SORT: #coarse_place = {zoneR, zoneG, zoneY, above}.
 #robot = {rob1}.
 ZOOM THIS SORT: #coarse_object = {yellow_box, blue_box, green_box}.
 ZOOM THIS SORT OF SORTS: #coarse_thing = #coarse_object + #robot.
@@ -225,7 +225,7 @@ comp(c9, zoneY).
 comp(c10, zoneY).
 comp(c11, zoneY).
 comp(c12, zoneY).
-comp(unknown_cell, unknown).
+comp(unknown_cell, above).
 comp(yellow_box_top, yellow_box).
 comp(blue_box_top, blue_box).
 comp(green_box_top, green_box).

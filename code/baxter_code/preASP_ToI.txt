@@ -7,7 +7,7 @@ sorts
 #step = 0..n. 
 #integer = 0..n.
 
-#room = {zoneR, zoneG, zoneY, unknown}.
+#room = {zoneR, zoneG, zoneY, above}.
 #robot = {rob1}.
 #object = {yellow_box, blue_box, green_box}.
 #thing = #object + #robot.
@@ -146,7 +146,7 @@ impossible(pickup(R,O1), I) :- holds(in_hand(R,O2), I).
 impossible(pickup(R,O), I) :- holds(loc(R,L1), I), holds(loc(O,L2), I) , L1 != L2.
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
 impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
-impossible(move(R, unknown), I).
+impossible(move(R, above), I).
 
 %%%%%%%%%%%%%%
 %% Defaults %%
@@ -590,9 +590,9 @@ has_intention(I) :- intended_action(A,I).
 %%%%%%%%%%%%%%%%%%%
 next_to(zoneR, zoneG).
 next_to(zoneG, zoneY).
-next_to(zoneR, unknown).
-next_to(zoneG, unknown).
-next_to(zoneY, unknown).
+next_to(zoneR, above).
+next_to(zoneG, above).
+next_to(zoneY, above).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 

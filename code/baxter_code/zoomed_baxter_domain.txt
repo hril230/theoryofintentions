@@ -5,9 +5,9 @@ sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #robot = {rob1}.
-#coarse_object = {blue_box}.
+#coarse_object = {green_box}.
 #coarse_thing = #coarse_object + #robot.
-#object = {blue_box_top}.
+#object = {green_box_top}.
 #thing = #object + #robot.
 
 #step = 0..n.
@@ -159,7 +159,7 @@ something_happened(I) :- occurs(A, I).
 %% Attributes.
 
 
-comp(blue_box_top, blue_box).
+comp(green_box_top, green_box).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -168,14 +168,14 @@ comp(blue_box_top, blue_box).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- -holds(coarse_in_hand(rob1,blue_box),I).
+goal(I) :- -holds(coarse_in_hand(rob1,green_box),I).
 
 
 
 %%%%%%%%%%%%%%%%%
 %% Initial State:
 %%%%%%%%%%%%%%%%%
-holds(in_hand(rob1,blue_box_top), 0).
+holds(in_hand(rob1,green_box_top), 0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
