@@ -1,144 +1,161 @@
+'''
+This program represents the Controller of the agent that uses traidtional planning. 
+It needs three arguments:
+1. The goal to be achieved (in terms of the fluents of the domain description).
+2. The length of the longest possible plan of the domain.
+3. An instance of the Executer that will execute the plan and obtain observations from the world. 
+
+Once the controller has run the simmulation, it will return:
+1. The history of his actions and observations (as he believes them).
+2. All the plans that has created during the run.
+3. A boolean specifiying if it has been rectified for having produced, during diagnosis, the false assumption that the goal has been reached when it was not. 
+
+
+The initial coniditions of the knowledge representation of the domain will be observed and given by the executer. In this simmulations, we create it so that the executer can observe the state of the whole domain, and therefore the knowledge of the initial conditions is alwasy complete and True.
+'''
+
 
 from datetime import datetime
 import subprocess
+from realWorld import World
 import re
-import baxter_controller as baxter
-import global_variables
+import random
 
+goal = None  # given when initialised
+maxPlanLength = None  #given when initialised
+history = None  #sarting with initial conditions taken from world and adding occurrence
+currentStep = None
+belief = None
 
-goal = ''
-maxPlanLength = 0
-history = []
-currentStep = 0
-belief = ['unknown']*7
-
-allPlans = []  
-currentPlan = [] # given by asp 
-diagnosis = []
-
+allPlans = None  
+currentPlan = None 
+possibleDiagnosis = []
+goal_correction = None
 
 planning_goal_marker = '%% @_@_@'
 planning_history_marker = '%% #_#_#'
+asp_planning_file = 'ASP_Traditional.sp'
 preASP_planning_file = 'preASP_Traditional.txt'
-preASP_planning_split = []
-history_index_planning_asp = 0
+preASP_planning_split = None
+history_index_planning_asp = None
+
+
 belief_history_marker = '%% *_*_*'
 asp_belief_file = 'ASP_Believe.sp'
 asp_diagnosing_file = 'ASP_Diagnosis.sp'
 preASP_domain_file = 'preASP_Domain.txt'
-preASP_belief_split = []
-history_index_domain_asp = 0
 
-def controllerTraditionalPlanning(newGoal, maxPlanLen, initialConditions, objects, zones, cells, arm, limb_object, gripper, current_location, current_refined_location, currently_holding):
+preASP_belief_split = None
+history_index_domain_asp = None
+executer = None
+
+def controllerTraditionalPlanning(thisPath,newGoal, maxPlanLen, new_executer):
 	global belief
+	global executer
 	global maxPlanLength
 	global goal
 	global allPlans
+	global currentPlan
+	global possibleDiagnosis
 	global currentStep
 	global history
+	global 	goal_correction 
+	global sparcPath
 
+	allPlans = []
+	currentPlan = []
+	currentStep = 0
+	goal_correction = 0
 	maxPlanLength = maxPlanLen
+	executer = new_executer 
 	goal = newGoal	
+	belief = ['unknown']*6
+	sparcPath = thisPath
 
-	history = history + observations_to_obsList(initialConditions,0)
+	initialConditions = list(executer.getRealValues())
+	history = observations_to_obsList(initialConditions,0)
 
 	preparePreASP_string_lists()
-	
-	executionTime = 0
-	
 	needNewPlan = True
 	while(needNewPlan == True):
-		diagnoseAndUpdate()
+		diagnose()
+		updateBeliefWithDiagnosis()
 		currentPlan = findPlan()
-                print '\nAction Plan:'
-                print currentPlan
-                print '\n'
 		needNewPlan = False
-                if(len(currentPlan) > 1 and currentPlan[1] == "Goal holds" and baxter.getGoalFeedback() == False):
-                    while(currentPlan[1] == "Goal holds"):
-                        updateBeliefWithDiagnosis()
-                        currentPlan = findPlan()
-		if(currentPlan[0] == "No Plan"):
-			break
-		for current_step in range(len(currentPlan)):
-                        action = currentPlan[current_step]
-			print('\n\nNext action (traditional planning) : ' + str(action))
-                        answer_sets = baxter.refine(action, history, current_step, 'traditional', current_refined_location, currently_holding)
-                        refined_plans = answer_sets.split('\n')
-                        refined_plan = refined_plans[0]
-                        print 'refined action plan: '
-                        print refined_plan
-                        current_refined_location, current_location, currently_holding, relevantObservations, time, happened, objects = baxter.execute_refined_plan(refined_plan, objects, cells, arm, limb_object, gripper, current_location, current_refined_location, currently_holding)
-			executionTime += time
+		if(len(currentPlan) > 1 and currentPlan[1] == "Goal holds" and executer.getGoalFeedback() == False):
+			goal_correction += 1
+			while(possibleDiagnosis and currentPlan[1] == "Goal holds"):
+				updateBeliefWithDiagnosis()
+				currentPlan = findPlan()
+
+		if(currentPlan[0] == "No Plan"): break
+		
+		for action in currentPlan:
+			print('Next action (traditional planning) : ' + str(action))
+			relevantObservations = executer.executeAction(action)
+			happened = updateBelief_fromAction(action,relevantObservations)
 			if(happened == True): 
 				history.append('hpd('+action+','+str(currentStep)+').')
 				currentStep += 1
-                                global_variables.current_location = current_location
 				history = history + observations_to_obsList(relevantObservations, currentStep)	
+				possibleDiagnosis = []	
 			else: 
 				print('Inconsistent observations, action did not happen, need to call planner')
-				currentStep += 1
-                                global_variables.current_location = current_location
 				history = history + observations_to_obsList(relevantObservations, currentStep)	
 				needNewPlan = True
 				break	
-	return (history, allPlans, executionTime) 
+	print('%%%%%%%%%%%%%%  Finish Plan Traditional %%%%%%%%%%%%%%%% ')
+	return (history, allPlans, goal_correction) 
 
 
+def diagnose():
+	global possibleDiagnosis
 
-# this function will find  minimal Plan AND update the current belief with inferred observations.
-
-def diagnoseAndUpdate():
-	global history
-	global currentStep
-	global history_index_domain_asp
-	global preASP_belief_split
-	global diagnosis
-
-	diagnosis = []
 	asp_diagnosing_split = preASP_belief_split[:history_index_domain_asp] + history + preASP_belief_split[history_index_domain_asp+1:]
 	asp_diagnosing_split[0] = "#const numSteps = "+str(currentStep)+"."
 	asp = '\n'.join(asp_diagnosing_split)
 	f1 = open(asp_diagnosing_file, 'w')
 	f1.write(asp) 
 	f1.close()
-	output = subprocess.check_output('java -jar sparc.jar '+ asp_diagnosing_file +' -A',shell=True)
-        outputs = output.split('}')
-        firstOutput = outputs[0]
-	firstOutput = firstOutput.strip('}').strip('{').split(', ')
+	output = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_diagnosing_file +' -A',shell=True)
+	output_split = output.rstrip().split('\n\n') 
+	possibleDiagnosis = [a.strip('}').strip('{').split(', ') for a in output_split]
+
+
+def updateBeliefWithDiagnosis():
+	chosenDiagnosis = possibleDiagnosis.pop()
 	fluents = []
-	for item in firstOutput:
-	    if('holds' in item): fluents.append(item)
-	    elif(item[0:4] == 'diag'): 
-	        item = item.replace('diag', 'hpd')
-	        commaIndex = item.rfind(',') 
-	        item = item[0:commaIndex+1] + 'true,'+item[commaIndex+1:]	
-	        diagnosis.append(item)
-        print 'diagnosis:'
-        print diagnosis
-        if diagnosis != []:
-            history.append(diagnosis[0])
-        answer = (', '.join(fluents))
-	updateBelief_fromAnswer(answer)
+	for item in chosenDiagnosis:
+		if('holds' in item): fluents.append(item)
+		elif(item[0:4] == 'diag'): 
+			item = item.replace('diag', 'hpd')
+			commaIndex = item.rfind(',') 
+			item = item[0:commaIndex+1] + 'true,'+item[commaIndex+1:]	
+	updateBelief_fromAnswer(', '.join(fluents))
 	
 
-
-
-
-def findPlan():
+def findPlan():	
 	global currentStep
 	global currentPlan
 	global preASP_planning_split
 	global allPlans
 	
 	newPlan = []
+	numSteps = 4
 
 	asp_planning_split = preASP_planning_split[:history_index_planning_asp] + getBelief_as_obsList(0) + preASP_planning_split[history_index_planning_asp+1:]
-	asp_planning = '\n'.join(asp_planning_split)
-        f1 = open('ASP_Traditional.sp', 'w')
-	f1.write(asp_planning) 
-	f1.close()
-        answerSet = subprocess.check_output('java -jar sparc.jar ASP_Traditional.sp -A', shell=True)
+
+	answerSet = '\n'
+	while(answerSet == '\n' and numSteps < maxPlanLength):
+		asp_planning_split[0] = '#const numSteps = '+ str(numSteps) + '.'
+		asp_planning = '\n'.join(asp_planning_split)
+        	f1 = open(asp_planning_file, 'w')
+		f1.write(asp_planning) 
+		f1.close()
+		print('Looking for next plan (Trad) - numberSteps ' + str(numSteps))
+	        answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' +asp_planning_file+' -A ',shell=True)
+		numSteps +=1
+	
 	if(answerSet == "\n"):
 		newPlan = ["No Plan","Futile Goal/Inconsistent"]
 	elif("{}" in answerSet):
@@ -146,17 +163,17 @@ def findPlan():
 	elif(answerSet == ""):
 		newPlan = ["No Plan","Unable to process"]
 	else:
-		plans = answerSet.strip('\n').split('\n') 
+		plans = answerSet.rstrip().split('\n\n') 
     		plans = [plan for plan in plans if plan!='' and plan!='{}']
-		firstPlan = plans[0]
-		plan_in_actions = firstPlan.strip('}').strip('{').split(', ')
+		#chosenPlan = random.choice(plans)
+		chosenPlan = plans[0]
+		plan_in_actions = chosenPlan.strip('}').strip('{').split(', ')
 		splitActionsList = [action[:-1].split('),') for action in plan_in_actions]
-		splitActionsList.sort(key=lambda x:int(x[1]))
+		splitActionsList.sort(key=lambda x:int(x[1])) 
  		plan_in_actions = ['),'.join(action)+ ')' for action in splitActionsList]
 		for a in plan_in_actions:
 			newPlan.append(a[7:a.rfind(',')])
 	allPlans.append(newPlan)
-
 	return newPlan
 
 
@@ -171,13 +188,13 @@ def updateBelief_fromAction(action, observations):
 	f1.write(asp) 
 	f1.close()
 	print('Next, checking belief-observations consistency ')
-	output = subprocess.check_output('java -jar sparc.jar '+ asp_belief_file +' -A',shell=True)
+	output = subprocess.check_output('java -jar '+ sparcPath + ' ' + asp_belief_file +' -A',shell=True)
 	output = output.strip('}').strip('{')
-
 	if 'holds' in output:
 		updateBelief_fromAnswer(output)
 		return True
 	else: return False
+
 
 def preparePreASP_string_lists():
     	global preASP_planning_split 
@@ -205,37 +222,31 @@ def preparePreASP_string_lists():
 	preASP_belief_split = preASP_belief.split('\n')
     	history_index_domain_asp = preASP_belief_split.index(belief_history_marker)
 
+
 def updateBelief_fromAnswer(answer):
 	global belief 
-	belief = ['unknown'] * 7
+	belief = ['unknown'] * 5
 	for holds in answer.split(', '):
-            try:
 		if holds[0] == '-':
 			fluent = holds[7:holds.rfind(',')]
 			if(fluent[0:8] == 'in_hand('): 
 				fluent = fluent[8:-1]
 				split_fluent = fluent.split(',')
-				if(split_fluent[1] == 'yellow_box'): belief[3] = 'false'
-				if(split_fluent[1] == 'blue_box'): belief[4] = 'false'
-				if(split_fluent[1] == 'green_box'): belief[6] = 'false'
-			
+				if(split_fluent[1] == 'green_box'): belief[executer.In_handGreenBox_index] = 'false'
+				if(split_fluent[1] == 'blue_box'): belief[executer.In_handBlueBox_index] = 'false'
 		else:
 			fluent = holds[6:holds.rfind(',')]
 			if(fluent[0:4] == 'loc('):
 				fluent = fluent[4:-1]
 				split_fluent = fluent.split(',')
-				if(split_fluent[0] == 'rob1'): belief[0] = split_fluent[1]
-				elif(split_fluent[0] == 'yellow_box'): belief[1] = split_fluent[1]
-				elif(split_fluent[0] == 'blue_box'): belief[2] = split_fluent[1]
-				elif(split_fluent[0] == 'green_box'): belief[5] = split_fluent[1]
+				if(split_fluent[0] == 'rob1'): belief[executer.LocationRobot_index] = split_fluent[1]
+				elif(split_fluent[0] == 'green_box'): belief[executer.LocationGreenBox_index] = split_fluent[1]
+				elif(split_fluent[0] == 'blue_box'): belief[executer.LocationBlueBox_index] = split_fluent[1]
 			elif(fluent[0:8] == 'in_hand('): 
 				fluent = fluent[8:-1]
 				split_fluent = fluent.split(',')
-				if(split_fluent[1] == 'yellow_box'): belief[3] = 'true'
-				if(split_fluent[1] == 'blue_box'): belief[4] = 'true'
-				if(split_fluent[1] == 'green_box'): belief[6] = 'true'
-            except IndexError:
-                print 'holds[0] doesnt exist'
+				if(split_fluent[1] == 'green_box'): belief[executer.In_handGreenBox_index] = 'true'
+				if(split_fluent[1] == 'blue_box'): belief[executer.In_handBlueBox_index] = 'true'
 
 def getBelief(index):
 	return belief[index]
@@ -243,56 +254,36 @@ def getBelief(index):
 
 def getBelief_as_obsList(step):
 	obsList = []
-	global belief
-	obsList.append('obs(loc(rob1,' +str(belief[0])+ '),true,'+str(step)+').')
-	if(belief[1] != 'unknown'): obsList.append('obs(loc(yellow_box,' +str(belief[1])+ '),true,'+str(step)+').')
-	if(belief[2] != 'unknown'): obsList.append('obs(loc(blue_box,' +str(belief[2])+ '),true,'+str(step)+').')
-	if(belief[3] != 'unknown'): obsList.append('obs(in_hand(rob1,yellow_box),' + belief[3]+ ','+str(step)+').')
-	if(belief[4] != 'unknown'): obsList.append('obs(in_hand(rob1,blue_box),' + belief[4]+ ','+str(step)+').')
-	if(belief[5] != 'unknown'): obsList.append('obs(loc(green_box,' +str(belief[5])+ '),true,'+str(step)+').')
-	if(belief[6] != 'unknown'): obsList.append('obs(in_hand(rob1,green_box),' + belief[6]+ ','+str(step)+').')
+	global belief		
+	if(belief[executer.LocationRobot_index] != 'unknown'): obsList.append('obs(loc(rob1,' +str(belief[executer.LocationRobot_index])+ '),true,'+str(step)+').')
+	if(belief[executer.LocationGreenBox_index] != 'unknown'):
+		obsList.append('obs(loc(green_box,' +str(belief[executer.LocationGreenBox_index])+ '),true,'+str(step)+').')
+	if(belief[executer.LocationBlueBox_index] != 'unknown'):
+		obsList.append('obs(loc(blue_box,' +str(belief[executer.LocationBlueBox_index])+ '),true,'+str(step)+').')
+	if(belief[executer.In_handGreenBox_index] != 'unknown'):
+		obsList.append('obs(in_hand(rob1,green_box),' + belief[executer.In_handGreenBox_index]+ ','+str(step)+').')
+	if(belief[executer.In_handBlueBox_index] != 'unknown'): obsList.append('obs(in_hand(rob1,blue_box),' + belief[executer.In_handBlueBox_index]+ ','+str(step)+').')
 	return obsList
-
 
 
 def observations_to_obsList(observations, step):
-
 	obsList = []
 	for observation in observations:
-		if (observation[0] == 0):
+		if (observation[0] == executer.LocationRobot_index and observation[1] != 'unknown'):
 			obsList.append('obs(loc(rob1,'+str(observation[1])+ '),true,'+ str(step) +').')
-		if (observation[0] == 1): 
-			if(observation[1] != 'unknown'):
-				obsList.append('obs(loc(yellow_box,' +str(observation[1])+ '),true,'+ str(step) +').')
-			else:
-				obsList.append('obs(loc(yellow_box,' + global_variables.current_location + '),false,'+ str(step) +').')
-		if (observation[0] == 2): 
-			if(observation[1] != 'unknown'):
-				obsList.append('obs(loc(blue_box,' +str(observation[1])+ '),true,'+ str(step) +').')
-			else:
-				obsList.append('obs(loc(blue_box,' + global_variables.current_location + '),false,'+ str(step) +').')
-		if (observation[0] == 5): 
+		if (observation[0] == executer.LocationGreenBox_index): 
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(green_box,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
-				obsList.append('obs(loc(green_box,' + global_variables.current_location + '),false,'+ str(step) +').')
-		if (observation[0] == 3 and observation[1] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,yellow_box),' + observation[1]+ ','+ str(step) +').')
-		if (observation[0] == 4 and observation[1] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,blue_box),' + observation[1]+ ','+ str(step) +').')
-		if (observation[0] == 6 and observation[1] != 'unknown'):
+				obsList.append('obs(loc(green_box,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
+		if (observation[0] == executer.LocationBlueBox_index): 
+			if(observation[1] != 'unknown'):
+				obsList.append('obs(loc(blue_box,' +str(observation[1])+ '),true,'+ str(step) +').')
+			else:
+				obsList.append('obs(loc(blue_box,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
+		if (observation[0] == executer.In_handGreenBox_index and observation[1] != 'unknown'):
 			obsList.append('obs(in_hand(rob1,green_box),' + observation[1]+ ','+ str(step) +').')
-
+		if (observation[0] == executer.In_handBlueBox_index and observation[1] != 'unknown'):
+			obsList.append('obs(in_hand(rob1,blue_box),' + observation[1]+ ','+ str(step) +').')
 	return obsList
 
-
-def updateBeliefWithDiagnosis():
-	chosenDiagnosis = possibleDiagnosis.pop()
-	fluents = []
-	for item in chosenDiagnosis:
-		if('holds' in item): fluents.append(item)
-		elif(item[0:4] == 'diag'): 
-			item = item.replace('diag', 'hpd')
-			commaIndex = item.rfind(',') 
-			item = item[0:commaIndex+1] + 'true,'+item[commaIndex+1:]	
-        updateBelief_fromAnswer(', '.join(fluents))

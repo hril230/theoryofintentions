@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {zoneR, zoneG, zoneY, unknown}.
+#room = {zoneR, zoneG, zoneY, above}.
 #robot = {rob1}.
 #object = {yellow_box, blue_box, green_box}.
 #thing = #object + #robot.
@@ -92,8 +92,8 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% An exogenous move of an object cannot happen if it is being in hand
 -occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
-%% Cannot move back to the 'unknown' location
--occurs(move(R, unknown), I).
+%% Cannot move back to the 'above' location
+-occurs(move(R, above), I).
 
 %%%%%%%%%%%%%%
 %% Defaults %%
@@ -163,9 +163,9 @@ something_happened(I) :- occurs(A, I), #rob_action(A).
 %% Attributes.
 next_to(zoneR,zoneG).
 next_to(zoneG,zoneY).
-next_to(zoneR, unknown).
-next_to(zoneG, unknown).
-next_to(zoneY, unknown).
+next_to(zoneR, above).
+next_to(zoneG, above).
+next_to(zoneY, above).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
