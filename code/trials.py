@@ -16,14 +16,16 @@ How I model different scenarios in realWorld.py:
 
 from datetime import datetime
 from simulation.realWorld import World
-import controllerTraditionalPlanning
-import controllerToI
+from controllerTraditionalPlanning import ControllerTraditionalPlanning
+from controllerToI import ControllerToI
 from simulation.executer import Executer
 import subprocess
 import  csv
 import random
 from simulation.domain_info import DomainInfo
-files_path = 'simulation/'
+subfolder_path = 'simulation/'
+results_file_name = "simulation/results/scenario_"
+
 
 sparcPath = "$HOME/work/solverfiles/sparc.jar"
 
@@ -57,13 +59,14 @@ def run_and_write(scenario, initial_conditions_index):
 	scenarioRecreated_toi = 0
 	slength = 0
 
-	my_domain_info = DomainInfo('myInfo')
+	domain_info = DomainInfo()
 
 	start_time_trad = datetime.now()
 	randomSeed = runCount
-	world_trad = World(sparcPath,initial_state,scenario,randomSeed)
+	world_trad = World(sparcPath,initial_state,scenario,randomSeed,domain_info)
 	executer = Executer(world_trad)
-	history_trad, plans_trad, goal_correction_trad = controllerTraditionalPlanning.controllerTraditionalPlanning(sparcPath,goal, maxPlanLength, executer)
+	controllerTraditionalPlanning = ControllerTraditionalPlanning(sparcPath,goal, maxPlanLength, executer, domain_info,subfolder_path)
+	history_trad, plans_trad, goal_correction_trad = controllerTraditionalPlanning.run()
 	end_time_trad = datetime.now()
 	time_planning_trad = (end_time_trad - start_time_trad).total_seconds()
 	numberPlans_trad = 0
@@ -76,9 +79,10 @@ def run_and_write(scenario, initial_conditions_index):
 	steps_executed_trad = world_trad.getExecutedSteps()
 
 	start_time_toi = datetime.now()
-	world_toi = World(sparcPath,initial_state,scenario,randomSeed)
+	world_toi = World(sparcPath,initial_state,scenario,randomSeed, domain_info)
 	executer = Executer(world_toi)
-	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer,my_domain_info, files_path)
+	controllerToI = ControllerToI(sparcPath,goal, maxPlanLength, executer,domain_info, subfolder_path)
+	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.run()
 	end_time_toi = datetime.now()
 	time_planning_toi = (end_time_toi - start_time_toi).total_seconds()
 	historyWorld_toi = world_toi.getHistory()
@@ -269,9 +273,8 @@ if __name__ == "__main__":
 
 	for s in scenarios:
 		runCount = 0
-		results_file_name = "simulation/scenario_" + str(s)
-		textfile = open(results_file_name+'.txt', 'w')
-		csvfile = open(results_file_name+'.csv', 'w')
+		textfile = open(results_file_name+ str(s)+'.txt', 'w')
+		csvfile = open(results_file_name+ str(s)+'.csv', 'w')
 		writer = csv.writer(csvfile)
 		writer.writerow(['Index', ' Total Time Trad', ' Total Time ToI' , ' Number Plans Trad', ' Number Plans ToI', ' Time Planning Trad', ' Time Planning ToI',' Exec TU Trad', ' Exec TU ToI', ' Steps Executed Trad', ' Steps Executed ToI', ' Achieved Goal Trad', ' Achieved Goal ToI', ' Goal Correction Trad', ' Goal Correction ToI', ' Exo-action', ' Scenario Recreated', ' Same Exo-action', ' Actions Before Replanning'])
 

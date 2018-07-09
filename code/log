@@ -1,0 +1,7 @@
+I have added two parameters to the controllers:
+  1. a DomainInfo objects that is in charge to deal with the info and formatting of the domain_info
+  2. a string that contains the name of the subfolder where the code for the executer will be
+
+Within the subfolder where you will put your code, you will need to create two more subfolders, one called ASP_files,
+and a second one called pre_ASP_files. The controllers will look for the pre_ASP files and store the
+.sp files in the relevant subfolders.
