@@ -29,7 +29,7 @@ class ControllerTraditionalPlanning():
 		self.preASP_domain_file = subfolder_path + 'pre_ASP_files/preASP_Domain.txt'
 		self.asp_planning_file = subfolder_path + 'ASP_files/ASP_Traditional.sp'
 		self.asp_belief_file = subfolder_path + 'ASP_files/ASP_Believe.sp'
-		self.asp_diagnosing_file = subfolder_path + 'pre_ASP_files/ASP_Diagnosis.sp'
+		self.asp_diagnosing_file = subfolder_path + 'ASP_files/ASP_Diagnosis.sp'
 
 		self.allPlans = []
 		self.currentPlan = []

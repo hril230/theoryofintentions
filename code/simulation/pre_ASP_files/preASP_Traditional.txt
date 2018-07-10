@@ -103,8 +103,7 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 -occurs(pickup(R, O1), I) :- holds(in_hand(R, O2), I).
 
 %% Cannot pick up an object if you are not in the same room.
--occurs(pickup(R, O), I) :- holds(loc(R, L1), I),
-			    holds(loc(O, L2), I), L1 != L2.
+-occurs(pickup(R, O), I) :- holds(loc(R, L), I),not holds(loc(O, L), I).
 
 %% An exogenous move of an object cannot be done to the same location.
 -occurs(exo_move(O,L),I) :- holds(loc(O,L),I).

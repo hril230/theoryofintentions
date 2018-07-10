@@ -7,18 +7,20 @@ import numpy
 import random
 
 class ControllerToI():
-	def __init__(self,sparc_path, newGoal, maxPlanLength, executer, domain_info, subfolder):
+	def __init__(self,sparcPath, newGoal, maxPlanLength, executer, domain_info, subfolder):
 		self.goal = newGoal
-		self.sparc_path = sparc_path
+		self.sparcPath = sparcPath
 		self.executer = executer
 		self.domain_info = domain_info
 		self.maxPlanLength = maxPlanLength
 
 		self.preASP_toi_file = subfolder+'pre_ASP_files/preASP_ToI.txt'
 		self.preASP_refined_domain_file = subfolder + 'pre_ASP_files/preASP_refined_domain.txt'
+		self.preASP_domain_file = subfolder + 'pre_ASP_files/preASP_Domain.txt'
 		self.asp_toi_file = subfolder+'ASP_files/ASP_ToI.sp'
 		self.asp_toi_diagnosing_file = subfolder + 'ASP_files/ASP_TOI_Diagnosis.sp'
 		self.zoomed_domain_file = subfolder + 'ASP_files/zoomed_domain.sp'
+		self.asp_domain_file = subfolder + 'ASP_files/ToI_belief.sp'
 
 		self.numberSteps = 4
 		self.numberActivities = 1
@@ -31,16 +33,17 @@ class ControllerToI():
 		self.toi_beginning_history_marker = '%% #_#_# beginning'
 		self.toi_end_history_marker = '%% #_#_# end'
 		self.toi_current_step_marker = '%% *_*_*'
+		self.domain_history_marker = '%% *_*_*'
+
 		self.believes_goal_holds  = False
 		self.preASP_toi_split = []
 
-		self.current_location = 'unknown'
-		self.current_refined_location = 'unknown_cell'
 		self.currently_holding = 'nothing'
 
-
 		self.toi_history = self.domain_info.observations_to_obsList(self.initialConditions,self.executer.getRobotLocation(),0)
+		self.current_refined_location = self.executer.getRefinedLocation()
 		self.preparePreASP_string_lists()
+
 
 	def run(self):
 		self.toi_history.append("hpd(select(my_goal), true,0).")
@@ -113,7 +116,7 @@ class ControllerToI():
 		f1.write(asp)
 		f1.close()
 
-		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_toi_file +' -A ',shell=True)
+		answerSet = subprocess.check_output('java -jar '+self.sparcPath + ' ' + self.asp_toi_file +' -A ',shell=True)
 		while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and self.numberSteps < self.currentStep + self.maxPlanLength+3):
 			current_asp_split[0] = "#const n = "+str(self.numberSteps+1)+". % maximum number of steps."
 			current_asp_split[1] = "#const max_len = "+str(self.numberSteps)+". % maximum activity_length of an activity."
@@ -122,7 +125,7 @@ class ControllerToI():
 			f1.write(asp)
 			f1.close()
 			#print('Looking for next action (ToI) - numberSteps ' + str(numberSteps))
-			answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_toi_file +' -A ',shell=True)
+			answerSet = subprocess.check_output('java -jar '+self.sparcPath + ' ' + self.asp_toi_file +' -A ',shell=True)
 			self.numberSteps +=1
 
 	        possibleAnswers = answerSet.rstrip().split('\n\n')
@@ -144,8 +147,6 @@ class ControllerToI():
 
 
 	def diagnose(self):
-
-
 		self.inputForPlanning = []
 		possibleDiagnosis = []
 		input = list(self.toi_history)
@@ -163,8 +164,8 @@ class ControllerToI():
 		f1.close()
 
 		# running only diagnosis
-		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_toi_diagnosing_file +' -A ',shell=True)
-	       	answers = answerSet.rstrip().split('\n\n')
+		answerSet = subprocess.check_output('java -jar '+self.sparcPath + ' ' + self.asp_toi_diagnosing_file +' -A ',shell=True)
+		answers = answerSet.rstrip().split('\n\n')
 
 
 		if self.currentDiagnosis in answerSet:
@@ -204,6 +205,24 @@ class ControllerToI():
 		self.toi_beginning_history_index = self.preASP_toi_split.index(self.toi_beginning_history_marker)
 		self.toi_current_step_index = self.preASP_toi_split.index(self.toi_current_step_marker)
 
+		reader = open(self.preASP_domain_file, 'r')
+		preASP_domain = reader.read()
+		reader.close()
+		self.preASP_domain_split = preASP_domain.split('\n')
+		self.history_index_domain_asp = self.preASP_domain_split.index(self.domain_history_marker)
+
+	def getBeliefState(self,history_formatted):
+		asp_domain_split = self.preASP_domain_split[:self.history_index_domain_asp] + history_formatted + self.preASP_domain_split[self.history_index_domain_asp+1:]
+		asp = '\n'.join(asp_domain_split)
+		f1 = open(self.asp_domain_file, 'w')
+		f1.write(asp)
+		f1.close()
+		print('checking state ')
+		output = subprocess.check_output('java -jar '+ self.sparcPath + ' ' + self.asp_domain_file +' -A',shell=True)
+		output = output.strip('}').strip('{')
+		if 'holds' in output:
+			print output
+		return output
 
 
 
@@ -212,13 +231,16 @@ class ControllerToI():
 	    # convert ToI history into traditional format so that they can be processed in the same way
 		history_formatted = []
 		for i in range(len(history)):
-			if ('hpd' in history[i]) and ('true' in history[i]):
-				if ('0)' in history[i]) or ('1)' in history[i]) or ('2)' in history[i]) or ('3)' in history[i]) or ('4)' in history[i]) or ('5)' in history[i]) or ('6)' in history[i]) or ('7)' in history[i]) or ('8)' in history[i]) or ('9)' in history[i]):
-					history_formatted.append(history[i][0:len(history[i])-8] + history[i][len(history[i])-3:len(history[i])])
-				else:
-					history_formatted.append(history[i][0:len(history[i])-9] + history[i][len(history[i])-4:len(history[i])])
-			elif not 'hpd' in history[i]:
+			if ('hpd' in history[i]):
+				if ('true' in history[i]):
+					history_formatted.append(history[i].replace('true,',''))
+				if ('false' in history[i]):
+					history_formatted.append('-'+history[i].replace('false,',''))
+			else:
 				history_formatted.append(history[i])
+		print('belief')
+		print self.getBeliefState(history_formatted)
+
 		initial_state = []
 		final_state = []
 	    # use action and history to figure out the transition (initial_state, action, final_state)
@@ -233,14 +255,17 @@ class ControllerToI():
 				if ('obs' in observation) and ('rob1' in observation) and ('loc' in observation):
 					initial_state = ['coarse_loc(rob1,' + observation[13:len(observation)-10] + ')']
 
+
 	        # if actions have happened since step zero, initial state may need to be updated
 			for observation in history_formatted:
 				if ('hpd' in observation) and ('move' in observation) and (not 'exo' in observation):
 					if ('0)' in observation) or ('1)' in observation) or ('2)' in observation) or ('3)' in observation) or ('4)' in observation) or ('5)' in observation) or ('6)' in observation) or ('7)' in observation) or ('8)' in observation) or ('9)' in observation):
 						initial_state = ['coarse_loc(rob1,' + observation[14:len(observation)-5] + ')']
+
 					else:
 						initial_state = ['coarse_loc(rob1,' + observation[14:len(observation)-6] + ')']
 				final_state = ['coarse_loc(rob1,' + action[10:len(action)-1] + ')']
+
 
 	    # the location of the robot and object, and the in_hand status of the object, are relevant for pickup transitions
 		elif 'pickup' in action:
@@ -276,7 +301,7 @@ class ControllerToI():
 
 
 	    # get refined answer set
-		refined_answer = subprocess.check_output('java -jar '+self.sparc_path + ' zoomed_domain.sp -A ',shell=True)
+		refined_answer = subprocess.check_output('java -jar '+self.sparcPath +' '+ self.zoomed_domain_file + ' -A ',shell=True)
 		if refined_answer == "" : raw_input()
 
 
@@ -300,10 +325,10 @@ class ControllerToI():
 				final_state[i] = final_state[i][0:len(final_state[i])-1]
 
 	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['zoneR', 'zoneG', 'zoneY', 'unknown'])
-		coarse_objects = Sort('coarse_object', ['yellow_box', 'blue_box', 'green_box'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'unknown_cell'])
-		objects = Sort('object', ['yellow_box_top', 'blue_box_top', 'green_box_top'])
+		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2', 'unknown'])
+		coarse_objects = Sort('coarse_object', ['book1', 'book2'])
+		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'unknown_cell'])
+		objects = Sort('object', ['ref_book1', 'ref_book2'])
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
 		coarse_components = Sort('coarse_component', ['#coarse_place', '#coarse_object'])
@@ -315,14 +340,14 @@ class ControllerToI():
 		actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 
 	    # EDIT these instantiations of the Components class to change which refined objects are associated with which coarse ones
-		zoneR_components = Components('zoneR', ['c1', 'c2', 'c3', 'c4'])
-		zoneG_components = Components('zoneG', ['c5', 'c6', 'c7', 'c8'])
-		zoneY_components = Components('zoneY', ['c9', 'c10', 'c11', 'c12'])
+		library_components = Components('library', ['c1', 'c2', 'c3', 'c4'])
+		kitchen_components = Components('kitchen', ['c5', 'c6', 'c7', 'c8'])
+		office1_components = Components('office1', ['c9', 'c10', 'c11', 'c12'])
+		office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
 		unknown_components = Components('unknown', ['unknown_cell'])
-		yellow_box_components = Components('yellow_box', ['yellow_box_top'])
-		blue_box_components = Components('blue_box', ['blue_box_top'])
-		green_box_components = Components('green_box', ['green_box_top'])
-		refinements = [zoneR_components, zoneG_components, zoneY_components, yellow_box_components, blue_box_components, green_box_components, unknown_components]
+		book1_components = Components('book1', ['ref_book1'])
+		book2_components = Components('book2', ['ref_book2'])
+		refinements = [library_components, kitchen_components, office1_components, office2_components, book1_components, book2_components, unknown_components]
 
 	    # initialise relevance lists
 		rel_initial_conditions = []
@@ -337,7 +362,7 @@ class ControllerToI():
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
 		irrelevant_sort_names = ['#coarse_place', '#coarse_object', '#place', '#object']
-		irrelevant_obj_consts = ['zoneR', 'zoneG', 'zoneY', 'unknown', 'yellow_box', 'blue_box', 'green_box', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'yellow_box_top', 'blue_box_top', 'green_box_top']
+		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'unknown', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12','c13', 'c14', 'c15', 'c16' 'ref_boo1', 'ref_book2']
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 

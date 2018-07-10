@@ -62,6 +62,11 @@ class World(object):
 				if(split_fluent[1] == 'book2'): self.RealValues[5] = 'true'
 
 
+	def getRefinedLocation(self):
+		if self.RealValues[1] == 'library': return 'c1'
+		elif self.RealValues[1] == 'kitchen': return 'c5'
+		elif self.RealValues[1] == 'office1': return 'c9'
+		elif self.RealValues[1] == 'office2': return 'c13'
 
 	def __getActionObservations(self,action,happened):
 		relevant_indexes= Set([])

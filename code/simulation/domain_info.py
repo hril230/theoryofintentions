@@ -1,6 +1,6 @@
 class DomainInfo():
 
-	DomainLocations = ['office1', 'office2' ,'kitchen','library']
+	DomainLocations = ['library','kitchen','office1', 'office2']
 
 	def __init__(self):
 		self.LibraryLocked_index = 0
