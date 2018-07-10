@@ -30,8 +30,6 @@ toi_beginning_history_index = None
 toi_current_step_index = None
 
 asp_toi_diagnosing_file = 'ASP_TOI_Diagnosis.sp'
-
-
 executer = None
 goal_correction = None
 
@@ -53,14 +51,14 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	numberActivities = 1
 	numberSteps = 4
 	maxPlanLength = maxPlanLen
-	executer = new_executer 
-	goal = newGoal	
-	goal_correction = 0	
+	executer = new_executer
+	goal = newGoal
+	goal_correction = 0
 	initialConditions = list(executer.getRealValues())
 	currentDiagnosis = ''
 	inputForPlanning = []
 
-	preparePreASP_string_lists()	
+	preparePreASP_string_lists()
 	toi_history = observations_to_obsList(initialConditions,0)
     	toi_history.append("hpd(select(my_goal), true,0).")
 
@@ -73,7 +71,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 		print(' $$$$$$$$$$$$$$$$$    next action with ToI : ' +str(nextAction) +'  at step '+ str(currentStep))
 
 		if(nextAction == 'finish'):
-			if(executer.getGoalFeedback() == True): 
+			if(executer.getGoalFeedback() == True):
 				toi_history.append('finish')
 				finish = True
 				break
@@ -90,13 +88,13 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 			finish = True
 			break
 
-	
-	
+
+
 		actionObservations = []
 		toi_history.append('attempt('+nextAction+','+str(currentStep)+').')
 
 		if(nextAction[0:4] == 'stop'):
-			numberActivities += 1 
+			numberActivities += 1
 			numberSteps += 1
 		elif(nextAction[0:5] == 'start'): toi_history.append("hpd("+nextAction+",true,"+str(currentStep)+").") # CHANGE MADE HERE (was 'pass')
 		else:
@@ -105,9 +103,9 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 			toi_history.append("hpd("+nextAction+",true,"+str(currentStep)+").") # CHANGE MADE HERE (added this line)
 		currentStep += 1
 		relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
-		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))				
+		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))
                 diagnose()
-	
+
 	if(currentDiagnosis != ''): toi_history.append(currentDiagnosis)
 	return (toi_history, numberActivities, goal_correction)
 
@@ -124,7 +122,7 @@ def runToIPlanning(input):
 	global maxPlanLength
 	global currentStep
 	global believes_goal_holds
-	nextAction = None	
+	nextAction = None
 	print('running ToI planning ')
 
 
@@ -135,35 +133,35 @@ def runToIPlanning(input):
 	current_asp_split[2] = "#const max_name = " + str(numberActivities) + "."
 	asp = '\n'.join(current_asp_split)
         f1 = open(asp_toi_file, 'w')
-	f1.write(asp) 
+	f1.write(asp)
 	f1.close()
 
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
-	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):	
+	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 		current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
 		asp = '\n'.join(current_asp_split)
         	f1 = open(asp_toi_file, 'w')
-		f1.write(asp) 
+		f1.write(asp)
 		f1.close()
 		print('Looking for next action (ToI) - numberSteps ' + str(numberSteps))
 		answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
 		numberSteps +=1
-	
-        possibleAnswers = answerSet.rstrip().split('\n\n') 
+
+        possibleAnswers = answerSet.rstrip().split('\n\n')
 
 	chosenAnswer = possibleAnswers[0]
-	split_answer = chosenAnswer.strip('}').strip('{').split(', ') 
+	split_answer = chosenAnswer.strip('}').strip('{').split(', ')
 	toi_history = []
 	believes_goal_holds = False
-	for line in split_answer:	
-		if("intended_action" in line):      		
-			nextAction = line[16:line.rfind(',')] 
-		#elif("number_unobserved" in line): continue	
-		elif("selected_goal_holds" in line): 
+	for line in split_answer:
+		if("intended_action" in line):
+			nextAction = line[16:line.rfind(',')]
+		#elif("number_unobserved" in line): continue
+		elif("selected_goal_holds" in line):
 			believes_goal_holds = True
 		else:
-			toi_history.append(line + '.')	
+			toi_history.append(line + '.')
 	return nextAction
 
 
@@ -186,12 +184,12 @@ def diagnose():
 
 	asp = '\n'.join(current_asp_split)
         f1 = open(asp_toi_diagnosing_file, 'w')
-	f1.write(asp) 
+	f1.write(asp)
 	f1.close()
 
 	# running only diagnosis
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_diagnosing_file +' -A ',shell=True)
-       	answers = answerSet.rstrip().split('\n\n')  
+       	answers = answerSet.rstrip().split('\n\n')
 
 
 	if currentDiagnosis in answerSet:
@@ -203,8 +201,8 @@ def diagnose():
  	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
 	for line in split_diagnosis:
 		if("number_unobserved" in line):
-			newLine =line.replace("number_unobserved","explanation") 
-			inputForPlanning.append(newLine + '.') 
+			newLine =line.replace("number_unobserved","explanation")
+			inputForPlanning.append(newLine + '.')
 		elif("unobserved" in line):
 			newLine = line.replace("unobserved", "occurs") + '.'
 			inputForPlanning.append(newLine)
@@ -213,7 +211,7 @@ def diagnose():
 		elif(line == ""): pass
 		else:
 			inputForPlanning.append(line + '.')
-			
+
 	print('current diagnosis: '+str(currentDiagnosis))
 	return
 
@@ -224,7 +222,6 @@ def preparePreASP_string_lists():
 	global toi_current_step_marker
 	global preASP_toi_file
 	global goal
-
 	global preASP_toi_split
 	global toi_beginning_history_index
 	global toi_current_step_index
@@ -247,12 +244,12 @@ def observations_to_obsList(observations, step):
 	for observation in observations:
 		if (observation[0] == executer.LocationRobot_index and observation[1] != 'unknown'):
 			obsList.append('obs(loc(rob1,'+str(observation[1])+ '),true,'+ str(step) +').')
-		if (observation[0] == executer.LocationGreenBox_index): 
+		if (observation[0] == executer.LocationGreenBox_index):
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(green_box,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
 				obsList.append('obs(loc(green_box,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == executer.LocationBlueBox_index): 
+		if (observation[0] == executer.LocationBlueBox_index):
 			if(observation[1] != 'unknown'):
 				obsList.append('obs(loc(blue_box,' +str(observation[1])+ '),true,'+ str(step) +').')
 			else:
@@ -262,7 +259,3 @@ def observations_to_obsList(observations, step):
 		if (observation[0] == executer.In_handBlueBox_index and observation[1] != 'unknown'):
 			obsList.append('obs(in_hand(rob1,blue_box),' + observation[1]+ ','+ str(step) +').')
 	return obsList
-	
-
-
-
