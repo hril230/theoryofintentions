@@ -1,8 +1,7 @@
 class Executer(object):
-
 	def __init__(self,thisWorld):
 		self.world = thisWorld
-	
+
 	def executeAction(self, action):
 		return self.world.executeAction(action)
 
@@ -10,9 +9,8 @@ class Executer(object):
 		return self.world.getTheseObservations(indexes)
 
 	def getRealValues(self):
-		
 		return self.world.getRealValues()
-	
+
 	def getRobotLocation(self):
 		return self.world.getRobotLocation()
 
@@ -23,4 +21,7 @@ class Executer(object):
 		return self.world.getExecutedSteps()
 
 	def __del__(self):
-        	print('deleting executer ')
+		print('deleting executer ')
+
+	def getRefinedLocation(self):
+		return self.world.getRefinedLocation()
