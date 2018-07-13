@@ -293,7 +293,6 @@ class Executer():
         self.current_refined_location = 'unknown_cell'
         self.current_location = 'unknown'
         self.currently_holding = 'nothing'
-        self.green_box_in_hand = False # TODO remove
         self.object_placed = False
         self.RealValues = self.getInitialConditions()
         reader = open(preASP_domain_file, 'r')
@@ -308,8 +307,14 @@ class Executer():
 
     def executeAction(self, action):
         input = self.__getRealValues_as_obsList(0) + ['hpd('+ action +',0).']
-        refinedPlan = self.getRefinedPlan(action)
-        happened = self.executeRefinedPlan(refinedPlan)
+        happened = False
+        global search_complete
+        search_complete = False
+        global searched_cells
+        searched_cells = []
+        while (not happened and not search_complete): # plan and attempt new refined plans until all cells have been searched
+            refinedPlan = self.getRefinedPlan(action)
+            if refinedPlan != None: happened = self.executeRefinedPlan(refinedPlan)
         self.executedSteps += 1
         if not happened: self.history.append(action + " (FAILED) ")
         else:
@@ -496,6 +501,7 @@ class Executer():
             if not happened_refined:
                 happened = False
                 break
+
         return happened
 
 
@@ -560,7 +566,6 @@ class Executer():
         self.gripper.close()
         time.sleep(0.5)
         self.ik_move(obj.elevated_pose)
-        self.green_box_in_hand = True
 
 
 
@@ -570,7 +575,6 @@ class Executer():
         else: self.ik_move(zone.mid_pose)
         self.gripper.open()
         self.ik_move(zone.elevated_pose)
-        self.green_box_in_hand = False
 
 
 
@@ -711,6 +715,19 @@ class Executer():
         blue_box_components = Components('blue_box', ['blue_box_top'])
         green_box_components = Components('green_box', ['green_box_top'])
         refinements = [zoneR_components, zoneG_components, zoneY_components, yellow_box_components, blue_box_components, green_box_components, above_components]
+
+        # for pickup actions, check whether all the cells have been searched for the object
+        if 'pickup' in action:
+            object_to_pick_up = action[12:len(action)-1]
+            global search_complete
+            global searched_cells
+            search_complete = False
+            for component_list in refinements:
+                if self.current_location == component_list.name:
+                    search_complete = True
+                    for cell in component_list.components:
+                        if cell not in searched_cells: search_complete = False
+        else: search_complete = True # only for pickup actions do multiple cells need to be searched
 
         # initialise relevance lists
         rel_initial_conditions = []
@@ -903,6 +920,12 @@ class Executer():
                         line_relevant = False
                 if line_relevant:
                     zoomed_asp.write(line)
+        # write in any direct observations
+        if not search_complete:
+            for cell in searched_cells: zoomed_asp.write('holds(directly_observed(rob1,loc('+object_to_pick_up+','+cell+),false),0)')
+        # write in display instructions
+        zoomed_asp.write('display\n')
+        zoomed_asp.write('occurs\n')
         original_asp.close()
         zoomed_asp.close()
 
@@ -930,22 +953,25 @@ class Executer():
             if 'blue' in fluent:
                 blue_pixel_count = self.tally_pixels(200, 0, 30, 180)
                 if blue_pixel_count > 50:
-                    print ('the blue_box is in ' + self.current_location)
+                    print ('the blue_box is in ' + self.current_refined_location)
                     self.RealValues[self.LocationBlueBox_index] = self.current_location
                     hpd = True
                 else:
-                    print ('the blue_box is not in ' + self.current_location)
+                    print ('the blue_box is not in ' + self.current_refined_location)
                     self.RealValues[self.LocationBlueBox_index] = 'unknown'
                     hpd = False
             # if there are green pixels, the green box is in the current location
             elif 'green' in fluent:
-                green_pixel_count = self.tally_pixels(150, 250, 150, 180)
+                green_pixel_count = self.tally_pixels(50, 80, 50, 10)
+                #self.examine_image(50, 80, 50, 10)
                 if green_pixel_count > 50:
-                    print ('the green_box is in ' + self.current_location)
+                    print ('the green_box is in ' + self.current_refined_location)
                     self.RealValues[self.LocationGreenBox_index] = self.current_location
                     hpd = True
                 else:
-                    print ('the green_box is not in ' + self.current_location)
+                    print ('the green_box is not in ' + self.current_refined_location)
+                    global searched_cells
+                    searched_cells.append(self.current_refined_location)
                     self.RealValues[self.LocationGreenBox_index] = 'unknown'
                     hpd = False
 
@@ -965,7 +991,7 @@ class Executer():
         # picking up an object can fail and needs to be tested
         else:
             hpd = False
-            # test if there are pixels of the relevant colour close to the camer
+            # test if there are pixels of the relevant colour close to the camera
             if 'blue_box' in fluent:
                 blue_pixel_count = self.tally_pixels(200, 0, 30, 180)
                 if blue_pixel_count > 0:
@@ -1003,7 +1029,7 @@ class Executer():
         for pixel_x in range(400):
             for pixel_y in range(640):
                 pixel_matches_colour = colour.match(pixel_x, pixel_y, self.camera_image)
-                if pixel_matches_colour: pixel_count = pixel_count + 1
+                if (pixel_x < 250) and (pixel_x > 100) and (pixel_y < 450) and (pixel_y > 300) and pixel_matches_colour: pixel_count = pixel_count + 1
         return pixel_count
 
 
@@ -1104,30 +1130,3 @@ def test_goal(newGoal, relevant_observations):
             relevant_observations.append([6, 'false'])
 
     return relevant_observations
-
-
-
-# MAIN
-if __name__ == "__main__":
-
-    # go back to initial position
-    initial_pose = {
-        'left': PoseStamped(
-            header=Header(stamp=rospy.Time.now(), frame_id='base'),
-            pose=Pose(
-                position=Point(
-                    x = 0.4,
-                    y = 0.26,
-                    z = 0.4,
-                ),
-                orientation=Quaternion(
-                    x = 0.0,
-                    y = -2.0,
-                    z = 0.0,
-                    w = 0.0,
-                ),
-            ),
-        ),
-    }
-    ik_move(initial_pose)
-'''

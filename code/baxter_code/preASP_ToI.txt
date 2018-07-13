@@ -147,6 +147,7 @@ impossible(pickup(R,O), I) :- holds(loc(R,L1), I), holds(loc(O,L2), I) , L1 != L
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
 impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
 impossible(move(R, above), I).
+impossible(exo_move(O, above), I).
 
 %%%%%%%%%%%%%%
 %% Defaults %%
