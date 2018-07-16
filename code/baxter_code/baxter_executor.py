@@ -45,6 +45,8 @@ history_marker = '%% *_*_*'
 # Defines the pose that the arm should take to reach a zone
 class Zone():
     def __init__(self, name, x_coordinate, y_coordinate):
+        self.x_coordinate = x_coordinate
+        self.y_coordinate = y_coordinate
         self.name = name
         self.pose = {
             'left': PoseStamped(
@@ -410,17 +412,16 @@ class Executer():
         green_box_top = Object('green_box_top', x_coordinate, y_coordinate)
 
         # determine the location of the blue box
-#        blue = BGR_colour(200, 0, 30, 180)
-#        x_coordinate, y_coordinate, blue_box_zone = self.locate_object(blue)
-#        print ('The blue box is in:')
-#        print (blue_box_zone)
+        blue = BGR_colour(200, 0, 30, 180)
+        x_coordinate, y_coordinate, blue_box_zone = self.locate_object(blue)
+        print ('The blue box is in:')
+        print (blue_box_zone)
 
         # initialise the blue_box object
-#        blue_box = Object('blue_box', x_coordinate, y_coordinate)
-#        blue_box_top = Object('blue_box_top', x_coordinate-0.03, y_coordinate+0.02)
-        blue_box_zone = 'zoneR' # TODO detect blue box properly
+        blue_box = Object('blue_box', x_coordinate, y_coordinate)
+        blue_box_top = Object('blue_box_top', x_coordinate, y_coordinate)
 
-        self.objects = [green_box, green_box_top]
+        self.objects = [green_box, green_box_top, blue_box, blue_box_top]
 
         initial_conditions = ['above', green_box_zone, blue_box_zone, 'false', 'false']
         return initial_conditions
@@ -727,6 +728,7 @@ class Executer():
                     search_complete = True
                     for cell in component_list.components:
                         if cell not in searched_cells: search_complete = False
+                if object_to_pick_up == component_list.name: refined_object = component_list.components[0]
         else: search_complete = True # only for pickup actions do multiple cells need to be searched
 
         # initialise relevance lists
@@ -922,10 +924,10 @@ class Executer():
                     zoomed_asp.write(line)
         # write in any direct observations
         if not search_complete:
-            for cell in searched_cells: zoomed_asp.write('holds(directly_observed(rob1,loc('+object_to_pick_up+','+cell+),false),0)')
+            for cell in searched_cells: zoomed_asp.write('holds(directly_observed(rob1,loc('+refined_object+','+cell+'),false),0).\n')
         # write in display instructions
         zoomed_asp.write('display\n')
-        zoomed_asp.write('occurs\n')
+        zoomed_asp.write('occurs.\n')
         original_asp.close()
         zoomed_asp.close()
 
@@ -956,6 +958,10 @@ class Executer():
                     print ('the blue_box is in ' + self.current_refined_location)
                     self.RealValues[self.LocationBlueBox_index] = self.current_location
                     hpd = True
+                    for cell in self.cells:
+                        if cell.name == self.current_refined_location:
+                            for obj in self.objects:
+                                if 'blue' in obj.name: obj.set_location(cell.x_coordinate, cell.y_coordinate)
                 else:
                     print ('the blue_box is not in ' + self.current_refined_location)
                     self.RealValues[self.LocationBlueBox_index] = 'unknown'
@@ -963,16 +969,20 @@ class Executer():
             # if there are green pixels, the green box is in the current location
             elif 'green' in fluent:
                 green_pixel_count = self.tally_pixels(50, 80, 50, 10)
-                #self.examine_image(50, 80, 50, 10)
                 if green_pixel_count > 50:
                     print ('the green_box is in ' + self.current_refined_location)
                     self.RealValues[self.LocationGreenBox_index] = self.current_location
                     hpd = True
+                    for cell in self.cells:
+                        if cell.name == self.current_refined_location:
+                            for obj in self.objects:
+                                if 'green' in obj.name: obj.set_location(cell.x_coordinate, cell.y_coordinate)
                 else:
                     print ('the green_box is not in ' + self.current_refined_location)
                     global searched_cells
+                    global search_complete
                     searched_cells.append(self.current_refined_location)
-                    self.RealValues[self.LocationGreenBox_index] = 'unknown'
+                    if search_complete: self.RealValues[self.LocationGreenBox_index] = 'unknown'
                     hpd = False
 
         # putting an object down never fails
@@ -1049,84 +1059,3 @@ class Executer():
         cv2.waitKey(0)
         return
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Obscelete functions, undeleted in case I want to use them again later
-
-'''
-# this function tests the fluents relevant to the goal
-# EDIT this section if different objects are included in the goal (e.g. if the goal involves a purple oject, add a section for testing the purple object's location etc)
-def test_goal(newGoal, relevant_observations):
-    print ('testing goal: ' + newGoal)
-
-    # if there are blue pixels, the blue box is in the current location
-    if ('blue' in newGoal):
-        blue_pixel_count = tally_pixels(200, 0, 30, 250)
-        if blue_pixel_count > 0:
-            print ('the blue_box is in ' + global_variables.current_location)
-            relevant_observations.append([2, global_variables.current_location])
-        else:
-            print ('the blue_box is not in ' + global_variables.current_location)
-            relevant_observations.append([2, 'unknown'])
-
-    # if there are green pixels, the green box is in the current location
-    if ('green' in newGoal):
-        green_pixel_count = tally_pixels(50, 250, 50, 180)
-        if green_pixel_count > 0:
-            print ('the green_box is in ' + global_variables.current_location)
-            relevant_observations.append([5, global_variables.current_location])
-        else:
-            print ('the green_box is not in ' + global_variables.current_location)
-            relevant_observations.append([5, 'unknown'])
-
-    # if there are lots of blue pixels, the blue box must be close to the wrist camera (and, therefore, in_hand)
-    if ('blue' in newGoal):
-        blue_pixel_count = tally_pixels(200, 0, 30, 150)
-        if blue_pixel_count > 100:
-            print ('the blue_box is in_hand')
-            relevant_observations.append([4, 'true'])
-        else:
-            print ('the blue_box is not in_hand')
-            relevant_observations.append([4, 'false'])
-
-    # if there are lots of green pixels, the green box must be close to the wrist camera (and, therefore, in_hand)
-    if ('green' in newGoal):
-        green_pixel_count = tally_pixels(0, 100, 0, 100)
-        #if green_pixel_count > 10:
-        if global_variables.green_box_in_hand: # TODO remove this, it's for testing purposes only
-            print ('the green_box is in_hand')
-            relevant_observations.append([6, 'true'])
-        else:
-            print ('the green_box is not in_hand')
-            relevant_observations.append([6, 'false'])
-
-    return relevant_observations
