@@ -1,32 +1,32 @@
-#const n = 10. % maximum number of steps.
+#const n = 1. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ZOOM THIS SORT: #coarse_place = {library,kitchen,office1, office2}.
+#coarse_place = {library,kitchen,office1, office2}.
 #robot = {rob1}.
-ZOOM THIS SORT: #coarse_object = {book1, book2}.
-ZOOM THIS SORT: #object = {ref_book1, ref_book2}.
-ZOOM THIS SORT OF SORTS: #coarse_thing = #coarse_object + #robot.
-ZOOM THIS SORT: #place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, unknown_cell}.
-ZOOM THIS SORT OF SORTS: #thing = #object + #robot.
+#coarse_object = {book1, book2}.
+#object = {ref_book1, ref_book2}.
+#coarse_thing = #coarse_object + #robot.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
+#thing = #object + #robot.
 
 #step = 0..n.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
-ZOOM INERTIAL FLUENTS: #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
-ZOOM DEFINED FLUENTS: #physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
+#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 #knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
 #knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent) + observed(#robot, #physical_fluent).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-ZOOM ACTIONS: #action = test(#robot, #physical_inertial_fluent, #outcome) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#action = test(#robot, #physical_inertial_fluent, #outcome) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
 
-ZOOM THIS SORT OF SORTS: #refined_component = #place + #object.
-ZOOM THIS SORT OF SORTS: #coarse_component = #coarse_place + #coarse_object.
+#refined_component = #place + #object.
+#coarse_component = #coarse_place + #coarse_object.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
@@ -97,9 +97,6 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1
 
 % Cannot pick up an object if you are not in the same room.
 -occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
-
-% Cannot move to the unknown location
--occurs(move(R, unknown_cell), I).
 
 % The next two executability conditions make sure that the robot has tested the objects location before trying to pick it up
 -occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
@@ -204,22 +201,6 @@ next_to(c14, c15).
 next_to(c4, c7).
 next_to(c8, c11).
 next_to(c12, c15).
-next_to(c1, unknown_cell).
-next_to(unknown_cell, c2).
-next_to(unknown_cell, c3).
-next_to(unknown_cell, c4).
-next_to(unknown_cell, c5).
-next_to(unknown_cell, c6).
-next_to(unknown_cell, c7).
-next_to(unknown_cell, c8).
-next_to(unknown_cell, c9).
-next_to(unknown_cell, c10).
-next_to(unknown_cell, c11).
-next_to(unknown_cell, c12).
-next_to(unknown_cell, c13).
-next_to(unknown_cell, c14).
-next_to(unknown_cell, c15).
-next_to(unknown_cell, c16).
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
@@ -239,28 +220,24 @@ comp(c13, office2).
 comp(c14, office2).
 comp(c15, office2).
 comp(c16, office2).
-comp(unknown_cell, unknown).
 comp(ref_book1, book1).
 comp(ref_book2, book2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 
-
-%%%%%%%%%
-%% Goal:
-%%%%%%%%%
-%% GOAL GOES HERE
-
-
-
-%%%%%%%%%%%%%%%%%
-%% Initial State:
-%%%%%%%%%%%%%%%%%
-%% INITIAL STATE GOES HERE
+%%%%%%%%%%%%
+%% History:
+%%%%%%%%%%%%
+%% *_*_*
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-occurs.
+diag(A,I).
+holds(loc(A,B),numSteps).
+holds(in_hand(A,B),numSteps).
+holds(coarse_loc(A,B),numSteps).
+holds(coarse_in_hand(A,B),numSteps).
+-holds(in_hand(rob1,B), numSteps).

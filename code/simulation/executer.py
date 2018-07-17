@@ -11,8 +11,8 @@ class Executer(object):
 	def getRealValues(self):
 		return self.world.getRealValues()
 
-	def getRobotLocation(self):
-		return self.world.getRobotLocation()
+	def getMyLocation(self):
+		return self.world.getMyLocation()
 
 	def getGoalFeedback(self):
 		return self.world.getGoalFeedback()
@@ -23,5 +23,5 @@ class Executer(object):
 	def __del__(self):
 		print('deleting executer ')
 
-	def getRefinedLocation(self):
-		return self.world.getRefinedLocation()
+	def getMyRefinedLocation(self):
+		return self.world.getMyRefinedLocation()

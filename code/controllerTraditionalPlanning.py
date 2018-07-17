@@ -41,7 +41,7 @@ class ControllerTraditionalPlanning():
 		self.sparcPath = thisPath
 
 		initialConditions = list(self.executer.getRealValues())
-		self.history = self.domain_info.observations_to_obsList(initialConditions,self.executer.getRobotLocation(),0)
+		self.history = self.domain_info.observations_to_obsList(initialConditions,self.executer.getMyLocation(),0)
 		self.preparePreASP_string_lists()
 
 	def run(self):
@@ -66,11 +66,11 @@ class ControllerTraditionalPlanning():
 				if(happened == True):
 					self.history.append('hpd('+action+','+str(self.currentStep)+').')
 					self.currentStep += 1
-					self.history = self.history + self.domain_info.observations_to_obsList(relevantObservations,self.executer.getRobotLocation(), self.currentStep)
+					self.history = self.history + self.domain_info.observations_to_obsList(relevantObservations,self.executer.getMyLocation(), self.currentStep)
 					self.possibleDiagnosis = []
 				else:
 					print('Inconsistent observations, action did not happen, need to call planner')
-					self.history = self.history + self.domain_info.observations_to_obsList(relevantObservations,self.executer.getRobotLocation(), self.currentStep)
+					self.history = self.history + self.domain_info.observations_to_obsList(relevantObservations,self.executer.getMyLocation(), self.currentStep)
 					needNewPlan = True
 					break
 		print('%%%%%%%%%%%%%%  Finish Plan Traditional %%%%%%%%%%%%%%%% ')
@@ -140,7 +140,7 @@ class ControllerTraditionalPlanning():
 
 
 	def updateBelief_fromAction(self,action, observations):
-		input = self.domain_info.getBelief_as_obsList(self.belief,0) + self.domain_info.observations_to_obsList(observations,self.executer.getRobotLocation(),1) + ['hpd('+ action +',0).']
+		input = self.domain_info.getBelief_as_obsList(self.belief,0) + self.domain_info.observations_to_obsList(observations,self.executer.getMyLocation(),1) + ['hpd('+ action +',0).']
 		asp_belief_split = self.preASP_belief_split[:self.history_index_domain_asp] + input + self.preASP_belief_split[self.history_index_domain_asp+1:]
 		asp = '\n'.join(asp_belief_split)
 		f1 = open(self.asp_belief_file, 'w')

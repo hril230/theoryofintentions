@@ -7,8 +7,7 @@ sorts
 #step = 0..n.
 #integer = 0..n.
 
-#secure_room = {library}.
-#room = #secure_room + {kitchen, office1, office2}.
+#room = {library, kitchen, office1, office2}.
 #robot = {rob1}.
 #book = {book1, book2}.
 #object = #book.
@@ -19,14 +18,14 @@ sorts
 #boolean = {true, false}.
 
 
-#physical_inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object) + locked(#secure_room).
+#physical_inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
 #possible_goal = {my_goal}.
 #physical_defined_fluent = #possible_goal.
 
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 
-#physical_agent_action = move(#robot,#room) + pickup(#robot,#object) + put_down(#robot,#object) + unlock(#robot,#secure_room).
-#physical_exogenous_action = exo_move(#object, #room) + exo_lock(#secure_room).
+#physical_agent_action = move(#robot,#room) + pickup(#robot,#object) + put_down(#robot,#object).
+#physical_exogenous_action = exo_move(#object, #room).
 
 #mental_agent_action = start(#activity_name) + stop(#activity_name).
 
@@ -121,8 +120,6 @@ holds(F,I+1) :- #inertial_fluent(F),
 holds(loc(R, L), I+1) :- occurs(move(R, L), I).
 holds(in_hand(R,O),I+1) :- occurs(pickup(R,O), I).
 -holds(in_hand(R,O),I+1) :- occurs(put_down(R,O), I).
--holds(locked(L),I+1) :- occurs(unlock(R,L),I).
-holds(locked(L),I+1) :- occurs(exo_lock(L),I).
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 
@@ -143,18 +140,13 @@ holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
 %% (Desc: 10 - 14)
 impossible(move(R,L),I) :- holds(loc(R,L),I).
 impossible(move(R,L2),I) :- holds(loc(R,L1),I), -next_to(L1,L2).
-impossible(move(R,L1),I) :- holds(locked(L1),I).
-impossible(move(R,L2),I) :- holds(loc(R,L1),I), holds(locked(L1),I).
-impossible(unlock(R,L), I) :- -holds(locked(L),I).
-impossible(unlock(R,L1),I) :- holds(loc(R,L2),I), -next_to(L1,L2), L1 != L2.
+
+
 impossible(put_down(R,O), I) :- -holds(in_hand(R,O), I).
 impossible(pickup(R,O1), I) :- holds(in_hand(R,O2), I).
 impossible(pickup(R,O), I) :- holds(loc(R,L), I), not holds(loc(O,L), I).
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
-impossible(exo_move(O,L),I) :- holds(locked(L),I).
-impossible(exo_move(O,L2),I) :- holds(loc(O,L1),I), holds(locked(L1),I).
 impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
-impossible(exo_lock(L),I) :- holds(locked(L),I).
 
 %%%%%%%%%%%%%%
 %% Defaults %%

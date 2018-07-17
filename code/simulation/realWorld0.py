@@ -1,10 +1,8 @@
 from sets import Set
 import subprocess
 import random
-preASP_domain_file = 'simulation/pre_ASP_files/preASP_Domain.txt'
-preASP_refined_world_file = 'simulation/pre_ASP_files/preASP_refined_world.txt'
-asp_World_file = 'simulation/ASP_files/ASP_World.sp'
-asp_Refined_World_file = 'simulation/ASP_files/ASP_Refined_World.sp'
+preASP_refined_domain_file = 'simulation/pre_ASP_files/preASP_refined_world.txt'
+asp_World_file = 'simulation/ASP_files/refiend_world.sp'
 history_marker = '%% *_*_*'
 display_marker = 'display'
 
@@ -15,8 +13,7 @@ class World(object):
 	def __init__(self,thisPath,initialConditionsWorld, scenario, this_seed, new_domain_info):
 
 		self.RealValues = list(initialConditionsWorld)
-		self.RealRefinedValues = list(initialConditionsWorld)
-		reader = open(preASP_refined_world_file, 'r')
+		reader = open(preASP_refined_domain_file, 'r')
 		pre_asp = reader.read()
 		reader.close()
 		self.pre_asp_split = pre_asp.split('\n')
@@ -33,7 +30,7 @@ class World(object):
 		print 'initial real values'
 		print self.RealValues
 
-	def __updateWorldValues(self,answerSet):
+	def __updateRealValues(self,answerSet):
 		self.RealValues[self.domain_info.In_handBook1_index] =  'false'
 		self.RealValues[self.domain_info.In_handBook2_index] =  'false'
 		newRealValues = answerSet.strip('\n')
@@ -51,24 +48,10 @@ class World(object):
 				split_fluent = fluent.split(',')
 				if(split_fluent[1] == 'book1'): self.RealValues[self.domain_info.In_handBook1_index] = 'true'
 				if(split_fluent[1] == 'book2'): self.RealValues[self.domain_info.In_handBook2_index] = 'true'
-			if(fluent[0:11] == 'coarse_loc('):
-				fluent = fluent[4:-1]
-				split_fluent = fluent.split(',')
-				if(split_fluent[0] == 'rob1'): self.RealRefinedValues[self.domain_info.LocationRobot_index] = split_fluent[1]
-				elif(split_fluent[0] == 'book1'): self.RealRefinedValues[self.domain_info.LocationBook1_index] = split_fluent[1]
-				elif(split_fluent[0] == 'book2'): self.RealRefinedValues[self.domain_info.LocationBook2_index] = split_fluent[1]
-			elif(fluent[0:15] == 'coarse_in_hand('):
-				fluent = fluent[8:-1]
-				split_fluent = fluent.split(',')
-				if(split_fluent[1] == 'book1'): self.RealRefinedValues[self.domain_info.In_handBook1_index] = 'true'
-				if(split_fluent[1] == 'book2'): self.RealValues[self.domain_info.In_handBook2_index] = 'true'
-
 		print 'realValues'
 		print self.RealValues
-		print 'refinedValues'
-		print self.RealRefinedValues
 
-	def getMyRefinedLocation(self):
+	def getRefinedLocation(self):
 		if self.RealValues[self.domain_info.LocationRobot_index] == 'library': return 'c1'
 		elif self.RealValues[self.domain_info.LocationRobot_index] == 'kitchen': return 'c5'
 		elif self.RealValues[self.domain_info.LocationRobot_index] == 'office1': return 'c9'
@@ -87,20 +70,6 @@ class World(object):
 			relevant_indexes.add(self.domain_info.LocationBook2_index)
 
 		return self.getTheseObservations(relevant_indexes)
-
-	def __getRealRefinedValues_as_obsList(self,step):
-		obsList = []
-		if(self.RealValues[self.domain_info.LocationRobot_index] != 'unknown'):
-			obsList.append('obs(coarse_loc(rob1,'+str(self.RealRefinedValues[self.domain_info.LocationRobot_index])+'),true,'+str(step)+').')
-		if(self.RealValues[self.domain_info.LocationBook1_index] != 'unknown'):
-			obsList.append('obs(coarse_loc(book1,'+str(self.RealRefinedValues[self.domain_info.LocationBook1_index])+'),true,'+str(step)+').')
-		if(self.RealValues[self.domain_info.LocationBook2_index] != 'unknown'):
-			obsList.append('obs(coarse_loc(book2,'+str(self.RealRefinedValues[self.domain_info.LocationBook2_index])+'),true,'+str(step)+').')
-		if(self.RealValues[self.domain_info.In_handBook1_index] != 'unknown'):
-			obsList.append('obs(coarse_in_hand(rob1,book1),'+self.RealRefinedValues[self.domain_info.In_handBook1_index]+','+str(step)+').')
-		if(self.RealValues[self.domain_info.In_handBook2_index] != 'unknown'):
-			obsList.append('obs(coarse_in_hand(rob1,book2),'+self.RealRefinedValues[self.domain_info.In_handBook2_index]+','+str(step)+').')
-		return obsList
 
 	def __getRealValues_as_obsList(self,step):
 		obsList = []
@@ -128,21 +97,21 @@ class World(object):
 
 		if(scenario == 'random'):
 			if(random.random()<0.08): return exo_action
-			choice = random.choice(['book1','book2'])
+			choice = random.choice(['library','book1','book2'])
 			if(choice == 'book1'  and (self.RealValues[self.domain_info.In_handBook1_index] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
 			elif(choice == 'book2'  and (self.RealValues[self.domain_info.In_handBook2_index] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
 			if(choice == 'book1'):
-				allRefinedLocations = list(self.domain_info.RefinedDomainLocations)
-				currentRefinedLocation = self.RealRefinedValues[self.domain_info.LocationBook1_index]
-				allRefinedLocations.remove(currentRefinedLocation)
-				newRefinedLocation = random.choice(allRefinedLocations)
-				exo_action =  'exo_move(book1,' +newRefinedLocation+ ')'
+				allLocations = list(self.domain_info.DomainLocations)
+				currentLocation = self.RealValues[self.domain_info.LocationBook1_index]
+				allLocations.remove(currentLocation)
+				newLocation = random.choice(allLocations)
+				exo_action =  'exo_move(book1,' +newLocation+ ')'
 			elif(choice == 'book2'):
-				allRefinedLocations = list(self.domain_info.RefinedDomainLocations)
-				currentRefinedLocation = self.RealRefinedValues[self.domain_info.LocationBook2_index]
-				allRefinedLocations.remove(currentRefinedLocation)
-				newRefinedLocation = random.choice(allRefinedLocations)
-				exo_action =  'exo_move(book2,' +newRefinedLocation+ ')'
+				allLocations = list(self.domain_info.DomainLocations)
+				currentLocation = self.RealValues[self.domain_info.LocationBook2_index]
+				allLocations.remove(currentLocation)
+				newLocation = random.choice(allLocations)
+				exo_action =  'exo_move(book2,' +newLocation+ ')'
 		return exo_action
 
 
@@ -152,29 +121,25 @@ class World(object):
 	def executeAction(self,action):
 		happened = False
 		exo_action = ''
-		input = self.__getRealRefinedValues_as_obsList(0) + ['hpd('+ action +',0).']
+		input = self.__getRealValues_as_obsList(0) + ['hpd('+ action +',0).']
 		if(self.exo_action_happened == False):
 			exo_action = self.__get_scenario_exo_action(action)
 			if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
 		asp_split = self.pre_asp_split[0:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
 		asp = '\n'.join(asp_split)
-		f1 = open(asp_Refined_World_file, 'w')
+		f1 = open(asp_World_file, 'w')
 		f1.write(asp)
 		f1.close()
-		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
+		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_World_file+' -A',shell=True)
 		self.executionTimeUnits += self.__getexecutionTimeUnits(action)
 		self.executedSteps += 1
-
-		print ' \n\n\n Answer:'
-		print answer
-		print ' \n\n\n'
 
 		if(answer == '\n'):
 			happened = False
 			self.history.append(action + " (FAILED) ")
 		else:
 			happened = True
-			self.__updateWorldValues(answer)
+			self.__updateRealValues(answer)
 			self.history.append(action)
 			if(exo_action != ''):
 				self.history.append(exo_action)
@@ -201,7 +166,7 @@ class World(object):
 			observations.append([index,observableValues[index]])
 		return observations
 
-	def getMyLocation(self):
+	def getRobotLocation(self):
 		return self.RealValues[self.domain_info.LocationRobot_index]
 
 	def achievedGoal(self):

@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from sets import Set
 import subprocess
@@ -20,7 +19,7 @@ class ControllerToI():
 		self.asp_toi_file = subfolder+'ASP_files/ASP_ToI.sp'
 		self.asp_toi_diagnosing_file = subfolder + 'ASP_files/ASP_TOI_Diagnosis.sp'
 		self.zoomed_domain_file = subfolder + 'ASP_files/zoomed_domain.sp'
-		self.asp_domain_file = subfolder + 'ASP_files/ToI_belief.sp'
+		self.asp_belief_file = subfolder + 'ASP_files/ToI_belief.sp'
 
 		self.numberSteps = 4
 		self.numberActivities = 1
@@ -38,11 +37,14 @@ class ControllerToI():
 		self.believes_goal_holds  = False
 		self.preASP_toi_split = []
 
-		self.currently_holding = 'nothing'
 
-		self.toi_history = self.domain_info.observations_to_obsList(self.initialConditions,self.executer.getRobotLocation(),0)
-		self.current_refined_location = self.executer.getRefinedLocation()
+
+		first_obs_list = self.domain_info.observations_to_obsList(self.initialConditions,self.executer.getMyLocation(),0)
+		self.toi_history = first_obs_list
+		self.belief_history = self.filtered_plain_history(first_obs_list)
 		self.preparePreASP_string_lists()
+		self.set_initial_belief()
+
 
 
 	def run(self):
@@ -83,20 +85,31 @@ class ControllerToI():
 			elif(nextAction[0:5] == 'start'): pass
 			else:
 				print('action : '+ str(nextAction))
-				actionObservations = self.executer.executeAction(nextAction)
-				answer_sets = self.refine(nextAction, self.toi_history, self.currentStep)
+				answer_sets = self.refine(nextAction, self.belief_history, self.currentStep)
+				plans = answer_sets.rstrip().split('\n\n')
+				refinedPlan = plans[0]
+				refinedPlan = refinedPlan.strip('{').strip('}')
+				refinedPlan = refinedPlan.split(', ')
+				for action in refinedPlan:
+					actionObservations = self.executer.executeAction(action)
 
 			self.currentStep += 1
 			relevantObservations = actionObservations + self.executer.getTheseObservations(self.getIndexesRelevantToGoal())
-			robotLocation = self.executer.getRobotLocation()
-			self.toi_history = self.toi_history + list(set(self.domain_info.observations_to_obsList(relevantObservations,robotLocation,self.currentStep)))
+			robotLocation = self.executer.getMyLocation()
+			new_obs_list = list(set(self.domain_info.observations_to_obsList(relevantObservations,robotLocation,self.currentStep)))
+			self.toi_history = self.toi_history + new_obs_list
+			self.belief_history = self.belief_history + new_obs_list
 			self.diagnose()
+			self.update_belief(nextAction)
+
 
 		if(self.currentDiagnosis != ''): self.toi_history.append(self.currentDiagnosis)
 		return (self.toi_history, self.numberActivities, self.goal_correction)
 
 
 
+ 	def filtered_plain_history(self,this_list):
+		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
 
 	def getIndexesRelevantToGoal(self):
 		return [self.domain_info.LocationBook1_index, self.domain_info.LocationBook2_index, self.domain_info.In_handBook1_index, self.domain_info.In_handBook2_index]
@@ -166,6 +179,7 @@ class ControllerToI():
 		# running only diagnosis
 		answerSet = subprocess.check_output('java -jar '+self.sparcPath + ' ' + self.asp_toi_diagnosing_file +' -A ',shell=True)
 		answers = answerSet.rstrip().split('\n\n')
+		print "diagnosis"
 
 
 		if self.currentDiagnosis in answerSet:
@@ -187,9 +201,6 @@ class ControllerToI():
 			elif(line == ""): pass
 			else:
 				self.inputForPlanning.append(line + '.')
-
-
-		#print('current diagnosis: '+str(self.currentDiagnosis))
 		return
 
 
@@ -209,92 +220,68 @@ class ControllerToI():
 		preASP_domain = reader.read()
 		reader.close()
 		self.preASP_domain_split = preASP_domain.split('\n')
+		#history_index_domainasp : integer that holds the line where the history needs to be added in the asp domain file
 		self.history_index_domain_asp = self.preASP_domain_split.index(self.domain_history_marker)
 
-	def getBeliefState(self,history_formatted):
-		asp_domain_split = self.preASP_domain_split[:self.history_index_domain_asp] + history_formatted + self.preASP_domain_split[self.history_index_domain_asp+1:]
-		asp = '\n'.join(asp_domain_split)
-		f1 = open(self.asp_domain_file, 'w')
+	def update_belief(self, action):
+		if('start' in action or 'stop' in action): return
+		possible_last_action = 'hpd(' +action+', '+ str(self.currentStep-1) + ').'
+		input = self.belief_history + [possible_last_action]
+		if(self.currentDiagnosis != ''):
+			input.append(self.currentDiagnosis.replace('unobserved','hpd')+'.')
+
+		asp_belief_split = self.preASP_domain_split[:self.history_index_domain_asp] + input + self.preASP_domain_split[self.history_index_domain_asp+1:]
+		asp_belief_split[0] = "#const numSteps = "+ str(self.currentStep) + "."
+		asp = '\n'.join(asp_belief_split)
+		f1 = open(self.asp_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print('checking state ')
-		output = subprocess.check_output('java -jar '+ self.sparcPath + ' ' + self.asp_domain_file +' -A',shell=True)
-		output = output.strip('}').strip('{')
+		print('Next, checking belief-observations consistency ')
+		output = subprocess.check_output('java -jar '+ self.sparcPath + ' ' + self.asp_belief_file +' -A',shell=True)
+		output = output.rstrip().strip('{').strip('}')
+
 		if 'holds' in output:
-			print output
-		return output
+			self.belief_history.append(possible_last_action)
+			self.belief = self.domain_info.getBelief_fromAnswer(output)
+		print 'updated belief'
+		print self.belief
+
+	def set_initial_belief(self):
+		input = self.belief_history
+		asp_belief_split = self.preASP_domain_split[:self.history_index_domain_asp] + input + self.preASP_domain_split[self.history_index_domain_asp+1:]
+		asp_belief_split[0] = "#const numSteps = "+ str(self.currentStep) + "."
+		asp = '\n'.join(asp_belief_split)
+		f1 = open(self.asp_belief_file, 'w')
+		f1.write(asp)
+		f1.close()
+		output = subprocess.check_output('java -jar '+ self.sparcPath + ' ' + self.asp_belief_file +' -A',shell=True)
+		output = output.rstrip().strip('{').strip('}')
+		self.belief = self.domain_info.getBelief_fromAnswer(output)
+		print 'initial belief: ' + str(self.belief)
 
 
 
 	# this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
 	def refine(self,action, history, current_step):
-	    # convert ToI history into traditional format so that they can be processed in the same way
-		history_formatted = []
-		for i in range(len(history)):
-			if ('hpd' in history[i]):
-				if ('true' in history[i]):
-					history_formatted.append(history[i].replace('true,',''))
-				if ('false' in history[i]):
-					history_formatted.append('-'+history[i].replace('false,',''))
-			else:
-				history_formatted.append(history[i])
-		print('belief')
-		print self.getBeliefState(history_formatted)
-
 		initial_state = []
 		final_state = []
+		robot_coarse_location = self.belief[self.domain_info.LocationRobot_index]
 	    # use action and history to figure out the transition (initial_state, action, final_state)
 	    # the location of the robot is relevant for move transitions
-
-		print "history_formatted"
-		print history_formatted
-		print "action"
-		print action
+		action_object = action[action.find(',')+1:-1]
 		if 'move' in action:
-			for observation in history_formatted:
-				if ('obs' in observation) and ('rob1' in observation) and ('loc' in observation):
-					initial_state = ['coarse_loc(rob1,' + observation[13:len(observation)-10] + ')']
+			initial_state = ['coarse_loc(rob1,' + robot_coarse_location + ')']
+			final_state = ['coarse_loc(rob1,' + action_object + ')']
 
-
-	        # if actions have happened since step zero, initial state may need to be updated
-			for observation in history_formatted:
-				if ('hpd' in observation) and ('move' in observation) and (not 'exo' in observation):
-					if ('0)' in observation) or ('1)' in observation) or ('2)' in observation) or ('3)' in observation) or ('4)' in observation) or ('5)' in observation) or ('6)' in observation) or ('7)' in observation) or ('8)' in observation) or ('9)' in observation):
-						initial_state = ['coarse_loc(rob1,' + observation[14:len(observation)-5] + ')']
-
-					else:
-						initial_state = ['coarse_loc(rob1,' + observation[14:len(observation)-6] + ')']
-				final_state = ['coarse_loc(rob1,' + action[10:len(action)-1] + ')']
-
-
-	    # the location of the robot and object, and the in_hand status of the object, are relevant for pickup transitions
 		elif 'pickup' in action:
-			obj = action[12:len(action)-1]
-	        # include the in_hand status of the object
-			initial_state = ['-coarse_in_hand(rob1,' + obj + ')']
-			final_state = ['coarse_in_hand(rob1,' + obj + ')']
-	        # include the location of the robot
-			for observation in history_formatted:
-				if ('obs' in observation) and ('rob1' in observation) and ('loc' in observation):
-					rob_loc = 'coarse_loc(rob1,' + observation[13:len(observation)-10] + ')'
-			for observation in history_formatted:
-				if ('hpd' in observation) and ('move' in observation):
-					rob_loc = 'coarse_loc(rob1,' + observation[14:len(observation)-5] + ')'
-	        # include the location of the object
-			for observation in history_formatted:
-				if ('obs' in observation) and (obj in observation) and ('loc' in observation):
-					obj_loc = 'coarse_loc(' + obj + ',' + observation[9+len(obj):len(observation)-10] + ')'
-				if ('exo' in observation) and (obj in observation):
-					obj_loc = 'coarse_loc(' + obj + ',' + observation[14+len(obj):len(observation)-9] + ')'
-			initial_state.append(rob_loc)
-			initial_state.append(obj_loc)
-			final_state.append('coarse_loc(rob1,' + obj_loc[12+len(obj):len(obj_loc)-1] + ')')
-			final_state.append(obj_loc)
-
+			initial_state = ['-coarse_in_hand(rob1,' + action_object + ')']
+			final_state = ['coarse_in_hand(rob1,' + action_object + ')']
+			initial_state.append('coarse_loc(rob1,' + robot_coarse_location + ')')
+			initial_state.append('coarse_loc('+ action_object+','+ robot_coarse_location+')')
 	    # the in_hand status of the object is relevant for put_down transitions
 		elif 'put_down' in action:
-			initial_state = ['coarse_in_hand(rob1,' + action[14:len(action)-1] + ')']
-			final_state = ['-coarse_in_hand(rob1,' + action[14:len(action)-1] + ')']
+			initial_state = ['coarse_in_hand(rob1,' + action_object + ')']
+			final_state = ['-coarse_in_hand(rob1,' + action_object + ')']
 
 	    # edit refined_asp to get temporary zoomed_asp file
 		self.zoom(initial_state, action, final_state)
@@ -303,8 +290,6 @@ class ControllerToI():
 	    # get refined answer set
 		refined_answer = subprocess.check_output('java -jar '+self.sparcPath +' '+ self.zoomed_domain_file + ' -A ',shell=True)
 		if refined_answer == "" : raw_input()
-
-
 
 	    # stop running code if refined answer set is empty
 		if refined_answer == '\n':
@@ -316,14 +301,6 @@ class ControllerToI():
 
 	# this action writes a zoomed ASP file
 	def zoom(self,initial_state, action, final_state):
-	    # clean up typos
-		for i in range(len(initial_state)):
-			if '))' in initial_state[i]:
-				initial_state[i] = initial_state[i][0:len(initial_state[i])-1]
-		for i in range(len(final_state)):
-			if '))' in final_state[i]:
-				final_state[i] = final_state[i][0:len(final_state[i])-1]
-
 	    # EDIT these lists to change the domain
 		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2', 'unknown'])
 		coarse_objects = Sort('coarse_object', ['book1', 'book2'])
@@ -371,16 +348,20 @@ class ControllerToI():
 			if not condition in final_state: # conditions that change are relevant
 				rel_initial_conditions.append(condition)
 				rel_conditions.append(condition)
-			elif ('rob1' in condition) and ('loc' in condition) and ('pickup' in action): # the robot's location is relevant for pickup actions
+			elif ('rob1' in condition) and ('loc' in condition) and ('pickup' in action): # the robot's location is always relevant for pickup actions
 				rel_initial_conditions.append(condition)
 				rel_conditions.append(condition)
+
 
 	    # refine initial conditions
 		for i in range(len(rel_initial_conditions)):
 			if ('loc' in rel_initial_conditions[i]) and ('rob1' in rel_initial_conditions[i]):
-				rel_initial_conditions[i] = 'loc(rob1,' + self.current_refined_location + ')'
+				rel_initial_conditions[i] = 'loc(rob1,' + self.executer.getMyRefinedLocation() + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
-				rel_initial_conditions[i] = 'in_hand(rob1,' + self.currently_holding + ')'
+				currently_holding = ''
+				if(self.belief[self.domain_info.In_handBook1_index] == 'true'): currently_holding = 'ref_book1'
+				elif(self.belief[self.domain_info.In_handBook2_index] == 'true'): currently_holding = 'ref_book2'
+				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant
 		for condition in final_state:
@@ -483,6 +464,8 @@ class ControllerToI():
 				rel_actions.append(act)
 				if act[0:opening_bracket] in irrelevant_actions:
 					irrelevant_actions.remove(act[0:opening_bracket])
+
+
 
 	    # determine what the goal of the refined ASP should be
 		self.goal = 'goal(I) :- '

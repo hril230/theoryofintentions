@@ -46,6 +46,7 @@ boolean = ['true', 'false']
 runCount = 0
 
 def run_and_write(scenario, initial_conditions_index):
+	print 'initial_conditions_index: ' +str(initial_conditions_index)
 	domain_info = DomainInfo()
 
 	randomSeed = runCount
@@ -70,43 +71,41 @@ def createConditionsAndRun(scenario):
 
 	if(scenario == 'random'):
 		controlledRun = True
-		controlledRunConditions = random.randrange(1,193,1)
+		controlledRunConditions = random.randrange(1,97,1)
+		controllerRunConditions = 42
 
-	#Cases when rob1 is holding book1
-	for locked_or_not in boolean:
-		for robot_location in locations:
+	#Cases when rob1 is holding book1 (16 possible combinations)
+	for robot_location in locations:
+		for book2_location in locations:
+			initial_conditions_index +=1
+			if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
+			book1_location = robot_location
+			in_handBook1 = 'true'
+			in_handBook2 = 'false'
+			initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+			run_and_write(scenario, initial_conditions_index)
+
+	#Cases when rob1 is holding book2 (16 possible combinations)
+	for robot_location in locations:
+		for book1_location in locations:
+			initial_conditions_index +=1
+			if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
+			book2_location = robot_location
+			in_handBook1 = 'false'
+			in_handBook2 = 'true'
+			initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+			run_and_write(scenario, initial_conditions_index)
+
+	#Cases when rob1 is not holding any book (64 possible combinations)
+	for robot_location in locations:
+		for book1_location in locations:
 			for book2_location in locations:
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-				book1_location = robot_location
-				in_handBook1 = 'true'
-				in_handBook2 = 'false'
-				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				run_and_write(scenario, initial_conditions_index)
-
-	#Cases when rob1 is holding book2
-	for locked_or_not in boolean:
-		for robot_location in locations:
-			for book1_location in locations:
-				initial_conditions_index +=1
-				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-				book2_location = robot_location
 				in_handBook1 = 'false'
-				in_handBook2 = 'true'
-				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+				in_handBook2 = 'false'
+				initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 				run_and_write(scenario, initial_conditions_index)
-
-	#Cases when rob1 is not holding any book
-	for locked_or_not in boolean:
-		for robot_location in locations:
-			for book1_location in locations:
-				for book2_location in locations:
-					initial_conditions_index +=1
-					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-					in_handBook1 = 'false'
-					in_handBook2 = 'false'
-					initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-					run_and_write(scenario, initial_conditions_index)
 
 if __name__ == "__main__":
 	'''
@@ -119,12 +118,6 @@ if __name__ == "__main__":
 
 	for s in scenarios:
 		runCount = 0
-		textfile = open(results_file_name+ str(s)+'.txt', 'w')
-		csvfile = open(results_file_name+ str(s)+'.csv', 'w')
-		writer = csv.writer(csvfile)
-		writer.writerow(['Index', ' Total Time Trad', ' Total Time ToI' , ' Number Plans Trad', ' Number Plans ToI', ' Time Planning Trad', ' Time Planning ToI',' Exec TU Trad', ' Exec TU ToI', ' Steps Executed Trad', ' Steps Executed ToI', ' Achieved Goal Trad', ' Achieved Goal ToI', ' Goal Correction Trad', ' Goal Correction ToI', ' Exo-action', ' Scenario Recreated', ' Same Exo-action', ' Actions Before Replanning'])
-
-
 		createConditionsAndRun(s)
 		if(s == 'random'):
 			for x in range (1,numberRunsRandomScenario): createConditionsAndRun(s)

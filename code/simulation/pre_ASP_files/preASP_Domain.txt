@@ -3,8 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#secure_room = {library}.
-#room = #secure_room + {kitchen, office1, office2}.
+#room = {library, kitchen, office1, office2}.
 #robot = {rob1}.
 #book = {book1, book2}.
 #object = #book.
@@ -13,12 +12,12 @@
 #boolean = {true, false}.
 #step = 0..numSteps.
 
-#inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object) + locked(#secure_room).
+#inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
 #fluent = #inertial_fluent.
 
 #rob_action = move(#robot, #room) + pickup(#robot, #object)
-	+ put_down(#robot, #object) + unlock(#robot, #secure_room).
-#exo_action = exo_move(#object,#room) + exo_lock(#secure_room).
+	+ put_down(#robot, #object).
+#exo_action = exo_move(#object,#room).
 #action = #rob_action + #exo_action.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,12 +47,6 @@ holds(in_hand(R, O), I+1) :- occurs(pickup(R, O), I).
 %% Putting an object down causes it to no longer be in hand.
 -holds(in_hand(R, O), I+1) :- occurs(put_down(R, O), I).
 
-%% Unlocking a room causes it to be not be locked.
--holds(locked(L),I+1) :- occurs(unlock(R, L),I).
-
-%% Exogenous locking causes the door to be locked.
-holds(locked(L), I+1) :- occurs(exo_lock(L), I).
-
 %% Exogenous moving an object causes the object to be in a different location.
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
@@ -81,18 +74,6 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% Cannot move to a location if it is not next to it.
 -occurs(move(R, L2), I) :- holds(loc(R, L1), I), -next_to(L1,L2).
 
-%% Cannot move to a location if it is locked.
--occurs(move(R, L), I) :- holds(locked(L), I).
-
-%% Cannot from a location if it is locked.
--occurs(move(R, L2), I) :- holds(loc(R,L1), I), holds(locked(L1), I).
-
-%% Cannot unlock if it is not locked.
--occurs(unlock(R, L), I) :- -holds(locked(L), I).
-
-%% Cannot unlock a room L1 if it's in a room L2 which is not either same as L1, or next to L1.
--occurs(unlock(R, L1), I) :- holds(loc(R,L2), I), -next_to(L1,L2), L1 != L2.
-
 %% Cannot put down an object unless it is in hand.
 -occurs(put_down(R, O), I) :-  -holds(in_hand(R, O), I).
 
@@ -105,17 +86,8 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% An exogenous move of an object cannot be done to the same location.
 -occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
 
-%% An exogenous move of an object cannot be done to a locked room.
--occurs(exo_move(O,L),I) :- holds(locked(L),I).
-
 %% An exogenous move of an object cannot happen if it is being in hand
 -occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
-
-%% An exogenous move of an object cannot be done from a locked room.
--occurs(exo_move(O,L1),I) :- holds(loc(O,L),I), holds(locked(L),I).
-
-%% An exogenous lock cannot be done to a locked room.
--occurs(exo_lock(L),I) :- holds(locked(L),I).
 
 %%%%%%%%%%%%%%
 %% Defaults %%
@@ -187,4 +159,3 @@ display
 diag(A,I).
 holds(F,numSteps).
 -holds(in_hand(rob1,B), numSteps).
--holds(locked(library), numSteps).

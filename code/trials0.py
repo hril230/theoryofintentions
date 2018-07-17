@@ -227,40 +227,37 @@ def createConditionsAndRun(scenario):
 		controlledRunConditions = random.randrange(1,193,1)
 
 	#Cases when rob1 is holding book1
-	for locked_or_not in boolean:
-		for robot_location in locations:
+	for robot_location in locations:
+		for book2_location in locations:
+			initial_conditions_index +=1
+			if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
+			book1_location = robot_location
+			in_handBook1 = 'true'
+			in_handBook2 = 'false'
+			initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+			run_and_write(scenario, initial_conditions_index)
+
+	#Cases when rob1 is holding book2
+	for robot_location in locations:
+		for book1_location in locations:
+			initial_conditions_index +=1
+			if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
+			book2_location = robot_location
+			in_handBook1 = 'false'
+			in_handBook2 = 'true'
+			initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+			run_and_write(scenario, initial_conditions_index)
+
+	#Cases when rob1 is not holding any book
+	for robot_location in locations:
+		for book1_location in locations:
 			for book2_location in locations:
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-				book1_location = robot_location
-				in_handBook1 = 'true'
-				in_handBook2 = 'false'
-				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				run_and_write(scenario, initial_conditions_index)
-
-	#Cases when rob1 is holding book2
-	for locked_or_not in boolean:
-		for robot_location in locations:
-			for book1_location in locations:
-				initial_conditions_index +=1
-				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-				book2_location = robot_location
 				in_handBook1 = 'false'
-				in_handBook2 = 'true'
-				initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+				in_handBook2 = 'false'
+				initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 				run_and_write(scenario, initial_conditions_index)
-
-	#Cases when rob1 is not holding any book
-	for locked_or_not in boolean:
-		for robot_location in locations:
-			for book1_location in locations:
-				for book2_location in locations:
-					initial_conditions_index +=1
-					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-					in_handBook1 = 'false'
-					in_handBook2 = 'false'
-					initial_state = [locked_or_not, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-					run_and_write(scenario, initial_conditions_index)
 
 if __name__ == "__main__":
 	'''
