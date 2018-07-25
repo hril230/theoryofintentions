@@ -1,4 +1,4 @@
-#const n = 10. % maximum number of steps.
+#const numSteps = 10. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -12,7 +12,7 @@ ZOOM THIS SORT OF SORTS: #coarse_thing = #coarse_object + #robot.
 ZOOM THIS SORT: #place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, unknown_cell}.
 ZOOM THIS SORT OF SORTS: #thing = #object + #robot.
 
-#step = 0..n.
+#step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
 ZOOM INERTIAL FLUENTS: #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
@@ -75,6 +75,7 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 
 % Axioms relating coarse-resolution attributes and fine-resolution counterparts
 holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
+holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
 holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
 -holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
 coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1), #place(C2).

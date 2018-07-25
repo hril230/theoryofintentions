@@ -5,14 +5,14 @@ class Executer(object):
 	def executeAction(self, action):
 		return self.world.executeAction(action)
 
-	def getTheseObservations(self,indexes):
-		return self.world.getTheseObservations(indexes)
+	def getTheseCoarseObservations(self,indexes):
+		return self.world.getTheseCoarseObservations(indexes)
 
-	def getRealValues(self):
-		return self.world.getRealValues()
+	def getState(self):
+		return self.world.getState()
 
-	def getMyLocation(self):
-		return self.world.getMyLocation()
+	def getMyRefinedLocation(self):
+		return self.world.getRobotsRefinedLocation()
 
 	def getGoalFeedback(self):
 		return self.world.getGoalFeedback()
@@ -22,6 +22,3 @@ class Executer(object):
 
 	def __del__(self):
 		print('deleting executer ')
-
-	def getMyRefinedLocation(self):
-		return self.world.getMyRefinedLocation()

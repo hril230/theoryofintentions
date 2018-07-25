@@ -19,7 +19,7 @@ import re
 import random
 
 class ControllerTraditionalPlanning():
-	def __init__(self,thisPath,goal, maxPlanLen, executer,domain_info,subfolder_path):
+	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, known_world_state, newGoal, max_plan_length):
 		self.planning_goal_marker = '%% @_@_@'
 		self.planning_history_marker = '%% #_#_#'
 		self.belief_history_marker = '%% *_*_*'
@@ -35,13 +35,12 @@ class ControllerTraditionalPlanning():
 		self.currentPlan = []
 		self.currentStep = 0
 		self.goal_correction = 0
-		self.maxPlanLength = maxPlanLen
+		self.max_plan_length = maxPlanLen
 		self.executer = executer
 		self.goal = goal
-		self.sparcPath = thisPath
-
-		initialConditions = list(self.executer.getRealValues())
-		self.history = self.domain_info.observations_to_obsList(initialConditions,self.executer.getMyLocation(),0)
+		self.sparc_path = thisPath
+		initialConditions = list(self.executer.getState())
+		self.history = self.domain_info.observations_to_obs(initialConditions,self.executer.getMyCoarseLocation(),0)
 		self.preparePreASP_string_lists()
 
 	def run(self):
@@ -56,21 +55,19 @@ class ControllerTraditionalPlanning():
 				while(self.possibleDiagnosis and self.currentPlan[1] == "Goal holds"):
 					self.updateBeliefWithDiagnosis()
 					self.currentPlan = self.findPlan()
-
 			if(self.currentPlan[0] == "No Plan"): break
-
 			for action in self.currentPlan:
 				print('Next action (traditional planning) : ' + str(action))
 				relevantObservations = self.executer.executeAction(action)
-				happened = self.updateBelief_fromAction(action,relevantObservations)
+				happened = self.update_belief(action,relevantObservations)
 				if(happened == True):
 					self.history.append('hpd('+action+','+str(self.currentStep)+').')
 					self.currentStep += 1
-					self.history = self.history + self.domain_info.observations_to_obsList(relevantObservations,self.executer.getMyLocation(), self.currentStep)
+					self.history = self.history + self.domain_info.observations_to_obs(relevantObservations,self.executer.getMyCoarseLocation(), self.currentStep)
 					self.possibleDiagnosis = []
 				else:
 					print('Inconsistent observations, action did not happen, need to call planner')
-					self.history = self.history + self.domain_info.observations_to_obsList(relevantObservations,self.executer.getMyLocation(), self.currentStep)
+					self.history = self.history + self.domain_info.observations_to_obs(relevantObservations,self.executer.getMyCoarseLocation(), self.currentStep)
 					needNewPlan = True
 					break
 		print('%%%%%%%%%%%%%%  Finish Plan Traditional %%%%%%%%%%%%%%%% ')
@@ -84,7 +81,7 @@ class ControllerTraditionalPlanning():
 		f1 = open(self.asp_diagnosing_file, 'w')
 		f1.write(asp)
 		f1.close()
-		output = subprocess.check_output('java -jar '+self.sparcPath + ' ' + self.asp_diagnosing_file +' -A',shell=True)
+		output = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_diagnosing_file +' -A',shell=True)
 		output_split = output.rstrip().split('\n\n')
 		self.possibleDiagnosis = [a.strip('}').strip('{').split(', ') for a in output_split]
 
@@ -98,24 +95,24 @@ class ControllerTraditionalPlanning():
 				item = item.replace('diag', 'hpd')
 				commaIndex = item.rfind(',')
 				item = item[0:commaIndex+1] + 'true,'+item[commaIndex+1:]
-		self.belief = self.domain_info.getBelief_fromAnswer(', '.join(fluents))
+		self.belief = self.domain_info.get_coarse_belief(', '.join(fluents))
 
 
 	def findPlan(self):
 		newPlan = []
 		numSteps = 4 #the min number of steps of the first ASP to run.
 
-		asp_planning_split = self.preASP_planning_split[:self.history_index_planning_asp] + self.domain_info.getBelief_as_obsList(self.belief,0) + self.preASP_planning_split[self.history_index_planning_asp+1:]
+		asp_planning_split = self.preASP_planning_split[:self.history_index_planning_asp] + self.domain_info.coarseStateToAstractObsList(self.belief,0) + self.preASP_planning_split[self.history_index_planning_asp+1:]
 
 		answerSet = '\n'
-		while(answerSet == '\n' and numSteps < self.maxPlanLength):
+		while(answerSet == '\n' and numSteps < self.max_plan_length):
 			asp_planning_split[0] = '#const numSteps = '+ str(numSteps) + '.'
 			asp_planning = '\n'.join(asp_planning_split)
 	        	f1 = open(self.asp_planning_file, 'w')
 			f1.write(asp_planning)
 			f1.close()
 			print('Looking for next plan (Trad) - numberSteps ' + str(numSteps))
-		        answerSet = subprocess.check_output('java -jar '+self.sparcPath + ' ' +self.asp_planning_file+' -A ',shell=True)
+		        answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' +self.asp_planning_file+' -A ',shell=True)
 			numSteps +=1
 
 		if(answerSet == "\n"):
@@ -139,18 +136,18 @@ class ControllerTraditionalPlanning():
 		return newPlan
 
 
-	def updateBelief_fromAction(self,action, observations):
-		input = self.domain_info.getBelief_as_obsList(self.belief,0) + self.domain_info.observations_to_obsList(observations,self.executer.getMyLocation(),1) + ['hpd('+ action +',0).']
+	def update_belief(self,action, observations):
+		input = self.domain_info.get_state_as_obsList(self.belief,0) + self.domain_info.observations_to_obs(observations,self.executer.getMyCoarseLocation(),1) + ['hpd('+ action +',0).']
 		asp_belief_split = self.preASP_belief_split[:self.history_index_domain_asp] + input + self.preASP_belief_split[self.history_index_domain_asp+1:]
 		asp = '\n'.join(asp_belief_split)
 		f1 = open(self.asp_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
 		print('Next, checking belief-observations consistency ')
-		output = subprocess.check_output('java -jar '+ self.sparcPath + ' ' + self.asp_belief_file +' -A',shell=True)
+		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_belief_file +' -A',shell=True)
 		output = output.strip('}').strip('{')
 		if 'holds' in output:
-			self.belief = self.domain_info.getBelief_fromAnswer(output)
+			self.belief = self.domain_info.get_coarse_belief(output)
 			return True
 		else: return False
 
@@ -161,7 +158,7 @@ class ControllerTraditionalPlanning():
 		self.preASP_planning = reader.read()
 		reader.close()
 		self.preASP_planning_split = self.preASP_planning.split('\n')
-		self.preASP_planning_split[0] = "#const numSteps = "+ str(self.maxPlanLength)+"."
+		self.preASP_planning_split[0] = "#const numSteps = "+ str(self.max_plan_length)+"."
 		index_goal = self.preASP_planning_split.index(self.planning_goal_marker)
 		goal_formatted = "goal(I) :- "+ self.goal
 		self.preASP_planning_split.insert(index_goal+1,  goal_formatted)

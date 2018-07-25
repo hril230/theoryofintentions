@@ -218,6 +218,13 @@ comp(ref_book2, book2).
 %% History:
 %%%%%%%%%%%%
 %% *_*_*
+obs(loc(rob1,c10),true,0).
+obs(loc(ref_book1,c7),true,0).
+obs(loc(ref_book2,c4),true,0).
+obs(in_hand(rob1,ref_book1),false,0).
+obs(in_hand(rob1,ref_book2),false,0).
+hpd(move(rob1,c9),0).
+hpd(exo_move(book2,c8),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

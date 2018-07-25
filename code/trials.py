@@ -1,18 +1,3 @@
-'''Python program to run experimental trials in the agent reasoning programs (with toi and traditional planning
-Objectives:
-1. Select all possible valid initial states for the objects in the domain.
-2. Run two pairwise for each initial state.
-
-How I model different scenarios in realWorld.py:
-
-# scenario 1 - just planning, everything goes fine, no unexpected changes in the world.
-# scenario 2 - unexpected achievement of goal.
-# scenario 3 - unexpected false observation that leads to not expected achievement of goal, diagnosis and replan.
-# scenario 4 - unexpected true observation that leads to not expected achievement of goal, diagnosis and replan.
-# scenario 5 - Failure to achieve goal, diagnosis, and re-planning.
-# scenario 6 - Failure to execute, diagnosis and replaning.
-'''
-
 
 from datetime import datetime
 from simulation.realWorld import World
@@ -23,89 +8,99 @@ import subprocess
 import  csv
 import random
 from simulation.domain_info import DomainInfo
-subfolder_path = 'simulation/'
-results_file_name = "simulation/results/scenario_"
+ASP_subfolder_path = 'simulation/'
+results_file_name = "simulation/results/"
 
-
-sparcPath = "$HOME/work/solverfiles/sparc.jar"
+sparc_path = "$HOME/work/solverfiles/sparc.jar"
 
 goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
 
-maxPlanLength = 17
-scenario = None
+max_plan_length = 17
 
 textfile = None
 csvfile = None
 writer = None
 initial_state = []
 
-locations = ['office1', 'office2', 'kitchen', 'library']
+
+coarse_locations = DomainInfo.CoarseLocations
+coarse_locations_as_cells = DomainInfo.CoarseLocationsAsCells
 boolean = ['true', 'false']
 
 
-runCount = 0
+run_count = 0
 
-def run_and_write(scenario, initial_conditions_index):
+def runAndWrite(initial_conditions_index):
 	print 'initial_conditions_index: ' +str(initial_conditions_index)
 	domain_info = DomainInfo()
 
-	randomSeed = runCount
-	world_trad = World(sparcPath,initial_state,scenario,randomSeed,domain_info)
-	executer = Executer(world_trad)
+	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
+	print(indexes_relevant_goal)
+	random_seed = run_count
+	my_world = World(sparc_path,initial_state,random_seed,domain_info)
+	executer = Executer(my_world)
 
-	controllerToI = ControllerToI(sparcPath,goal, maxPlanLength, executer,domain_info, subfolder_path)
+
+	known_world = my_world.getCoarseState()
+	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, known_world, goal, max_plan_length)
+
 	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.run()
 
 
 
 
 
-def createConditionsAndRun(scenario):
+def createConditionsAndRun():
 	global initial_state
 
 
 	initial_conditions_index = 0
 
-	controlledRun = False
-	controlledRunConditions = 2
-
-	if(scenario == 'random'):
-		controlledRun = True
-		controlledRunConditions = random.randrange(1,97,1)
-		controllerRunConditions = 42
+	controlled_run = True
+	controlled_run_conditions = random.randrange(1,97,1)
+	#controlled_run_conditions = 12
 
 	#Cases when rob1 is holding book1 (16 possible combinations)
-	for robot_location in locations:
-		for book2_location in locations:
+	for robot_coarse_location_as_cells in coarse_locations_as_cells:
+		robot_refined_location = random.choice(robot_coarse_location_as_cells)
+		for book2_coarse_location_as_cells in coarse_locations_as_cells:
+			book2_refined_location = random.choice(book2_coarse_location_as_cells)
 			initial_conditions_index +=1
-			if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-			book1_location = robot_location
-			in_handBook1 = 'true'
-			in_handBook2 = 'false'
-			initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-			run_and_write(scenario, initial_conditions_index)
+			if(controlled_run == True and initial_conditions_index != controlled_run_conditions): continue
+			book1_refined_location = robot_refined_location
+			refined_in_handBook1 = 'true'
+			refined_in_handBook2 = 'false'
+			initial_state = [robot_refined_location , book1_refined_location , book2_refined_location, refined_in_handBook1, refined_in_handBook2]
+			runAndWrite(initial_conditions_index)
 
 	#Cases when rob1 is holding book2 (16 possible combinations)
-	for robot_location in locations:
-		for book1_location in locations:
+	for robot_coarse_location_as_cells in coarse_locations_as_cells:
+		robot_refined_location = random.choice(robot_coarse_location_as_cells)
+		for book1_coarse_location_as_cells in coarse_locations_as_cells:
+			book1_refined_location = random.choice(book1_coarse_location_as_cells)
 			initial_conditions_index +=1
-			if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-			book2_location = robot_location
-			in_handBook1 = 'false'
-			in_handBook2 = 'true'
-			initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-			run_and_write(scenario, initial_conditions_index)
+			if(controlled_run == True and initial_conditions_index != controlled_run_conditions): continue
+			book2_refined_location = robot_refined_location
+			refined_in_handBook2 = 'true'
+			refined_in_handBook1 = 'false'
+			initial_state = [robot_refined_location , book1_refined_location , book2_refined_location, refined_in_handBook1, refined_in_handBook2]
+			runAndWrite(initial_conditions_index)
 
-	#Cases when rob1 is not holding any book (64 possible combinations)
-	for robot_location in locations:
-		for book1_location in locations:
-			for book2_location in locations:
+	#Cases when rob1 is not holding book1 and book2 (64 possible combinations)
+	for robot_coarse_location_as_cells in coarse_locations_as_cells:
+		robot_refined_location = random.choice(robot_coarse_location_as_cells)
+		for book1_coarse_location_as_cells in coarse_locations_as_cells:
+			book1_refined_location = random.choice(book1_coarse_location_as_cells)
+			for book2_coarse_location_as_cells in coarse_locations_as_cells:
+				book2_refined_location = random.choice(book2_coarse_location_as_cells)
 				initial_conditions_index +=1
-				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-				in_handBook1 = 'false'
-				in_handBook2 = 'false'
-				initial_state = [robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				run_and_write(scenario, initial_conditions_index)
+				if(controlled_run == True and initial_conditions_index != controlled_run_conditions): continue
+				refined_in_handBook1 = 'false'
+				refined_in_handBook2 = 'false'
+				initial_state = [robot_refined_location , book1_refined_location , book2_refined_location, refined_in_handBook1, refined_in_handBook2]
+				runAndWrite(initial_conditions_index)
+
+
 
 if __name__ == "__main__":
 	'''
@@ -113,11 +108,5 @@ if __name__ == "__main__":
 	1. experimental_results.csv: A csv that contains the time taken for the reason during running for traditional planing vs theory of intentions .
 	2. experimental_results.txt: A detailed text file that contains initial state, plans and history.
 	'''
-	scenarios = ['random']
-	numberRunsRandomScenario = 1
-
-	for s in scenarios:
-		runCount = 0
-		createConditionsAndRun(s)
-		if(s == 'random'):
-			for x in range (1,numberRunsRandomScenario): createConditionsAndRun(s)
+	number_runs = 1
+	for x in range (0,number_runs): createConditionsAndRun()
