@@ -4,12 +4,12 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {kitchen}.
+#coarse_place = {office1}.
 #robot = {rob1}.
-#coarse_object = {book1}.
-#object = {ref_book1}.
+#coarse_object = {book2}.
+#object = {ref_book2}.
 #coarse_thing = #coarse_object + #robot.
-#place = {c5, c6, c7, c8}.
+#place = {c9, c10, c11, c12}.
 #thing = #object + #robot.
 
 #step = 0..numSteps.
@@ -182,19 +182,19 @@ something_happened(I) :- occurs(A, I).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Attributes.
 
-next_to(c5, c6).
-next_to(c5, c7).
-next_to(c6, c8).
-next_to(c7, c8).
+next_to(c9, c10).
+next_to(c9, c11).
+next_to(c10, c12).
+next_to(c11, c12).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
-comp(c5, kitchen).
-comp(c6, kitchen).
-comp(c7, kitchen).
-comp(c8, kitchen).
-comp(ref_book1, book1).
+comp(c9, office1).
+comp(c10, office1).
+comp(c11, office1).
+comp(c12, office1).
+comp(ref_book2, book2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -203,17 +203,17 @@ comp(ref_book1, book1).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_in_hand(rob1,book1),I).
+goal(I) :- holds(coarse_in_hand(rob1,book2),I).
 
 
 
 %%%%%%%%%%%%%%%%%
 %% Initial State:
 %%%%%%%%%%%%%%%%%
--holds(coarse_in_hand(rob1,book1), 0).
-holds(loc(rob1,c8), 0).
-holds(coarse_loc(book1,kitchen), 0).
-holds(loc(rob1,c8), 0).
+obs(loc(ref_book2,c11),false,1).
+-holds(coarse_in_hand(rob1,book2), 0).
+holds(coarse_loc(book2,office1), 0).
+holds(loc(rob1,c11), 0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

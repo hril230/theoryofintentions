@@ -5,6 +5,15 @@ class Executer(object):
 	def executeAction(self, action):
 		return self.world.executeAction(action)
 
+	def test(self,action):
+		self.world.executeAction(action)
+		return self.world.getLastTestResult()
+
+	def getLastTestResult(self):
+		return self.world.getLastTestResult()
+
+
+
 	def getTheseCoarseObservations(self,indexes):
 		return self.world.getTheseCoarseObservations(indexes)
 

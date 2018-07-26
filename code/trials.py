@@ -32,16 +32,19 @@ run_count = 0
 
 def runAndWrite(initial_conditions_index):
 	print 'initial_conditions_index: ' +str(initial_conditions_index)
+	print 'World refined initial state: ' + str(initial_state)
+
 	domain_info = DomainInfo()
 
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
-	print(indexes_relevant_goal)
 	random_seed = run_count
 	my_world = World(sparc_path,initial_state,random_seed,domain_info)
 	executer = Executer(my_world)
 
 
 	known_world = my_world.getCoarseState()
+
+	print 'World coarse initial state: ' + str(known_world)
 	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, known_world, goal, max_plan_length)
 
 	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.run()
@@ -58,7 +61,7 @@ def createConditionsAndRun():
 
 	controlled_run = True
 	controlled_run_conditions = random.randrange(1,97,1)
-	#controlled_run_conditions = 12
+	controlled_run_conditions = 47
 
 	#Cases when rob1 is holding book1 (16 possible combinations)
 	for robot_coarse_location_as_cells in coarse_locations_as_cells:

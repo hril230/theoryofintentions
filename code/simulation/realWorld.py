@@ -18,7 +18,7 @@ class World(object):
 		self.pre_asp_split = pre_asp.split('\n')
 		self.history_marker_index = self.pre_asp_split.index(history_marker) + 1
 		self.display_marker_index = self.pre_asp_split.index(display_marker) + 2
-		self.exo_action_happened = False
+		self.exo_action_happened = True
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
@@ -81,6 +81,7 @@ class World(object):
 		print('realWorld - deleting world ')
 
 	def executeAction(self,action):
+		print ' executing action ' + action
 		happened = False
 		exo_action = ''
 		input = self.domain_info.refinedStateToRefinedObsList(self.RefinedState,0) + ['hpd('+ action +',0).']
@@ -92,13 +93,14 @@ class World(object):
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
 
-		print ' \n\n\nrealWorld - Answer:' + answer + ':'
-
 		if(answer == '\n'):
-			print 'nothing happned in real world'
+			print '       nothing happned in real world '
 			happened = False
 			self.history.append(action + "realWorld -  (FAILED) ")
 		else:
+			if('test' in action):
+				if 'holds(directly_observed' in answer: self.lastTestResult = True
+				else: self.lastTestResult = False
 			happened = True
 			self.__updateStateFromAnswer(answer)
 			self.history.append(action)
@@ -115,9 +117,10 @@ class World(object):
 		f1.write(asp)
 		f1.close()
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
-
 		return answer
 
+	def getLastTestResult(self):
+		return self.lastTestResult
 
 	def getRefinedState(self):
 		return self.RefinedState

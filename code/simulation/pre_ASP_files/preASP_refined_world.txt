@@ -234,3 +234,5 @@ holds(in_hand(A,B),numSteps).
 holds(coarse_loc(A,B),numSteps).
 holds(coarse_in_hand(A,B),numSteps).
 -holds(coarse_in_hand(A,B),numSteps).
+holds(directly_observed(rob1,F,true),1).
+holds(directly_observed(rob1,F,false),1).

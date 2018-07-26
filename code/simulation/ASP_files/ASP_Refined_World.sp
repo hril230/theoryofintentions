@@ -223,12 +223,12 @@ comp(ref_book2, book2).
 %% History:
 %%%%%%%%%%%%
 %% *_*_*
-obs(loc(rob1,c8),true,0).
-obs(loc(ref_book1,c8),true,0).
-obs(loc(ref_book2,c7),true,0).
+obs(loc(rob1,c11),true,0).
+obs(loc(ref_book1,c13),true,0).
+obs(loc(ref_book2,c10),true,0).
 obs(in_hand(rob1,ref_book1),false,0).
 obs(in_hand(rob1,ref_book2),false,0).
-hpd(test(rob1,in_hand(rob1,ref_book1),true),0).
+hpd(test(rob1,loc(ref_book2,c11),true),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -240,3 +240,5 @@ holds(in_hand(A,B),numSteps).
 holds(coarse_loc(A,B),numSteps).
 holds(coarse_in_hand(A,B),numSteps).
 -holds(coarse_in_hand(A,B),numSteps).
+holds(directly_observed(rob1,F,true),1).
+holds(directly_observed(rob1,F,false),1).

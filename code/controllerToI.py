@@ -43,6 +43,8 @@ class ControllerToI():
 		self.preparePreASPStringLists()
 		self.setInitialBelief()
 		self.refined_location = self.executer.getMyRefinedLocation()
+		print 'initial coarse belief: '+ str(self.belief)
+		print 'initial refined location: ' + str(self.refined_location)
 
 
 	def run(self):
@@ -82,17 +84,34 @@ class ControllerToI():
 				self.number_steps += 1
 			elif(next_action[0:5] == 'start'): pass
 			else:
-				print('action: '+ str(next_action))
+				print('                       abstract action: '+ str(next_action))
+				print('                       coarse belief: ') + str(self.belief)
 				refined_location = self.executer.getMyRefinedLocation()
-				answer_sets = self.refine(next_action, self.belief, refined_location)
-				plans = answer_sets.rstrip().split('\n\n')
+				answer_set = self.refine(next_action, self.belief, refined_location)
+				plans = answer_set.rstrip().split('\n\n')
 				refined_plan = plans[0]
 				refined_plan = refined_plan.strip('{').strip('}')
 				refined_plan = refined_plan.split(', ')
-				print 'refiend plan: ' + str(refined_plan)
+				print '                     chosen refiend plan: '
+				print refined_plan
 				for refined_occurence in refined_plan:
 					refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
-					self.executer.executeAction(refined_action)
+					at_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
+					print '                    refined action: ' + refined_action + ' at step ' + str(at_step)
+					if('test' in refined_action):
+						testResult = self.executer.test(refined_action)
+						fluent = refined_action[refined_action.find(',')+1:refined_action.rfind(',')]
+						value = refined_action[refined_action.rfind(',')+1:-1]
+						while testResult == False:
+							real_value = ''
+							if value == 'true': real_value = 'false'
+							elif value == 'false': real_value = 'true'
+							obs = 'obs(' + fluent+','+real_value+',' + str(at_step+1) +').\n'
+							refined_plan = self.addObsAndRunZoomedDomain(obs)
+
+							print ' new plan: ' + str(refined_plan)
+					else: self.executer.executeAction(refined_action)
+
 
 			self.current_step += 1
 			relevant_observations = action_observations + self.executer.getTheseCoarseObservations(self.getIndexesRelevantToGoal())
@@ -108,6 +127,16 @@ class ControllerToI():
 		return (self.toi_history, self.number_activities, self.goal_correction)
 
 
+	def addObsAndRunZoomedDomain(self,obs):
+		self.zoomed_asp_list = self.zoomed_asp_list[:self.zoomed_obs_index] +[obs]+self.zoomed_asp_list[self.zoomed_obs_index+1:]
+		asp = ''.join(self.zoomed_asp_list)
+		f1 = open(self.zoomed_domain_file, 'w')
+		f1.write(asp)
+		f1.close()
+		raw_input()
+		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A ',shell=True)
+		plan = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
+		return plan
 
  	def filteredPlainHistory(self,this_list):
 		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
@@ -126,7 +155,7 @@ class ControllerToI():
 		current_asp_split[1] = "#const max_len = "+str(self.number_steps)+". % maximum activity_length of an activity."
 		current_asp_split[2] = "#const max_name = " + str(self.number_activities) + "."
 		asp = '\n'.join(current_asp_split)
-	        f1 = open(self.asp_toi_file, 'w')
+		f1 = open(self.asp_toi_file, 'w')
 		f1.write(asp)
 		f1.close()
 
@@ -263,30 +292,32 @@ class ControllerToI():
 
 	# this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
 	def refine(self,action,belief,refined_location):
-		initial_state = []
-		final_state = []
+		initial_state = Set([])
+		final_state = Set([])
 		coarse_location = belief[self.domain_info.LocationRobot_index]
 	    # use action and history to figure out the transition (initial_state, action, final_state)
 	    # the location of the robot is relevant for move transitions
 		action_object = action[action.find(',')+1:-1]
 		if 'move' in action:
-			initial_state = ['coarse_loc(rob1,' + coarse_location + ')']
-			final_state = ['coarse_loc(rob1,' + action_object + ')']
+			initial_state.add('coarse_loc(rob1,' + coarse_location + ')')
+			final_state.add('coarse_loc(rob1,' + action_object + ')')
 
 		elif 'pickup' in action:
-			initial_state = ['-coarse_in_hand(rob1,' + action_object + ')']
-			final_state = ['coarse_in_hand(rob1,' + action_object + ')']
-			initial_state.append('coarse_loc(rob1,' + coarse_location + ')')
-			initial_state.append('coarse_loc('+ action_object+','+ coarse_location+')')
+			initial_state.add('-coarse_in_hand(rob1,' + action_object + ')')
+			final_state.add('coarse_in_hand(rob1,' + action_object + ')')
+			initial_state.add('coarse_loc(rob1,' + coarse_location + ')')
+			initial_state.add('coarse_loc('+ action_object+','+ coarse_location+')')
 	    # the in_hand status of the object is relevant for put_down transitions
 		elif 'put_down' in action:
-			initial_state = ['coarse_in_hand(rob1,' + action_object + ')']
-			final_state = ['-coarse_in_hand(rob1,' + action_object + ')']
+			initial_state.add('coarse_in_hand(rob1,' + action_object + ')')
+			final_state.add('-coarse_in_hand(rob1,' + action_object + ')')
 
-		initial_state.append('loc(rob1,'+refined_location+')')
+		initial_state.add('loc(rob1,'+refined_location+')')
 		refined_location = self.executer.getMyRefinedLocation()
 	    # edit refined_asp to get temporary zoomed_asp file
-		self.zoom(initial_state, action, final_state)
+		print 'initial state abstrac action: ' + str(initial_state)
+		print 'final state after abstract action: ' + str(final_state)
+		self.zoom(list(initial_state), action, list(final_state))
 
 
 	    # get refined answer set
@@ -339,7 +370,7 @@ class ControllerToI():
 		rel_actions = ['test(#robot,#physical_inertial_fluent,#outcome)']
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
-		irrelevant_sort_names = ['#coarse_place', '#coarse_object', '#place', '#object']
+		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
 		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12','c13', 'c14', 'c15', 'c16' 'ref_boo1', 'ref_book2']
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
@@ -479,19 +510,20 @@ class ControllerToI():
 		self.goal = self.goal[0:len(self.goal)-2] + '.\n'
 
 	    # make temporary copy of refined ASP file that can be edited
-		original_asp = open(self.preASP_refined_domain_file, 'r')
-		zoomed_asp = open(self.zoomed_domain_file, 'w')
+		original_asp_reader = open(self.preASP_refined_domain_file, 'r')
+		self.zoomed_asp_list = []
+		zoomed_asp_writter = open(self.zoomed_domain_file, 'w')
 
-		for line in original_asp:
+		for line in original_asp_reader:
 			if line == '%% GOAL GOES HERE\n': # put goal in
-				zoomed_asp.write(self.goal)
+				self.zoomed_asp_list.append(self.goal)
 			elif line == '%% INITIAL STATE GOES HERE\n': # put initial conditions in
 				for condition in rel_initial_conditions:
 					if '-' in condition:
 						condition = condition.replace('-', '')
-						zoomed_asp.write('-holds(' + condition + ', 0).\n')
+						self.zoomed_asp_list.append('-holds(' + condition + ', 0).\n')
 					else:
-						zoomed_asp.write('holds(' + condition + ', 0).\n')
+						self.zoomed_asp_list.append('holds(' + condition + ', 0).\n')
 			elif ('cannot test in the first step' in line) and ('pickup' in action): # remove this axiom for pickup actions, as the object's location needs to be tested at step zero
 				pass
 			elif 'ZOOM THIS SORT:' in line: # add relevant constants to sort
@@ -502,7 +534,7 @@ class ControllerToI():
 						for const in sort.rel_constants:
 							zoomed_sort = zoomed_sort + const + ', '
 						zoomed_sort = zoomed_sort[0:len(zoomed_sort)-2] + '}.\n'
-						zoomed_asp.write(zoomed_sort)
+						self.zoomed_asp_list.append(zoomed_sort)
 			elif 'ZOOM THIS SORT OF SORTS' in line: # add relevant sorts
 				zoomed_sort = ''
 				for sort in sorts:
@@ -511,29 +543,32 @@ class ControllerToI():
 						for const in sort.rel_constants:
 							zoomed_sort = zoomed_sort + const + ' + '
 						zoomed_sort = zoomed_sort[0:len(zoomed_sort)-3] + '.\n'
-						zoomed_asp.write(zoomed_sort)
+						self.zoomed_asp_list.append(zoomed_sort)
 			elif 'ZOOM INERTIAL FLUENTS' in line: # add relevant inertial fluents
 				inertial_fluent_sort = '#physical_inertial_fluent = '
 				for fluent in rel_inertial_fluents:
 					inertial_fluent_sort = inertial_fluent_sort + fluent + ' + '
 				inertial_fluent_sort = inertial_fluent_sort[0:len(inertial_fluent_sort)-3] + '.\n'
-				zoomed_asp.write(inertial_fluent_sort)
+				self.zoomed_asp_list.append(inertial_fluent_sort)
 			elif 'ZOOM DEFINED FLUENTS' in line: # add relevant defined fluents
 				defined_fluent_sort = '#physical_defined_fluent = '
 				for fluent in rel_defined_fluents:
 					defined_fluent_sort = defined_fluent_sort + fluent + ' + '
 				defined_fluent_sort = defined_fluent_sort[0:len(defined_fluent_sort)-3] + '.\n'
-				zoomed_asp.write(defined_fluent_sort)
+				self.zoomed_asp_list.append(defined_fluent_sort)
 			elif 'ZOOM ACTIONS' in line: # add relevant actions
 				action_sort = '#action = '
 				for act in rel_actions:
 					action_sort = action_sort + act + ' + '
 				action_sort = action_sort[0:len(action_sort)-3] + '.\n'
-				zoomed_asp.write(action_sort)
+				self.zoomed_asp_list.append(action_sort)
 			else:
 				line_relevant = True
+
+				#print 'refined action: ' + action + ' irrelevant_sort_names: ' + str(irrelevant_sort_names)
 				for sort in irrelevant_sort_names: # don't include predicates with irrelevant sorts
 					if sort in line:
+						print ' irrelevant line for containing irrelevant sort name '
 						line_relevant = False
 				for const in irrelevant_obj_consts: # don't include attributes with irrelevant object constants
 					if const in line:
@@ -545,9 +580,14 @@ class ControllerToI():
 					if act in line:
 						line_relevant = False
 				if line_relevant:
-					zoomed_asp.write(line)
-		original_asp.close()
-		zoomed_asp.close()
+					self.zoomed_asp_list.append(line)
+
+		self.zoomed_obs_index = self.zoomed_asp_list.index('%% Initial State:\n') +2
+
+		original_asp_reader.close()
+		asp = ''.join(self.zoomed_asp_list)
+		zoomed_asp_writter.write(asp)
+		zoomed_asp_writter.close()
 
 	# Defines the sorts that may be included in a zoomed description
 class Sort():
