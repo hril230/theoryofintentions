@@ -1,4 +1,4 @@
-#const numSteps = 1.
+#const numSteps = 12.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
@@ -151,11 +151,61 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-obs(loc(rob1,office1),true,0).
+obs(loc(rob1,kitchen),true,0).
 obs(loc(book1,kitchen),true,0).
-obs(loc(book2,library),true,0).
+obs(loc(book2,office2),true,0).
 obs(in_hand(rob1,book1),false,0).
 obs(in_hand(rob1,book2),false,0).
+obs(in_hand(rob1,book2),false,2).
+obs(loc(book2,kitchen),false,2).
+obs(in_hand(rob1,book1),false,2).
+obs(loc(book1,kitchen),true,2).
+obs(in_hand(rob1,book1),false,3).
+obs(loc(book1,kitchen),false,3).
+obs(in_hand(rob1,book2),false,3).
+obs(loc(book2,kitchen),false,3).
+hpd(move(rob1,office1), 2).
+obs(loc(book1,office1),false,4).
+obs(loc(book2,office1),false,4).
+obs(in_hand(rob1,book2),false,4).
+obs(in_hand(rob1,book1),false,4).
+hpd(move(rob1,office2), 3).
+obs(loc(book1,office2),false,5).
+obs(loc(book2,office2),false,5).
+obs(in_hand(rob1,book1),false,5).
+obs(in_hand(rob1,book2),false,5).
+obs(loc(book2,office2),false,6).
+obs(loc(book1,office2),false,6).
+obs(in_hand(rob1,book2),false,6).
+obs(in_hand(rob1,book1),false,6).
+obs(in_hand(rob1,book1),false,7).
+obs(loc(book1,office2),false,7).
+obs(loc(book2,office2),false,7).
+obs(in_hand(rob1,book2),false,7).
+obs(in_hand(rob1,book1),false,8).
+obs(loc(book2,office2),false,8).
+obs(loc(book1,office2),false,8).
+obs(in_hand(rob1,book2),false,8).
+hpd(move(rob1,office1), 7).
+obs(in_hand(rob1,book2),false,9).
+obs(loc(book2,kitchen),true,9).
+obs(loc(book1,kitchen),true,9).
+obs(in_hand(rob1,book1),false,9).
+hpd(move(rob1,kitchen), 8).
+obs(in_hand(rob1,book1),false,10).
+obs(loc(book2,kitchen),true,10).
+obs(in_hand(rob1,book2),false,10).
+obs(loc(book1,kitchen),true,10).
+obs(loc(book1,kitchen),true,11).
+obs(in_hand(rob1,book2),false,11).
+obs(in_hand(rob1,book1),false,11).
+obs(loc(book2,kitchen),true,11).
+obs(in_hand(rob1,book2),false,12).
+obs(loc(book1,kitchen),true,12).
+obs(loc(book2,kitchen),true,12).
+obs(in_hand(rob1,book1),false,12).
+hpd(pickup(rob1,book1), 11).
+hpd(exo_move(book2,kitchen),3).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display

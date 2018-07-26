@@ -1,6 +1,6 @@
-#const numSteps = 7. % maximum number of steps.
-#const max_len = 6. % maximum activity_length of an activity.
-#const max_name = 1.
+#const numSteps = 32. % maximum number of steps.
+#const max_len = 31. % maximum activity_length of an activity.
+#const max_name = 3.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -572,31 +572,13 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% *_*_*
-current_step(2).
+current_step(12).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% #_#_# beginning
-obs(loc(rob1,office1),true,0).
-obs(loc(book1,kitchen),true,0).
-obs(loc(book2,library),true,0).
-obs(in_hand(rob1,book1),false,0).
-obs(in_hand(rob1,book2),false,0).
-obs(loc(book1,office1),false,2).
-obs(loc(book2,office1),false,2).
-obs(in_hand(rob1,book2),false,2).
-obs(in_hand(rob1,book1),false,2).
-hpd(select(my_goal),true,0).
-attempt(start(1),1).
-activity_goal(1,my_goal).
-activity_component(1,1,move(rob1,kitchen)).
-activity_component(1,2,pickup(rob1,book1)).
-activity_component(1,3,move(rob1,library)).
-activity_component(1,4,put_down(rob1,book1)).
-activity_length(1,4).
-explanation(0,2).
 %% #_#_# end
 
 

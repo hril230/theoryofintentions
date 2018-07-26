@@ -33,6 +33,7 @@ class DomainInfo():
 		return obsList
 
 	def abstractAnswerToCoarseState(self,answer):
+		answer = answer.rstrip().strip('{').strip('}')
 		state = ['unknown'] * 5
 		for holds in answer.split(', '):
 			if holds[0] == '-':
@@ -58,6 +59,7 @@ class DomainInfo():
 		return state
 
 	def refinedAnswerToRefinedState(self,answer):
+		answer = answer.rstrip().strip('{').strip('}')
 		state = ['unknown'] * 5
 		for holds in answer.split(', '):
 			if holds[0] == '-':
@@ -69,9 +71,8 @@ class DomainInfo():
 					if(split_fluent[1] == 'ref_book2'): state[self.In_handBook2_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
-				if(fluent[0:4] == 'loc('):
+ 				if(fluent[0:4] == 'loc('):
 					fluent = fluent[4:-1]
-
 					split_fluent = fluent.split(',')
 					if(split_fluent[0] == 'rob1'): state[self.LocationRobot_index] = split_fluent[1]
 					elif(split_fluent[0] == 'ref_book1'):state[self.LocationBook1_index] = split_fluent[1]
@@ -141,9 +142,7 @@ class DomainInfo():
 		goal = goal.rstrip()
 		conditions = goal.split(', ')
 		for condition in conditions:
-			print 'condition ' +  condition
 			fluent = condition[condition.find('(') + 1: condition.rfind(',')]
-			print 'fluent ' + fluent
 			if 'in_hand' in fluent:
 				if 'book1' in fluent: indexes.add(self.In_handBook1_index)
 				elif 'book2' in fluent: indexes.add(self.In_handBook2_index)

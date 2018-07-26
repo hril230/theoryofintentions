@@ -42,7 +42,7 @@ class ControllerToI():
 		self.belief_history = self.filteredPlainHistory(first_obs_list)
 		self.preparePreASPStringLists()
 		self.setInitialBelief()
-
+		self.refined_location = self.executer.getMyRefinedLocation()
 
 
 	def run(self):
@@ -82,12 +82,14 @@ class ControllerToI():
 				self.number_steps += 1
 			elif(next_action[0:5] == 'start'): pass
 			else:
-				print('action : '+ str(next_action))
-				answer_sets = self.refine(next_action, self.belief_history, self.current_step)
+				print('action: '+ str(next_action))
+				refined_location = self.executer.getMyRefinedLocation()
+				answer_sets = self.refine(next_action, self.belief, refined_location)
 				plans = answer_sets.rstrip().split('\n\n')
 				refined_plan = plans[0]
 				refined_plan = refined_plan.strip('{').strip('}')
 				refined_plan = refined_plan.split(', ')
+				print 'refiend plan: ' + str(refined_plan)
 				for refined_occurence in refined_plan:
 					refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 					self.executer.executeAction(refined_action)
@@ -242,8 +244,7 @@ class ControllerToI():
 		if 'holds' in output:
 			self.belief_history.append(possible_last_action)
 			self.belief = self.domain_info.abstractAnswerToCoarseState(output)
-		print 'updated belief'
-		print self.belief
+
 
 	def setInitialBelief(self):
 		input = self.belief_history
@@ -261,27 +262,29 @@ class ControllerToI():
 
 
 	# this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
-	def refine(self,action, history, current_step):
+	def refine(self,action,belief,refined_location):
 		initial_state = []
 		final_state = []
-		robot_coarse_location = self.belief[self.domain_info.LocationRobot_index]
+		coarse_location = belief[self.domain_info.LocationRobot_index]
 	    # use action and history to figure out the transition (initial_state, action, final_state)
 	    # the location of the robot is relevant for move transitions
 		action_object = action[action.find(',')+1:-1]
 		if 'move' in action:
-			initial_state = ['coarse_loc(rob1,' + robot_coarse_location + ')']
+			initial_state = ['coarse_loc(rob1,' + coarse_location + ')']
 			final_state = ['coarse_loc(rob1,' + action_object + ')']
 
 		elif 'pickup' in action:
 			initial_state = ['-coarse_in_hand(rob1,' + action_object + ')']
 			final_state = ['coarse_in_hand(rob1,' + action_object + ')']
-			initial_state.append('coarse_loc(rob1,' + robot_coarse_location + ')')
-			initial_state.append('coarse_loc('+ action_object+','+ robot_coarse_location+')')
+			initial_state.append('coarse_loc(rob1,' + coarse_location + ')')
+			initial_state.append('coarse_loc('+ action_object+','+ coarse_location+')')
 	    # the in_hand status of the object is relevant for put_down transitions
 		elif 'put_down' in action:
 			initial_state = ['coarse_in_hand(rob1,' + action_object + ')']
 			final_state = ['-coarse_in_hand(rob1,' + action_object + ')']
 
+		initial_state.append('loc(rob1,'+refined_location+')')
+		refined_location = self.executer.getMyRefinedLocation()
 	    # edit refined_asp to get temporary zoomed_asp file
 		self.zoom(initial_state, action, final_state)
 
@@ -301,9 +304,9 @@ class ControllerToI():
 	# this action writes a zoomed ASP file
 	def zoom(self,initial_state, action, final_state):
 	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2', 'unknown'])
+		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2'])
 		coarse_objects = Sort('coarse_object', ['book1', 'book2'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'unknown_cell'])
+		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16'])
 		objects = Sort('object', ['ref_book1', 'ref_book2'])
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
@@ -320,10 +323,9 @@ class ControllerToI():
 		kitchen_components = Components('kitchen', ['c5', 'c6', 'c7', 'c8'])
 		office1_components = Components('office1', ['c9', 'c10', 'c11', 'c12'])
 		office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
-		unknown_components = Components('unknown', ['unknown_cell'])
 		book1_components = Components('book1', ['ref_book1'])
 		book2_components = Components('book2', ['ref_book2'])
-		refinements = [library_components, kitchen_components, office1_components, office2_components, book1_components, book2_components, unknown_components]
+		refinements = [library_components, kitchen_components, office1_components, office2_components, book1_components, book2_components]
 
 	    # initialise relevance lists
 		rel_initial_conditions = []
@@ -338,7 +340,7 @@ class ControllerToI():
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
 		irrelevant_sort_names = ['#coarse_place', '#coarse_object', '#place', '#object']
-		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'unknown', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12','c13', 'c14', 'c15', 'c16' 'ref_boo1', 'ref_book2']
+		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12','c13', 'c14', 'c15', 'c16' 'ref_boo1', 'ref_book2']
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 

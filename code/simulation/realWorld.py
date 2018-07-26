@@ -38,55 +38,53 @@ class World(object):
 		relevant_indexes= Set([])
 		if(action[0:4] == 'move'):
 			relevant_indexes.add(self.domain_info.LocationRobot_index)
-		if(action == 'pickup(rob1,book1)' or action == '+put_down(rob1,book1)'):
+		if(action == 'pickup(rob1,ref_book1)' or action == '+put_down(rob1,ref_book1)'):
 			relevant_indexes.add(self.domain_info.In_handBook1_index)
 			relevant_indexes.add(self.domain_info.LocationBook1_index)
 
-		if(action == 'pickup(rob1,book2)' or action == '+put_down(rob1,book2)'):
+		if(action == 'pickup(rob1,ref_book2)' or action == '+put_down(rob1,ref_book2)'):
 			relevant_indexes.add(self.domain_info.In_handBook2_index)
 			relevant_indexes.add(self.domain_info.LocationBook2_index)
 
 		return self.getTheseCoarseObservations(relevant_indexes)
 
 	def __getExecutionTimeUnits(self,action):
-		print 'execution time units for action: ' + action
-		if(action[0:4] == 'move'):
-			return 3
-		if(action[0] == 'p'):
-			return 1
+		if 'move' in action: return 1
+		elif 'pickup' in action or 'put_down' in action: return 3
+		elif 'test' in action: return 1
+
+		return 0
 
 	def __getRandomExoAction(self,action):
 		exo_action = ''
 
 		if(random.random()<0.08): return exo_action
-		choice = random.choice(['book1','book2'])
-		if(choice == 'book1'  and (self.RefinedState[self.domain_info.In_handBook1_index] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
-		elif(choice == 'book2'  and (self.RefinedState[self.domain_info.In_handBook2_index] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
-		if(choice == 'book1'):
+		choice = random.choice(['ref_book1','ref_book2'])
+		if(choice == 'ref_book1'  and (self.RefinedState[self.domain_info.In_handBook1_index] == 'true' or action == 'pickup(rob1,ref_book1)')): choice = 'ref_book2'
+		elif(choice == 'ref_book2'  and (self.RefinedState[self.domain_info.In_handBook2_index] == 'true' or action == 'pickup(rob1,ref_book2)')): choice = 'ref_book1'
+		if(choice == 'ref_book1'):
 			allRefinedLocations = list(self.domain_info.RefinedLocations)
 			currentRefinedLocation = self.RefinedState[self.domain_info.LocationBook1_index]
-			print ' book 1 location before exo move: ' + currentRefinedLocation
 			allRefinedLocations.remove(currentRefinedLocation)
 			newRefinedLocation = random.choice(allRefinedLocations)
-			exo_action =  'exo_move(book1,' +newRefinedLocation+ ')'
-		elif(choice == 'book2'):
+			exo_action =  'exo_move(ref_book1,' +newRefinedLocation+ ')'
+		elif(choice == 'ref_book2'):
 			allRefinedLocations = list(self.domain_info.RefinedLocations)
 			currentRefinedLocation = self.RefinedState[self.domain_info.LocationBook2_index]
-			print ' book 2 location before exo move: ' + currentRefinedLocation
 			allRefinedLocations.remove(currentRefinedLocation)
 			newRefinedLocation = random.choice(allRefinedLocations)
-			exo_action =  'exo_move(book2,' +newRefinedLocation+ ')'
+			exo_action =  'exo_move(ref_book2,' +newRefinedLocation+ ')'
 		return exo_action
 
 
 	def __del__(self):
-		print('deleting world ')
+		print('realWorld - deleting world ')
 
 	def executeAction(self,action):
-		print 'execution actoin: ' + action
 		happened = False
 		exo_action = ''
 		input = self.domain_info.refinedStateToRefinedObsList(self.RefinedState,0) + ['hpd('+ action +',0).']
+
 		if(self.exo_action_happened == False):
 			exo_action = self.__getRandomExoAction(action)
 			if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
@@ -94,13 +92,12 @@ class World(object):
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
 
-		print ' \n\n\n Answer:'
-		print answer
-		print ' \n\n\n'
+		print ' \n\n\nrealWorld - Answer:' + answer + ':'
 
 		if(answer == '\n'):
+			print 'nothing happned in real world'
 			happened = False
-			self.history.append(action + " (FAILED) ")
+			self.history.append(action + "realWorld -  (FAILED) ")
 		else:
 			happened = True
 			self.__updateStateFromAnswer(answer)
@@ -108,7 +105,7 @@ class World(object):
 			if(exo_action != ''):
 				self.history.append(exo_action)
 				self.exo_action_happened = True
-				print('%%%%%%%%%     exo_action happened in realWorld.py :  '+exo_action)
+				print('%%%%%%%%% realWorld -      exo_action happened in realWorld.py :  '+exo_action)
 		return (self.__getActionObservations(action, happened))
 
 	def __runASPDomain(self,input):
@@ -146,10 +143,10 @@ class World(object):
 
 
 	def achievedGoal(self):
-		if(self.State[self.domain_info.LocationBook1_index] != 'library'): return 'false'
-		elif(self.State[self.domain_info.LocationBook2_index] != 'library'): return 'false'
-		elif(self.State[self.domain_info.In_handBook1_index] == 'true'): return 'false'
-		elif(self.State[self.domain_info.In_handBook2_index] == 'true'): return 'false'
+		if(self.CoarseState[self.domain_info.LocationBook1_index] != 'library'): return 'false'
+		elif(self.CoarseState[self.domain_info.LocationBook2_index] != 'library'): return 'false'
+		elif(self.CoarseState[self.domain_info.In_handBook1_index] == 'true'): return 'false'
+		elif(self.CoarseState[self.domain_info.In_handBook2_index] == 'true'): return 'false'
 		else: return 'true'
 
 	def getGoalFeedback(self):

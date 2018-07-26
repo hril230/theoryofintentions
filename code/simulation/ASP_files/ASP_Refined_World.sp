@@ -23,7 +23,9 @@ sorts
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#action = test(#robot, #physical_inertial_fluent, #outcome) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#rob_action = test(#robot, #physical_inertial_fluent, #outcome) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
 
 #refined_component = #place + #object.
 #coarse_component = #coarse_place + #coarse_object.
@@ -50,6 +52,9 @@ comp(#refined_component, #coarse_component).
 
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
+
+%% Exogenous moving an object causes the object to be in a different location.
+holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 % Grasping an object causes object to be in hand.
 holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
@@ -103,7 +108,11 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1
 -occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
 -occurs(pickup(rob1, OP), I) :- I = 0.
 
+%% An exogenous move of an object cannot be done to the same location.
+-occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
 
+%% An exogenous move of an object cannot happen if it is being in hand
+-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
@@ -123,10 +132,6 @@ holds(directly_observed(rob1, F, undet), I) :- not holds(directly_observed(rob1,
 holds(observed(rob1, F, O), I) :- holds(directly_observed(rob1, F, O), I).
 holds(observed(rob1, F, O), I) :- holds(indirectly_observed(rob1, F, O), I).
 
-% Make sure the outcome of any concrete action is tested
-occurs(test(rob1, F, true), I) :- -holds(F, I-1), holds(F, I), #physical_inertial_fluent(F).
-occurs(test(rob1, F, false), I) :- holds(F, I-1), -holds(F, I), #physical_inertial_fluent(F), not -occurs(test(rob1, F, false), I).
--occurs(test(R, F, O), 0). % cannot test in the first step
 
 
 
@@ -162,7 +167,7 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 
 
 %% Cannot execute two actions at the same time.
-:- occurs(A1,I), occurs(A2,I), A1 != A2.
+:- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
 
 
@@ -218,13 +223,12 @@ comp(ref_book2, book2).
 %% History:
 %%%%%%%%%%%%
 %% *_*_*
-obs(loc(rob1,c10),true,0).
-obs(loc(ref_book1,c7),true,0).
-obs(loc(ref_book2,c4),true,0).
+obs(loc(rob1,c8),true,0).
+obs(loc(ref_book1,c8),true,0).
+obs(loc(ref_book2,c7),true,0).
 obs(in_hand(rob1,ref_book1),false,0).
 obs(in_hand(rob1,ref_book2),false,0).
-hpd(move(rob1,c9),0).
-hpd(exo_move(book2,c8),0).
+hpd(test(rob1,in_hand(rob1,ref_book1),true),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
