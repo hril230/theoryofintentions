@@ -1,6 +1,6 @@
-#const numSteps = 17. % maximum number of steps.
-#const max_len = 16. % maximum activity_length of an activity.
-#const max_name = 1.
+#const numSteps = 18. % maximum number of steps.
+#const max_len = 17. % maximum activity_length of an activity.
+#const max_name = 2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -572,35 +572,104 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% *_*_*
-current_step(4).
+current_step(16).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% #_#_# beginning
-obs(loc(rob1,library),true,0).
-obs(loc(book1,office2),true,0).
 obs(loc(book2,office1),true,0).
-obs(in_hand(rob1,book1),false,0).
+obs(loc(rob1,library),true,0).
 obs(in_hand(rob1,book2),false,0).
+obs(in_hand(rob1,book1),false,0).
+obs(loc(book1,office2),true,0).
 obs(loc(book1,library),false,2).
 obs(in_hand(rob1,book2),false,2).
 obs(loc(book2,library),false,2).
 obs(in_hand(rob1,book1),false,2).
-obs(loc(book2,library),false,3).
 obs(in_hand(rob1,book1),false,3).
-obs(loc(book1,library),false,3).
 obs(in_hand(rob1,book2),false,3).
+obs(loc(book1,kitchen),false,3).
+obs(loc(rob1,kitchen),true,3).
+obs(loc(book2,kitchen),true,3).
+obs(loc(book2,kitchen),true,4).
 obs(in_hand(rob1,book2),false,4).
-obs(in_hand(rob1,book1),false,4).
 obs(loc(book1,kitchen),false,4).
-obs(loc(book2,office1),true,4).
+obs(in_hand(rob1,book1),false,4).
+obs(loc(book1,kitchen),false,5).
+obs(in_hand(rob1,book1),false,5).
+obs(in_hand(rob1,book2),false,5).
+obs(loc(book2,kitchen),true,5).
+obs(in_hand(rob1,book2),false,6).
+obs(in_hand(rob1,book1),false,6).
+obs(loc(book1,office1),false,6).
+obs(loc(rob1,office1),true,6).
+obs(loc(book2,office1),false,6).
+obs(loc(book1,office2),true,7).
+obs(in_hand(rob1,book2),false,7).
+obs(loc(rob1,office2),true,7).
+obs(in_hand(rob1,book1),false,7).
+obs(loc(book2,office2),false,7).
+obs(loc(book2,office2),false,8).
+obs(in_hand(rob1,book1),true,8).
+obs(in_hand(rob1,book2),false,8).
+obs(loc(book1,office2),true,8).
+obs(in_hand(rob1,book1),true,9).
+obs(loc(book1,office1),true,9).
+obs(loc(rob1,office1),true,9).
+obs(in_hand(rob1,book2),false,9).
+obs(loc(book2,office1),false,9).
+obs(loc(rob1,kitchen),true,10).
+obs(in_hand(rob1,book1),true,10).
+obs(loc(book2,kitchen),true,10).
+obs(in_hand(rob1,book2),false,10).
+obs(loc(book1,kitchen),true,10).
+obs(in_hand(rob1,book1),true,11).
+obs(loc(book2,library),false,11).
+obs(in_hand(rob1,book2),false,11).
+obs(loc(rob1,library),true,11).
+obs(loc(book1,library),true,11).
+obs(in_hand(rob1,book2),false,12).
+obs(in_hand(rob1,book1),false,12).
+obs(loc(book1,library),true,12).
+obs(loc(book2,library),false,12).
+obs(loc(book1,kitchen),false,13).
+obs(loc(rob1,kitchen),true,13).
+obs(in_hand(rob1,book1),false,13).
+obs(in_hand(rob1,book2),false,13).
+obs(loc(book2,kitchen),true,13).
+obs(in_hand(rob1,book2),true,14).
+obs(in_hand(rob1,book1),false,14).
+obs(loc(book2,kitchen),true,14).
+obs(loc(book1,kitchen),false,14).
+obs(loc(rob1,library),true,15).
+obs(loc(book1,library),true,15).
+obs(in_hand(rob1,book1),false,15).
+obs(loc(book2,library),true,15).
+obs(in_hand(rob1,book2),true,15).
+obs(loc(book1,library),true,16).
+obs(in_hand(rob1,book1),false,16).
+obs(in_hand(rob1,book2),false,16).
+obs(loc(book2,library),true,16).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
 attempt(move(rob1,kitchen),2).
-attempt(move(rob1,office1),3).
+attempt(stop(1),3).
+attempt(start(2),4).
+attempt(move(rob1,office1),5).
+attempt(move(rob1,office2),6).
+attempt(pickup(rob1,book1),7).
+attempt(move(rob1,office1),8).
+attempt(move(rob1,kitchen),9).
+attempt(move(rob1,library),10).
+attempt(put_down(rob1,book1),11).
+attempt(move(rob1,kitchen),12).
+attempt(pickup(rob1,book2),13).
+attempt(move(rob1,library),14).
+attempt(put_down(rob1,book2),15).
 activity_goal(1,my_goal).
+activity_goal(2,my_goal).
 activity_component(1,1,move(rob1,kitchen)).
 activity_component(1,2,move(rob1,office1)).
 activity_component(1,3,pickup(rob1,book2)).
@@ -615,8 +684,22 @@ activity_component(1,11,move(rob1,office1)).
 activity_component(1,12,move(rob1,kitchen)).
 activity_component(1,13,move(rob1,library)).
 activity_component(1,14,put_down(rob1,book1)).
+activity_component(2,1,move(rob1,office1)).
+activity_component(2,5,move(rob1,kitchen)).
+activity_component(2,4,move(rob1,office1)).
+activity_component(2,8,move(rob1,kitchen)).
+activity_component(2,6,move(rob1,library)).
+activity_component(2,9,pickup(rob1,book2)).
+activity_component(2,10,move(rob1,library)).
+activity_component(2,11,put_down(rob1,book2)).
+activity_component(2,2,move(rob1,office2)).
+activity_component(2,3,pickup(rob1,book1)).
+activity_component(2,7,put_down(rob1,book1)).
+futile_activity(1,3).
 activity_length(1,14).
-explanation(0,4).
+activity_length(2,11).
+explanation(1,16).
+occurs(exo_move(book2,kitchen),1).
 %% #_#_# end
 
 

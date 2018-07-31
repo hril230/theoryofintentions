@@ -104,9 +104,9 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1
 % Cannot pick up an object if you are not in the same room.
 -occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
 
-% The next two executability conditions make sure that the robot has tested the objects location before trying to pick it up
--occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
--occurs(pickup(rob1, OP), I) :- I = 0.
+%% The next two executability conditions make sure that the robot has tested the objects location before trying to pick it up
+%-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
+%-occurs(pickup(rob1, OP), I) :- I = 0.
 
 %% An exogenous move of an object cannot be done to the same location.
 -occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
@@ -223,12 +223,12 @@ comp(ref_book2, book2).
 %% History:
 %%%%%%%%%%%%
 %% *_*_*
-obs(loc(rob1,c11),true,0).
-obs(loc(ref_book1,c13),true,0).
-obs(loc(ref_book2,c10),true,0).
-obs(in_hand(rob1,ref_book1),false,0).
 obs(in_hand(rob1,ref_book2),false,0).
-hpd(test(rob1,loc(ref_book2,c11),true),0).
+obs(in_hand(rob1,ref_book1),false,0).
+obs(loc(ref_book2,c4),true,0).
+obs(loc(ref_book1,c4),true,0).
+obs(loc(rob1,c4),true,0).
+hpd(test(rob1,in_hand(rob1,ref_book2),false),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

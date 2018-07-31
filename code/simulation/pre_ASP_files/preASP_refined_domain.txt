@@ -1,4 +1,4 @@
-#const numSteps = 10. % maximum number of steps.
+#const numSteps = 6. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -236,11 +236,14 @@ comp(ref_book2, book2).
 %% GOAL GOES HERE
 
 
+%%%%%%%%%%%%%%%%%
+%% History:
+%%%%%%%%%%%%%%%%%
+%% HISTORY GOES HERE
 
 %%%%%%%%%%%%%%%%%
-%% Initial State:
+%% End of History:
 %%%%%%%%%%%%%%%%%
-%% INITIAL STATE GOES HERE
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

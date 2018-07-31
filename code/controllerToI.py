@@ -37,11 +37,10 @@ class ControllerToI():
 		self.believes_goal_holds  = False
 		self.preASP_toi_split = []
 
-		first_obs_list = self.domain_info.coarseStateToAstractObsList(known_world_state,0)
+		first_obs_list = list(self.domain_info.coarseStateToAstractObsSet(known_world_state,0))
 		self.toi_history = first_obs_list
-		self.belief_history = self.filteredPlainHistory(first_obs_list)
 		self.preparePreASPStringLists()
-		self.setInitialBelief()
+		self.setInitialBelief(self.filteredPlainHistory(first_obs_list))
 		self.refined_location = self.executer.getMyRefinedLocation()
 		print 'initial coarse belief: '+ str(self.belief)
 		print 'initial refined location: ' + str(self.refined_location)
@@ -52,24 +51,20 @@ class ControllerToI():
 		self.diagnose()
 		finish = False
 		while(finish == False):
-			next_action = self.runToIPlanning(self.input_for_planning)
-
-			#print(' $$$$$$$$$$$$$$$$$    next action with ToI : ' +str(next_action) +'  at step '+ str(self.current_step))
-
-			if(next_action == 'finish'):
+			abstract_action = self.runToIPlanning(self.input_for_planning)
+			if(abstract_action == 'finish'):
 				if(self.executer.getGoalFeedback() == True):
 					self.toi_history.append('finish')
 					finish = True
 					break
 				else:
 					self.goal_correction += 1
-					while(next_action == 'finish'):
+					while(abstract_action == 'finish'):
 						self.toi_history.append('obs(my_goal,false,'+str(self.current_step)+').')
-						#print('wrong assumption - goal not reached !!!!! ')
 						self.diagnose()
-						next_action = self.runToIPlanning(self.input_for_planning)
+						abstract_action = self.runToIPlanning(self.input_for_planning)
 
-			if(next_action == None):
+			if(abstract_action == None):
 		    		self.toi_history.append("Goal is futile")
 				finish = True
 				break
@@ -77,63 +72,71 @@ class ControllerToI():
 
 
 			action_observations = []
-			self.toi_history.append('attempt('+next_action+','+str(self.current_step)+').')
+			self.toi_history.append('attempt('+abstract_action+','+str(self.current_step)+').')
 
-			if(next_action[0:4] == 'stop'):
+			if(abstract_action[0:4] == 'stop'):
 				self.number_activities += 1
 				self.number_steps += 1
-			elif(next_action[0:5] == 'start'): pass
+			elif(abstract_action[0:5] == 'start'): pass
 			else:
-				print('                       abstract action: '+ str(next_action))
-				print('                       coarse belief: ') + str(self.belief)
-				refined_location = self.executer.getMyRefinedLocation()
-				answer_set = self.refine(next_action, self.belief, refined_location)
-				plans = answer_set.rstrip().split('\n\n')
-				refined_plan = plans[0]
-				refined_plan = refined_plan.strip('{').strip('}')
-				refined_plan = refined_plan.split(', ')
-				print '                     chosen refiend plan: '
-				print refined_plan
-				for refined_occurence in refined_plan:
-					refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
-					at_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
-					print '                    refined action: ' + refined_action + ' at step ' + str(at_step)
-					if('test' in refined_action):
-						testResult = self.executer.test(refined_action)
-						fluent = refined_action[refined_action.find(',')+1:refined_action.rfind(',')]
-						value = refined_action[refined_action.rfind(',')+1:-1]
-						while testResult == False:
-							real_value = ''
-							if value == 'true': real_value = 'false'
-							elif value == 'false': real_value = 'true'
-							obs = 'obs(' + fluent+','+real_value+',' + str(at_step+1) +').\n'
-							refined_plan = self.addObsAndRunZoomedDomain(obs)
+				print  '  controllerToI                      belief: ' + str(self.belief)
+				print  '  controllerToI                      next abstrac action: ' + abstract_action
+				need_refined_plan = True
+				self.refine(abstract_action, self.belief, self.executer.getMyRefinedLocation())
+				refined_plan_step = 0
+				refined_history_set = Set()
+				while(need_refined_plan):
+					refined_occurrences = self.runZoomedDomain()
+					print ' ControllerToI	refined plan: ' + str(refined_occurrences)
+					need_refined_plan = False
+					if not refined_occurrences:
+						need_refined_plan == False
+						break
+					for refined_occurence in refined_occurrences:
+						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
+						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
+						if occurrence_step != refined_plan_step: continue
 
-							print ' new plan: ' + str(refined_plan)
-					else: self.executer.executeAction(refined_action)
-
-
+						if 'test' in refined_action:
+ 							result, refined_fluent_value = self.executer.test(refined_action)
+							refined_history_set.add('hpd('+refined_action+','+str(refined_plan_step)+').\n')
+							refined_plan_step += 1
+							refined_history_set.add('obs('+refined_fluent_value[0]+','+refined_fluent_value[1]+','+str(refined_plan_step)+').\n')
+							if(result == False):
+								need_refined_plan = True
+								max_steps = refined_plan_step + 6
+								self.addObsZoomedDomain(list(refined_history_set),max_steps)
+								break
+						else:
+							self.executer.executeAction(refined_action)
+							refined_plan_step += 1
+					if(need_refined_plan == False): self.update_belief(abstract_action)
+			action_observation_indexes = self.domain_info.getActionIndexes(abstract_action)
+			goal_observation_indexes = self.getIndexesRelevantToGoal()
+			relevant_observation_indexes = goal_observation_indexes.union(action_observation_indexes)
+			relevant_observations = self.executer.getTheseCoarseObservations(relevant_observation_indexes)
 			self.current_step += 1
-			relevant_observations = action_observations + self.executer.getTheseCoarseObservations(self.getIndexesRelevantToGoal())
 			robot_location = self.belief[self.domain_info.LocationRobot_index]
-			new_obs_list = list(set(self.domain_info.observations_to_obs(relevant_observations,robot_location,self.current_step)))
+			new_obs_list = list(self.domain_info.observations_to_obs_set(relevant_observations,robot_location,self.current_step))
 			self.toi_history = self.toi_history + new_obs_list
-			self.belief_history = self.belief_history + new_obs_list
 			self.diagnose()
-			self.update_belief(next_action)
+
 
 
 		if(self.current_diagnosis != ''): self.toi_history.append(self.current_diagnosis)
 		return (self.toi_history, self.number_activities, self.goal_correction)
 
 
-	def addObsAndRunZoomedDomain(self,obs):
-		self.zoomed_asp_list = self.zoomed_asp_list[:self.zoomed_obs_index] +[obs]+self.zoomed_asp_list[self.zoomed_obs_index+1:]
+	def addObsZoomedDomain(self,obsList,max_steps):
+		self.zoomed_asp_list = self.zoomed_asp_list[:self.zoomed_obs_index]+obsList+self.zoomed_asp_list[self.zoomed_obs_index:]
+		self.zoomed_asp_list[0] = '#const numSteps = ' + str(max_steps) +'.'
 		asp = ''.join(self.zoomed_asp_list)
 		f1 = open(self.zoomed_domain_file, 'w')
 		f1.write(asp)
 		f1.close()
-		raw_input()
+
+	def runZoomedDomain(self):
+		'Running zoomed domain to get refined plan '
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A ',shell=True)
 		plan = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return plan
@@ -142,13 +145,10 @@ class ControllerToI():
 		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
 
 	def getIndexesRelevantToGoal(self):
-		return [self.domain_info.LocationBook1_index, self.domain_info.LocationBook2_index, self.domain_info.In_handBook1_index, self.domain_info.In_handBook2_index]
+		return Set([self.domain_info.LocationBook1_index, self.domain_info.LocationBook2_index, self.domain_info.In_handBook1_index, self.domain_info.In_handBook2_index])
 
 	def runToIPlanning(self,input):
-		next_action = None
-		#print('running ToI planning ')
-
-
+		abstract_action = None
 		current_asp_split = self.preASP_toi_split[:self.toi_beginning_history_index +1] + input + self.preASP_toi_split[self.toi_beginning_history_index +1:]
 		current_asp_split[self.toi_current_step_index +1] = 'current_step('+str(self.current_step)+').'
 		current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
@@ -158,7 +158,7 @@ class ControllerToI():
 		f1 = open(self.asp_toi_file, 'w')
 		f1.write(asp)
 		f1.close()
-
+		print 'creating a ToI Plan'
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_toi_file +' -A ',shell=True)
 		while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and self.number_steps < self.current_step + self.max_plan_length+3):
 			current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
@@ -167,6 +167,8 @@ class ControllerToI():
 			f1 = open(self.asp_toi_file, 'w')
 			f1.write(asp)
 			f1.close()
+			print 'Increasing variable number_steps and creating a ToI Plan'
+
 			#print('Looking for next action (ToI) - number_steps ' + str(number_steps))
 			answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_toi_file +' -A ',shell=True)
 			self.number_steps +=1
@@ -179,13 +181,13 @@ class ControllerToI():
 		self.believes_goal_holds = False
 		for line in split_answer:
 			if("intended_action" in line):
-				next_action = line[16:line.rfind(',')]
+				abstract_action = line[16:line.rfind(',')]
 			#elif("number_unobserved" in line): continue
 			elif("selected_goal_holds" in line):
 				self.believes_goal_holds = True
 			else:
 				self.toi_history.append(line + '.')
-		return next_action
+		return abstract_action
 
 
 
@@ -207,9 +209,9 @@ class ControllerToI():
 		f1.close()
 
 		# running only diagnosis
+		print 'Diagnosing ToI with current obs'
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_toi_diagnosing_file +' -A ',shell=True)
 		answers = answerSet.rstrip().split('\n\n')
-		print "diagnosis"
 
 
 		if self.current_diagnosis in answerSet:
@@ -217,6 +219,7 @@ class ControllerToI():
 				if(self.current_diagnosis in a): chosenAnswer = a
 		else:
 			chosenAnswer = answers[0]
+
 
 	 	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
 		for line in split_diagnosis:
@@ -226,7 +229,9 @@ class ControllerToI():
 			elif("unobserved" in line):
 				newLine = line.replace("unobserved", "occurs") + '.'
 				self.input_for_planning.append(newLine)
-				self.current_diagnosis = line
+				if(self.current_diagnosis != line):
+)					self.update_belief(line[line.find('(')+1:line.rfind(',')])
+					self.current_diagnosis = line
 			elif("selected_goal_holds" in line): pass
 			elif(line == ""): pass
 			else:
@@ -255,28 +260,22 @@ class ControllerToI():
 
 	def update_belief(self, action):
 		if('start' in action or 'stop' in action): return
-		possible_last_action = 'hpd(' +action+', '+ str(self.current_step-1) + ').'
-		input = self.belief_history + [possible_last_action]
-		if(self.current_diagnosis != ''):
-			input.append(self.current_diagnosis.replace('unobserved','hpd')+'.')
-
+		possible_last_action = 'hpd(' +action+', 0).'
+		input = list(self.domain_info.coarseStateToAstractObsSet(self.belief,0)) + [possible_last_action]
 		asp_belief_split = self.preASP_domain_split[:self.history_index_domain_asp] + input + self.preASP_domain_split[self.history_index_domain_asp+1:]
-		asp_belief_split[0] = "#const numSteps = "+ str(self.current_step) + "."
+		asp_belief_split[0] = "#const numSteps = 1."
 		asp = '\n'.join(asp_belief_split)
 		f1 = open(self.asp_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print('Next, checking belief-observations consistency ')
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_belief_file +' -A',shell=True)
 		output = output.rstrip().strip('{').strip('}')
 
 		if 'holds' in output:
-			self.belief_history.append(possible_last_action)
 			self.belief = self.domain_info.abstractAnswerToCoarseState(output)
 
 
-	def setInitialBelief(self):
-		input = self.belief_history
+	def setInitialBelief(self,input):
 		asp_belief_split = self.preASP_domain_split[:self.history_index_domain_asp] + input + self.preASP_domain_split[self.history_index_domain_asp+1:]
 		asp_belief_split[0] = "#const numSteps = "+ str(self.current_step) + "."
 		asp = '\n'.join(asp_belief_split)
@@ -286,14 +285,13 @@ class ControllerToI():
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_belief_file +' -A',shell=True)
 		output = output.rstrip().strip('{').strip('}')
 		self.belief = self.domain_info.abstractAnswerToCoarseState(output)
-		print 'initial belief: ' + str(self.belief)
 
 
 
 	# this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
 	def refine(self,action,belief,refined_location):
-		initial_state = Set([])
-		final_state = Set([])
+		initial_state = Set()
+		final_state = Set()
 		coarse_location = belief[self.domain_info.LocationRobot_index]
 	    # use action and history to figure out the transition (initial_state, action, final_state)
 	    # the location of the robot is relevant for move transitions
@@ -301,36 +299,23 @@ class ControllerToI():
 		if 'move' in action:
 			initial_state.add('coarse_loc(rob1,' + coarse_location + ')')
 			final_state.add('coarse_loc(rob1,' + action_object + ')')
+			#initial_state.add('loc(rob1,'+self.executer.getMyRefinedLocation()+')')
 
 		elif 'pickup' in action:
 			initial_state.add('-coarse_in_hand(rob1,' + action_object + ')')
 			final_state.add('coarse_in_hand(rob1,' + action_object + ')')
 			initial_state.add('coarse_loc(rob1,' + coarse_location + ')')
 			initial_state.add('coarse_loc('+ action_object+','+ coarse_location+')')
+			#initial_state.add('loc(rob1,'+self.executer.getMyRefinedLocation()+')')
+
 	    # the in_hand status of the object is relevant for put_down transitions
 		elif 'put_down' in action:
 			initial_state.add('coarse_in_hand(rob1,' + action_object + ')')
 			final_state.add('-coarse_in_hand(rob1,' + action_object + ')')
 
-		initial_state.add('loc(rob1,'+refined_location+')')
-		refined_location = self.executer.getMyRefinedLocation()
 	    # edit refined_asp to get temporary zoomed_asp file
-		print 'initial state abstrac action: ' + str(initial_state)
-		print 'final state after abstract action: ' + str(final_state)
 		self.zoom(list(initial_state), action, list(final_state))
 
-
-	    # get refined answer set
-		refined_answer = subprocess.check_output('java -jar '+self.sparc_path +' '+ self.zoomed_domain_file + ' -A ',shell=True)
-		if refined_answer == "" : raw_input()
-
-	    # stop running code if refined answer set is empty
-		if refined_answer == '\n':
-			raw_input('No refined answer set, press enter if you wish to continue.\n')
-
-	    # refined_plan = parse answer set
-		refined_plan = refined_answer
-		return refined_plan
 
 	# this action writes a zoomed ASP file
 	def zoom(self,initial_state, action, final_state):
@@ -380,7 +365,7 @@ class ControllerToI():
 			if not condition in final_state: # conditions that change are relevant
 				rel_initial_conditions.append(condition)
 				rel_conditions.append(condition)
-			elif ('rob1' in condition) and ('loc' in condition) and ('pickup' in action): # the robot's location is always relevant for pickup actions
+			elif ('rob1' in condition) and ('loc' in condition): # the robot's location is always relevant for pickup actions
 				rel_initial_conditions.append(condition)
 				rel_conditions.append(condition)
 
@@ -517,7 +502,7 @@ class ControllerToI():
 		for line in original_asp_reader:
 			if line == '%% GOAL GOES HERE\n': # put goal in
 				self.zoomed_asp_list.append(self.goal)
-			elif line == '%% INITIAL STATE GOES HERE\n': # put initial conditions in
+			elif line == '%% HISTORY GOES HERE\n': # put initial conditions in
 				for condition in rel_initial_conditions:
 					if '-' in condition:
 						condition = condition.replace('-', '')
@@ -565,10 +550,8 @@ class ControllerToI():
 			else:
 				line_relevant = True
 
-				#print 'refined action: ' + action + ' irrelevant_sort_names: ' + str(irrelevant_sort_names)
 				for sort in irrelevant_sort_names: # don't include predicates with irrelevant sorts
 					if sort in line:
-						print ' irrelevant line for containing irrelevant sort name '
 						line_relevant = False
 				for const in irrelevant_obj_consts: # don't include attributes with irrelevant object constants
 					if const in line:
@@ -582,7 +565,7 @@ class ControllerToI():
 				if line_relevant:
 					self.zoomed_asp_list.append(line)
 
-		self.zoomed_obs_index = self.zoomed_asp_list.index('%% Initial State:\n') +2
+		self.zoomed_obs_index = self.zoomed_asp_list.index('%% End of History:\n') - 2
 
 		original_asp_reader.close()
 		asp = ''.join(self.zoomed_asp_list)

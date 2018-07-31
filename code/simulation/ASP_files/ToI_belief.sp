@@ -1,4 +1,4 @@
-#const numSteps = 4.
+#const numSteps = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
@@ -151,25 +151,12 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-obs(loc(rob1,library),true,0).
-obs(loc(book1,office2),true,0).
-obs(loc(book2,office1),true,0).
+obs(in_hand(rob1,book2),true,0).
 obs(in_hand(rob1,book1),false,0).
-obs(in_hand(rob1,book2),false,0).
-obs(loc(book1,library),false,2).
-obs(in_hand(rob1,book2),false,2).
-obs(loc(book2,library),false,2).
-obs(in_hand(rob1,book1),false,2).
-obs(loc(book2,library),false,3).
-obs(in_hand(rob1,book1),false,3).
-obs(loc(book1,library),false,3).
-obs(in_hand(rob1,book2),false,3).
-hpd(move(rob1,kitchen), 2).
-obs(in_hand(rob1,book2),false,4).
-obs(in_hand(rob1,book1),false,4).
-obs(loc(book1,kitchen),false,4).
-obs(loc(book2,office1),true,4).
-hpd(move(rob1,office1), 3).
+obs(loc(rob1,library),true,0).
+obs(loc(book1,library),true,0).
+obs(loc(book2,library),true,0).
+hpd(put_down(rob1,book2), 0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display

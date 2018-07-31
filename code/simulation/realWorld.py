@@ -9,8 +9,6 @@ display_marker = 'display'
 
 
 class World(object):
-
-
 	def __init__(self,thisPath,world_initial_state, this_seed, new_domain_info):
 		reader = open(preASP_refined_world_file, 'r')
 		pre_asp = reader.read()
@@ -18,15 +16,15 @@ class World(object):
 		self.pre_asp_split = pre_asp.split('\n')
 		self.history_marker_index = self.pre_asp_split.index(history_marker) + 1
 		self.display_marker_index = self.pre_asp_split.index(display_marker) + 2
-		self.exo_action_happened = True
+		self.exo_action_happened = False
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
 		self.sparcPath = thisPath
 		self.domain_info = new_domain_info
 		random.seed(this_seed)
-		output = self.__runASPDomain(self.domain_info.refinedStateToRefinedObsList(world_initial_state,0))
-		output = output.rstrip().strip('{').strip('}')
+		obs_list = list(self.domain_info.refinedStateToRefinedObsSet(world_initial_state,0))
+		output = self.__runASPDomain(obs_list)
 		self.__updateStateFromAnswer(output)
 
 
@@ -34,8 +32,9 @@ class World(object):
 		self.RefinedState = self.domain_info.refinedAnswerToRefinedState(answer)
 		self.CoarseState = self.domain_info.refinedAnswerToCoarseState(answer)
 
-	def __getActionObservations(self,action,happened):
-		relevant_indexes= Set([])
+
+	def __getRefinedObservations(self,action,happened):
+		relevant_indexes= Set()
 		if(action[0:4] == 'move'):
 			relevant_indexes.add(self.domain_info.LocationRobot_index)
 		if(action == 'pickup(rob1,ref_book1)' or action == '+put_down(rob1,ref_book1)'):
@@ -81,10 +80,9 @@ class World(object):
 		print('realWorld - deleting world ')
 
 	def executeAction(self,action):
-		print ' executing action ' + action
 		happened = False
 		exo_action = ''
-		input = self.domain_info.refinedStateToRefinedObsList(self.RefinedState,0) + ['hpd('+ action +',0).']
+		input = list(self.domain_info.refinedStateToRefinedObsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
 
 		if(self.exo_action_happened == False):
 			exo_action = self.__getRandomExoAction(action)
@@ -92,15 +90,11 @@ class World(object):
 		answer = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
-
 		if(answer == '\n'):
-			print '       nothing happned in real world '
-			happened = False
+			print '                nothing happned in real world '
 			self.history.append(action + "realWorld -  (FAILED) ")
+			raw_input()
 		else:
-			if('test' in action):
-				if 'holds(directly_observed' in answer: self.lastTestResult = True
-				else: self.lastTestResult = False
 			happened = True
 			self.__updateStateFromAnswer(answer)
 			self.history.append(action)
@@ -108,16 +102,24 @@ class World(object):
 				self.history.append(exo_action)
 				self.exo_action_happened = True
 				print('%%%%%%%%% realWorld -      exo_action happened in realWorld.py :  '+exo_action)
-		return (self.__getActionObservations(action, happened))
+	 	return self.__getDirectObservation(answer)
+
+	def __getDirectObservation(self,answer):
+		answer = answer.rstrip().strip('{').strip('}')
+		for entry in answer.split(', '):
+			if 'directly_observed' in entry: return entry
+		return ''
+
+
 
 	def __runASPDomain(self,input):
-		asp_split = self.pre_asp_split[0:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
+		asp_split = self.pre_asp_split[:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
 		asp = '\n'.join(asp_split)
 		f1 = open(asp_Refined_World_file, 'w')
 		f1.write(asp)
 		f1.close()
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
-		return answer
+		return answer.rstrip().strip('{').strip('}')
 
 	def getLastTestResult(self):
 		return self.lastTestResult
@@ -142,6 +144,8 @@ class World(object):
 		for index in indexes:
 			observations.append([index,observableValues[index]])
 		return observations
+
+
 
 
 
