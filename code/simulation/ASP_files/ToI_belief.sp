@@ -151,12 +151,12 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-obs(in_hand(rob1,book2),true,0).
-obs(in_hand(rob1,book1),false,0).
+obs(in_hand(rob1,book1),true,0).
 obs(loc(rob1,library),true,0).
 obs(loc(book1,library),true,0).
+obs(in_hand(rob1,book2),false,0).
 obs(loc(book2,library),true,0).
-hpd(put_down(rob1,book2), 0).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display

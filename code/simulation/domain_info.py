@@ -123,6 +123,20 @@ class DomainInfo():
 			obsSet.add('obs(in_hand(rob1,book2),'+state[self.In_handBook2_index]+','+str(step)+').')
 		return obsSet
 
+	def coarseStateToCoarseObsSet(self,state,step):
+		obsSet = set([])
+		if(state[self.LocationRobot_index] != 'unknown'):
+			obsSet.add('obs(coarse_loc(rob1,'+str(state[self.LocationRobot_index])+'),true,'+str(step)+').')
+		if(state[self.LocationBook1_index] != 'unknown'):
+			obsSet.add('obs(coarse_loc(book1,'+str(state[self.LocationBook1_index])+'),true,'+str(step)+').')
+		if(state[self.LocationBook2_index] != 'unknown'):
+			obsSet.add('obs(coarse_loc(book2,'+str(state[self.LocationBook2_index])+'),true,'+str(step)+').')
+		if(state[self.In_handBook1_index] != 'unknown'):
+			obsSet.add('obs(coarse_in_hand(rob1,book1),'+state[self.In_handBook1_index]+','+str(step)+').')
+		if(state[self.In_handBook2_index] != 'unknown'):
+			obsSet.add('obs(coarse_in_hand(rob1,book2),'+state[self.In_handBook2_index]+','+str(step)+').')
+		return obsSet
+
 	def refinedStateToRefinedObsSet(self,state,step):
 		obsSet = set([])
 		if(state[self.LocationRobot_index] != 'unknown'):
@@ -136,6 +150,15 @@ class DomainInfo():
 		if(state[self.In_handBook2_index] != 'unknown'):
 			obsSet.add('obs(in_hand(rob1,ref_book2),'+state[self.In_handBook2_index]+','+str(step)+').')
 		return obsSet
+
+
+	def indirectObservationsToObsSet(self,indirectObservationsSet,step):
+		newSet = set()
+		for a in indirectObservationsSet:
+			a = a.replace('indirect_observation_at_step','obs').replace('coarse_','')
+			a = a[:a.rfind(',')+1] + str(step) +').'
+			newSet.add(a)
+		return newSet
 
 	def getIndexesRelevantToGoal(self,goal):
 		indexes = Set()

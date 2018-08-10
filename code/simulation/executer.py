@@ -22,23 +22,10 @@ class Executer(object):
 			elif value_test == 'true': real_value = 'false'
 			test_result = False
 		else: real_value = value_test
-		return test_result,  (fluent_test, real_value)
-
-
-	def getLastTestResult(self):
-		return self.lastTestResult
+		return test_result,  direct_observation
 
 	def getTheseCoarseObservations(self,indexes):
 		return self.world.getTheseCoarseObservations(indexes)
-
-	def getRefinedState(self):
-		return self.world.getRefinedState()
-
-	def getCoarseState(self):
-		return self.world.getCoarseState()
-
-	def getMyRefinedLocation(self):
-		return self.world.getRobotsRefinedLocation()
 
 	def getGoalFeedback(self):
 		return self.world.getGoalFeedback()

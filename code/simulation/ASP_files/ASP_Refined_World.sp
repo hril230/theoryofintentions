@@ -18,12 +18,12 @@ sorts
 #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
 #physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
-#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
-#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent) + observed(#robot, #physical_fluent).
+#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
+#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#rob_action = test(#robot, #physical_inertial_fluent, #outcome) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
 #exo_action = exo_move(#object,#place).
 #action = #rob_action + #exo_action.
 
@@ -78,6 +78,9 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 % Only one object can be held at any time.
 -holds(in_hand(R, OP2), I) :- holds(in_hand(R, OP1), I), OP1!=OP2.
 
+-holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
+-holds(coarse_in_hand(R, OP2), I) :- holds(coarse_in_hand(R, OP1), I), OP1!=OP2.
+
 % Axioms relating coarse-resolution attributes and fine-resolution counterparts
 holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
 holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
@@ -117,8 +120,8 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(can_be_tested(rob1, loc(T, C)), I) :- holds(loc(rob1, C), I).
-holds(can_be_tested(rob1, in_hand(rob1, OP)), I).
+holds(can_be_tested(rob1, loc(T, C), V), I) :- holds(loc(rob1, C), I).
+holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
@@ -131,8 +134,13 @@ holds(may_discover(rob1, coarse_in_hand(rob1, O), true), I) :- -holds(indirectly
 holds(directly_observed(rob1, F, undet), I) :- not holds(directly_observed(rob1, F, true), I), not holds(directly_observed(rob1, F, false), I).
 holds(observed(rob1, F, O), I) :- holds(directly_observed(rob1, F, O), I).
 holds(observed(rob1, F, O), I) :- holds(indirectly_observed(rob1, F, O), I).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
+holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), comp(Z, T), holds(directly_observed(rob1, loc(Z, C), undet), I).
 
-
+-holds(indirectly_observed(R,F,O),I) :- not holds(indirectly_observed(R,F,O),I).
+-holds(may_discover(R,F,B),I) :- not holds(may_discover(R,F,B),I).
+-holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, true), I).
+-holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, false), I).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -219,16 +227,20 @@ comp(ref_book2, book2).
 
 
 
-%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%
 %% History:
-%%%%%%%%%%%%
-%% *_*_*
+%%%%%%%%%%%%%%%%%
+%% HISTORY GOES HERE
 obs(in_hand(rob1,ref_book2),false,0).
-obs(in_hand(rob1,ref_book1),false,0).
+obs(loc(ref_book1,c2),true,0).
 obs(loc(ref_book2,c4),true,0).
-obs(loc(ref_book1,c4),true,0).
-obs(loc(rob1,c4),true,0).
-hpd(test(rob1,in_hand(rob1,ref_book2),false),0).
+obs(in_hand(rob1,ref_book1),true,0).
+obs(loc(rob1,c2),true,0).
+
+%%%%%%%%%%%%%%%%%
+%% End of History:
+%%%%%%%%%%%%%%%%%
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

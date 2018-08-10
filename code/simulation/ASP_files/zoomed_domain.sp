@@ -5,8 +5,8 @@ sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #robot = {rob1}.
-#coarse_object = {book2}.
-#object = {ref_book2}.
+#coarse_object = {book1}.
+#object = {ref_book1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
 
@@ -16,8 +16,8 @@ sorts
 #physical_inertial_fluent = in_hand(#robot,#object).
 #physical_defined_fluent = coarse_in_hand(#robot,#coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
-#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
-#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent) + observed(#robot, #physical_fluent).
+#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
+#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
@@ -62,6 +62,8 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 % Only one object can be held at any time.
 -holds(in_hand(R, OP2), I) :- holds(in_hand(R, OP1), I), OP1!=OP2.
 
+-holds(coarse_in_hand(R, OP2), I) :- holds(coarse_in_hand(R, OP1), I), OP1!=OP2.
+
 % Axioms relating coarse-resolution attributes and fine-resolution counterparts
 holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
 -holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
@@ -88,7 +90,7 @@ holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(can_be_tested(rob1, in_hand(rob1, OP)), I).
+holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
@@ -98,6 +100,17 @@ holds(may_discover(rob1, coarse_in_hand(rob1, O), true), I) :- -holds(indirectly
 holds(directly_observed(rob1, F, undet), I) :- not holds(directly_observed(rob1, F, true), I), not holds(directly_observed(rob1, F, false), I).
 holds(observed(rob1, F, O), I) :- holds(directly_observed(rob1, F, O), I).
 holds(observed(rob1, F, O), I) :- holds(indirectly_observed(rob1, F, O), I).
+
+
+
+-holds(indirectly_observed(R,F,O),I) :- not holds(indirectly_observed(R,F,O),I).
+-holds(may_discover(R,F,B),I) :- not holds(may_discover(R,F,B),I).
+-holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, true), I).
+-holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, false), I).
+
+
+
+
 
 % Make sure the outcome of any concrete action is tested
 occurs(test(rob1, F, true), I) :- -holds(F, I-1), holds(F, I), #physical_inertial_fluent(F).
@@ -160,7 +173,7 @@ something_happened(I) :- occurs(A, I).
 
 
 
-comp(ref_book2, book2).
+comp(ref_book1, book1).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -169,13 +182,13 @@ comp(ref_book2, book2).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- -holds(coarse_in_hand(rob1,book2),I).
+goal(I) :- -holds(coarse_in_hand(rob1,book1),I).
 
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(in_hand(rob1,ref_book2), 0).
+holds(in_hand(rob1,ref_book1), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
