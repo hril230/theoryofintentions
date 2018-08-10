@@ -43,9 +43,10 @@ def runAndWrite(initial_conditions_index):
 
 
 	known_world = my_world.getCoarseState()
+	robot_refined_location = my_world.getRobotRefinedLocation()
 
 	print 'World coarse initial state: ' + str(known_world)
-	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, known_world, goal, max_plan_length)
+	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, known_world, goal, max_plan_length)
 
 	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.run()
 
@@ -61,7 +62,8 @@ def createConditionsAndRun():
 
 	controlled_run = True
 	controlled_run_conditions = random.randrange(1,97,1)
-	controlled_run_conditions = 47
+	controlled_run_conditions = 1
+	#controlled_run_conditions = 47
 
 	#Cases when rob1 is holding book1 (16 possible combinations)
 	for robot_coarse_location_as_cells in coarse_locations_as_cells:

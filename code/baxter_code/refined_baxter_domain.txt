@@ -23,7 +23,7 @@ ZOOM DEFINED FLUENTS: #physical_defined_fluent = coarse_loc(#coarse_thing, #coar
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-ZOOM ACTIONS: #action = test(#robot, #physical_inertial_fluent, #outcome) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+ZOOM ACTIONS: #action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
 
 ZOOM THIS SORT OF SORTS: #refined_component = #place + #object.
 ZOOM THIS SORT OF SORTS: #coarse_component = #coarse_place + #coarse_object.

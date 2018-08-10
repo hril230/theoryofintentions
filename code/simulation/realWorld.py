@@ -4,7 +4,7 @@ import random
 preASP_refined_world_file = 'simulation/pre_ASP_files/preASP_refined_world.txt'
 asp_World_file = 'simulation/ASP_files/ASP_World.sp'
 asp_Refined_World_file = 'simulation/ASP_files/ASP_Refined_World.sp'
-history_marker = '%% *_*_*'
+history_marker = '%% HISTORY GOES HERE'
 display_marker = 'display'
 
 
@@ -16,7 +16,7 @@ class World(object):
 		self.pre_asp_split = pre_asp.split('\n')
 		self.history_marker_index = self.pre_asp_split.index(history_marker) + 1
 		self.display_marker_index = self.pre_asp_split.index(display_marker) + 2
-		self.exo_action_happened = False
+		self.exo_action_happened = True
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
@@ -24,6 +24,7 @@ class World(object):
 		self.domain_info = new_domain_info
 		random.seed(this_seed)
 		obs_list = list(self.domain_info.refinedStateToRefinedObsSet(world_initial_state,0))
+		print('updating world state from initial state in ASP: ')
 		output = self.__runASPDomain(obs_list)
 		self.__updateStateFromAnswer(output)
 
@@ -82,18 +83,23 @@ class World(object):
 	def executeAction(self,action):
 		happened = False
 		exo_action = ''
-		input = list(self.domain_info.refinedStateToRefinedObsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
 
-		if(self.exo_action_happened == False):
-			exo_action = self.__getRandomExoAction(action)
-			if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
+		################################## for testing proposes only ##################################
+		if('test(rob1,loc(ref_book1' in action and self.RefinedState[self.domain_info.LocationBook1_index]!='c1'):
+			self.executeAction('exo_move(ref_book1,c1)')
+			print('%%%%%%%%% realWorld -      exo_action happened in realWorld.py : exo_move(ref_book1,c1)')
+		######################################################################################################
+
+		input = list(self.domain_info.refinedStateToRefinedObsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
+		if(self.exo_action_happened == False): exo_action = self.__getRandomExoAction(action)
+		if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
+		print( 'executing action in real world: ' + action)
 		answer = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
 		if(answer == '\n'):
 			print '                nothing happned in real world '
 			self.history.append(action + "realWorld -  (FAILED) ")
-			raw_input()
 		else:
 			happened = True
 			self.__updateStateFromAnswer(answer)
@@ -121,18 +127,6 @@ class World(object):
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
 		return answer.rstrip().strip('{').strip('}')
 
-	def getLastTestResult(self):
-		return self.lastTestResult
-
-	def getRefinedState(self):
-		return self.RefinedState
-	def getCoarseState(self):
-		return self.CoarseState
-	def getRobotsRefinedLocation(self):
-		return self.RefinedState[self.domain_info.LocationRobot_index]
-	def getRobotsCoarseLocation(self):
-		return self.CoarseState[self.domain_info.LocationRobot_index]
-
 	def getTheseCoarseObservations(self,indexes):
 		observableValues = list(self.CoarseState)
 		robotLocation = self.CoarseState[self.domain_info.LocationRobot_index]
@@ -144,10 +138,6 @@ class World(object):
 		for index in indexes:
 			observations.append([index,observableValues[index]])
 		return observations
-
-
-
-
 
 	def achievedGoal(self):
 		if(self.CoarseState[self.domain_info.LocationBook1_index] != 'library'): return 'false'
@@ -168,3 +158,9 @@ class World(object):
 
 	def getExecutedSteps(self):
 		return self.executedSteps
+
+	def getCoarseState(self):
+		return self.CoarseState
+
+	def getRobotRefinedLocation(self):
+		return self.RefinedState[self.domain_info.LocationRobot_index]
