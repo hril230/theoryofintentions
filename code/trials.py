@@ -4,7 +4,6 @@ from simulation.realWorld import World
 from controllerTraditionalPlanning import ControllerTraditionalPlanning
 from controllerToI import ControllerToI
 from simulation.executer import Executer
-import subprocess
 import  csv
 import random
 from simulation.domain_info import DomainInfo
@@ -22,7 +21,6 @@ csvfile = None
 writer = None
 initial_state = []
 
-
 coarse_locations = DomainInfo.CoarseLocations
 coarse_locations_as_cells = DomainInfo.CoarseLocationsAsCells
 boolean = ['true', 'false']
@@ -31,8 +29,8 @@ boolean = ['true', 'false']
 run_count = 0
 
 def runAndWrite(initial_conditions_index):
-	print 'initial_conditions_index: ' +str(initial_conditions_index)
-	print 'World refined initial state: ' + str(initial_state)
+	print 'Trials: Initial_conditions_index: ' +str(initial_conditions_index)
+	print 'Trials: World refined initial state: ' + str(initial_state)
 
 	domain_info = DomainInfo()
 
@@ -45,25 +43,20 @@ def runAndWrite(initial_conditions_index):
 	known_world = my_world.getCoarseState()
 	robot_refined_location = my_world.getRobotRefinedLocation()
 
-	print 'World coarse initial state: ' + str(known_world)
+	print 'Trials: World coarse initial state: ' + str(known_world)
 	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, known_world, goal, max_plan_length)
 
 	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.run()
 
 
-
-
-
 def createConditionsAndRun():
 	global initial_state
-
-
 	initial_conditions_index = 0
 
-	controlled_run = True
-	controlled_run_conditions = random.randrange(1,97,1)
-	controlled_run_conditions = 1
-	#controlled_run_conditions = 47
+	controlled_run = False
+	#controlled_run_conditions = 5
+	#controlled_run_conditions = random.randrange(1,97,1)
+
 
 	#Cases when rob1 is holding book1 (16 possible combinations)
 	for robot_coarse_location_as_cells in coarse_locations_as_cells:

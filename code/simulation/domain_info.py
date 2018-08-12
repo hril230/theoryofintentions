@@ -109,56 +109,76 @@ class DomainInfo():
 					if(split_fluent[1] == 'book2'): state[self.In_handBook2_index] = 'true'
 		return state
 
-	def coarseStateToAstractObsSet(self,state,step):
-		obsSet = set([])
-		if(state[self.LocationRobot_index] != 'unknown'):
-			obsSet.add('obs(loc(rob1,'+str(state[self.LocationRobot_index])+'),true,'+str(step)+').')
-		if(state[self.LocationBook1_index] != 'unknown'):
-			obsSet.add('obs(loc(book1,'+str(state[self.LocationBook1_index])+'),true,'+str(step)+').')
-		if(state[self.LocationBook2_index] != 'unknown'):
-			obsSet.add('obs(loc(book2,'+str(state[self.LocationBook2_index])+'),true,'+str(step)+').')
-		if(state[self.In_handBook1_index] != 'unknown'):
-			obsSet.add('obs(in_hand(rob1,book1),'+state[self.In_handBook1_index]+','+str(step)+').')
-		if(state[self.In_handBook2_index] != 'unknown'):
-			obsSet.add('obs(in_hand(rob1,book2),'+state[self.In_handBook2_index]+','+str(step)+').')
-		return obsSet
 
-	def coarseStateToCoarseObsSet(self,state,step):
-		obsSet = set([])
+	def coarseStateToAstractHoldsSet(self,state,step):
+		holdsSet = set([])
 		if(state[self.LocationRobot_index] != 'unknown'):
-			obsSet.add('obs(coarse_loc(rob1,'+str(state[self.LocationRobot_index])+'),true,'+str(step)+').')
+			holdsSet.add('holds(loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
 		if(state[self.LocationBook1_index] != 'unknown'):
-			obsSet.add('obs(coarse_loc(book1,'+str(state[self.LocationBook1_index])+'),true,'+str(step)+').')
+			holdsSet.add('holds(loc(book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
 		if(state[self.LocationBook2_index] != 'unknown'):
-			obsSet.add('obs(coarse_loc(book2,'+str(state[self.LocationBook2_index])+'),true,'+str(step)+').')
-		if(state[self.In_handBook1_index] != 'unknown'):
-			obsSet.add('obs(coarse_in_hand(rob1,book1),'+state[self.In_handBook1_index]+','+str(step)+').')
-		if(state[self.In_handBook2_index] != 'unknown'):
-			obsSet.add('obs(coarse_in_hand(rob1,book2),'+state[self.In_handBook2_index]+','+str(step)+').')
-		return obsSet
+			holdsSet.add('holds(loc(book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		if(state[self.In_handBook1_index] == 'true'):
+			holdsSet.add('holds(in_hand(rob1,book1),'+str(step)+').')
+		elif(state[self.In_handBook1_index] == 'false'):
+			holdsSet.add('-holds(in_hand(rob1,book1),'+str(step)+').')
+		if(state[self.In_handBook2_index] == 'true'):
+			holdsSet.add('holds(in_hand(rob1,book2),'+str(step)+').')
+		elif(state[self.In_handBook2_index] == 'false'):
+			holdsSet.add('-holds(in_hand(rob1,book2),'+str(step)+').')
+		return holdsSet
 
-	def refinedStateToRefinedObsSet(self,state,step):
-		obsSet = set([])
+
+	def coarseStateToCoarseHoldsSet(self,state,step):
+		holdsSet = set([])
 		if(state[self.LocationRobot_index] != 'unknown'):
-			obsSet.add('obs(loc(rob1,'+str(state[self.LocationRobot_index])+'),true,'+str(step)+').')
+			holdsSet.add('holds(coarse_loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
 		if(state[self.LocationBook1_index] != 'unknown'):
-			obsSet.add('obs(loc(ref_book1,'+str(state[self.LocationBook1_index])+'),true,'+str(step)+').')
+			holdsSet.add('holds(coarse_loc(book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
 		if(state[self.LocationBook2_index] != 'unknown'):
-			obsSet.add('obs(loc(ref_book2,'+str(state[self.LocationBook2_index])+'),true,'+str(step)+').')
-		if(state[self.In_handBook1_index] != 'unknown'):
-			obsSet.add('obs(in_hand(rob1,ref_book1),'+state[self.In_handBook1_index]+','+str(step)+').')
-		if(state[self.In_handBook2_index] != 'unknown'):
-			obsSet.add('obs(in_hand(rob1,ref_book2),'+state[self.In_handBook2_index]+','+str(step)+').')
-		return obsSet
+			holdsSet.add('holds(coarse_loc(book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		if(state[self.In_handBook1_index] == 'true'):
+			holdsSet.add('holds(coarse_in_hand(rob1,book1),'+str(step)+').')
+		if(state[self.In_handBook1_index] == 'false'):
+			holdsSet.add('-holds(coarse_in_hand(rob1,book1),'+str(step)+').')
+		if(state[self.In_handBook2_index] == 'true'):
+			holdsSet.add('holds(coarse_in_hand(rob1,book2),'+str(step)+').')
+		if(state[self.In_handBook2_index] == 'false'):
+			holdsSet.add('-holds(coarse_in_hand(rob1,book2),'+str(step)+').')
+		return holdsSet
 
+
+	def refinedStateToRefinedHoldsSet(self,state,step):
+		holdsSet = set([])
+		if(state[self.LocationRobot_index] != 'unknown'):
+			holdsSet.add('holds(loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
+		if(state[self.LocationBook1_index] != 'unknown'):
+			holdsSet.add('holds(loc(ref_book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
+		if(state[self.LocationBook2_index] != 'unknown'):
+			holdsSet.add('holds(loc(ref_book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		if(state[self.In_handBook1_index] == 'true'):
+			holdsSet.add('holds(in_hand(rob1,ref_book1),'+str(step)+').')
+		if(state[self.In_handBook1_index] == 'false'):
+			holdsSet.add('-holds(in_hand(rob1,ref_book1),'+str(step)+').')
+		if(state[self.In_handBook2_index] == 'true'):
+			holdsSet.add('holds(in_hand(rob1,ref_book2),'+str(step)+').')
+		if(state[self.In_handBook2_index] == 'false'):
+			holdsSet.add('-holds(in_hand(rob1,ref_book2),'+str(step)+').')
+		return holdsSet
 
 	def indirectObservationsToObsSet(self,indirectObservationsSet,step):
 		newSet = set()
 		for a in indirectObservationsSet:
-			a = a.replace('indirect_observation_at_step','obs').replace('coarse_','')
-			a = a[:a.rfind(',')+1] + str(step) +').'
+			#a = a.replace('indirect_observation_at_step','obs').replace('coarse_','')
+			a = a.replace('holds(indirectly_observed(rob1,', 'obs(').replace('coarse_','')
+			a = a[:a.rfind('),')] + ','+str(step) +').'
 			newSet.add(a)
 		return newSet
+
+	def directObservationToRefinedObs(self,directObservation,step):
+		directObservation = directObservation.replace('holds(directly_observed(rob1,','obs(')
+		directObservation = directObservation[:directObservation.rfind('),')]+','+str(step)+').\n'
+		return directObservation
 
 	def getIndexesRelevantToGoal(self,goal):
 		indexes = Set()

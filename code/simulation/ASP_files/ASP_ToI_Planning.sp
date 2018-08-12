@@ -1,6 +1,11 @@
 #const numSteps = 5. % maximum number of steps.
 #const max_len = 4. % maximum activity_length of an activity.
 #const max_name = 1.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This ASP is used to plan with ToI and to Diagnose with ToI. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -579,17 +584,17 @@ current_step(2).
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% #_#_# beginning
-obs(in_hand(rob1,book1),true,0).
-obs(loc(rob1,library),true,0).
-obs(loc(book1,library),true,0).
-obs(in_hand(rob1,book2),false,0).
-obs(loc(book2,library),true,0).
 hpd(select(my_goal),true,0).
+attempt(start(1),1).
 activity_goal(1,my_goal).
 activity_component(1,1,put_down(rob1,book1)).
 activity_length(1,1).
-attempt(start(1),1).
-explaining(2).
+explanation(0,2).
+holds(loc(rob1,library),0).
+holds(loc(book1,library),0).
+holds(loc(book2,library),0).
+holds(in_hand(rob1,book1),0).
+-holds(in_hand(rob1,book2),0).
 %% #_#_# end
 
 
@@ -610,3 +615,6 @@ intended_action.
 number_unobserved.
 selected_goal_holds.
 unobserved.
+holds(loc(A,B),0).
+holds(in_hand(R,B),0).
+-holds(in_hand(R,B),0).

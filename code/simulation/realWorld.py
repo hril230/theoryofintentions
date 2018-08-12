@@ -23,7 +23,7 @@ class World(object):
 		self.sparcPath = thisPath
 		self.domain_info = new_domain_info
 		random.seed(this_seed)
-		obs_list = list(self.domain_info.refinedStateToRefinedObsSet(world_initial_state,0))
+		obs_list = list(self.domain_info.refinedStateToRefinedHoldsSet(world_initial_state,0))
 		print('updating world state from initial state in ASP: ')
 		output = self.__runASPDomain(obs_list)
 		self.__updateStateFromAnswer(output)
@@ -33,20 +33,6 @@ class World(object):
 		self.RefinedState = self.domain_info.refinedAnswerToRefinedState(answer)
 		self.CoarseState = self.domain_info.refinedAnswerToCoarseState(answer)
 
-
-	def __getRefinedObservations(self,action,happened):
-		relevant_indexes= Set()
-		if(action[0:4] == 'move'):
-			relevant_indexes.add(self.domain_info.LocationRobot_index)
-		if(action == 'pickup(rob1,ref_book1)' or action == '+put_down(rob1,ref_book1)'):
-			relevant_indexes.add(self.domain_info.In_handBook1_index)
-			relevant_indexes.add(self.domain_info.LocationBook1_index)
-
-		if(action == 'pickup(rob1,ref_book2)' or action == '+put_down(rob1,ref_book2)'):
-			relevant_indexes.add(self.domain_info.In_handBook2_index)
-			relevant_indexes.add(self.domain_info.LocationBook2_index)
-
-		return self.getTheseCoarseObservations(relevant_indexes)
 
 	def __getExecutionTimeUnits(self,action):
 		if 'move' in action: return 1
@@ -76,24 +62,22 @@ class World(object):
 			exo_action =  'exo_move(ref_book2,' +newRefinedLocation+ ')'
 		return exo_action
 
-
 	def __del__(self):
-		print('realWorld - deleting world ')
+		print('realWorld - deleting world  #############################################################################################################\n\n\n\n ')
 
 	def executeAction(self,action):
 		happened = False
 		exo_action = ''
 
 		################################## for testing proposes only ##################################
-		if('test(rob1,loc(ref_book1' in action and self.RefinedState[self.domain_info.LocationBook1_index]!='c1'):
+		if('test(rob1,loc(ref_book1' in action and self.RefinedState[self.domain_info.LocationBook1_index]!='c1' and self.RefinedState[self.domain_info.In_handBook1_index] == 'false'):
 			self.executeAction('exo_move(ref_book1,c1)')
 			print('%%%%%%%%% realWorld -      exo_action happened in realWorld.py : exo_move(ref_book1,c1)')
 		######################################################################################################
 
-		input = list(self.domain_info.refinedStateToRefinedObsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
+		input = list(self.domain_info.refinedStateToRefinedHoldsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
 		if(self.exo_action_happened == False): exo_action = self.__getRandomExoAction(action)
 		if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
-		print( 'executing action in real world: ' + action)
 		answer = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
@@ -116,28 +100,15 @@ class World(object):
 			if 'directly_observed' in entry: return entry
 		return ''
 
-
-
 	def __runASPDomain(self,input):
 		asp_split = self.pre_asp_split[:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
 		asp = '\n'.join(asp_split)
 		f1 = open(asp_Refined_World_file, 'w')
 		f1.write(asp)
 		f1.close()
+		print '\nRealWorld: updating state'
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
 		return answer.rstrip().strip('{').strip('}')
-
-	def getTheseCoarseObservations(self,indexes):
-		observableValues = list(self.CoarseState)
-		robotLocation = self.CoarseState[self.domain_info.LocationRobot_index]
-		observations = []
-		if(self.CoarseState[self.domain_info.LocationBook1_index] != robotLocation):
-			observableValues[self.domain_info.LocationBook1_index] = 'unknown'
-		if(self.CoarseState[self.domain_info.LocationBook2_index] != robotLocation):
-			observableValues[self.domain_info.LocationBook2_index] = 'unknown'
-		for index in indexes:
-			observations.append([index,observableValues[index]])
-		return observations
 
 	def achievedGoal(self):
 		if(self.CoarseState[self.domain_info.LocationBook1_index] != 'library'): return 'false'
@@ -155,9 +126,6 @@ class World(object):
 
 	def getExecutionTimeUnits(self):
 		return self.executionTimeUnits
-
-	def getExecutedSteps(self):
-		return self.executedSteps
 
 	def getCoarseState(self):
 		return self.CoarseState

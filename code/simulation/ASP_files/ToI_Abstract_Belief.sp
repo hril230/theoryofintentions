@@ -1,5 +1,10 @@
 #const numSteps = 1.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This ASP is used to update the abstract belief of the ControllerToI.
+%% It does not have planning module.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,11 +156,11 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-obs(in_hand(rob1,book1),true,0).
-obs(loc(rob1,library),true,0).
-obs(loc(book1,library),true,0).
-obs(in_hand(rob1,book2),false,0).
-obs(loc(book2,library),true,0).
+holds(loc(rob1,library),0).
+holds(loc(book1,library),0).
+holds(loc(book2,library),0).
+holds(in_hand(rob1,book1),0).
+-holds(in_hand(rob1,book2),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

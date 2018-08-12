@@ -1,5 +1,11 @@
 #const numSteps = 6. % maximum number of steps.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This ASP is used for zooming. This ASP contains planning.
+%% It does not have understanding of exogeneous actions, and it
+%% does not contain diagnosis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,8 +22,8 @@ sorts
 #physical_inertial_fluent = in_hand(#robot,#object).
 #physical_defined_fluent = coarse_in_hand(#robot,#coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
-#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
-#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome).
+#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
+#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
@@ -170,7 +176,6 @@ something_happened(I) :- occurs(A, I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Attributes.
-
 
 
 comp(ref_book1, book1).

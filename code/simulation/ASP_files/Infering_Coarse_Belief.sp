@@ -1,4 +1,10 @@
-#const numSteps = 2.
+#const numSteps = 10.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This ASP is used for inferring indirect observations from the direct observations set
+%% collected during the execution of a refined plan. This ASP does not contain planning
+%% or diagnosis. It does not have understanding of exogeneous actions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -18,8 +24,8 @@ sorts
 #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
 #physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
-#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
-#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome).
+#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
+#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
@@ -133,6 +139,7 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 -holds(may_discover(R,F,B),I) :- not holds(may_discover(R,F,B),I).
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, true), I).
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, false), I).
+-holds(directly_observed(R,loc(O,C1),true),I) :- holds(directly_observed(R,loc(O,C2),true),I), C1!=C2.
 
 
 %%% predicate used for output proposes
@@ -176,9 +183,6 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Attributes.
-
-next_to(c1, c2).
-next_to(c1, c3).
 next_to(c1, c2).
 next_to(c1, c3).
 next_to(c2, c4).
@@ -193,10 +197,12 @@ next_to(c10, c12).
 next_to(c11, c12).
 next_to(c13, c14).
 next_to(c13, c15).
-next_to(c14, c15).
+next_to(c14, c16).
+next_to(c15, c16).
 next_to(c4, c7).
 next_to(c8, c11).
 next_to(c12, c15).
+
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
@@ -226,13 +232,29 @@ comp(ref_book2, book2).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-obs(coarse_in_hand(rob1,book1),false,0).
-obs(coarse_in_hand(rob1,book2),false,0).
-obs(coarse_loc(book2,library),true,0).
-obs(coarse_loc(rob1,library),true,0).
-obs(coarse_loc(book1,library),true,0).
-holds(loc(rob1,c3),0).
-holds(directly_observed(rob1,in_hand(rob1,ref_book1),false),2).
+-holds(coarse_in_hand(rob1,book2),0).
+holds(coarse_loc(book1,kitchen),0).
+holds(coarse_loc(book2,library),0).
+-holds(coarse_in_hand(rob1,book1),0).
+holds(coarse_loc(rob1,kitchen),0).
+holds(loc(rob1,c8),0).
+holds(directly_observed(rob1,loc(ref_book1,c8),false),1).
+holds(directly_observed(rob1,loc(ref_book2,c5),false),6).
+holds(directly_observed(rob1,loc(rob1,c5),true),6).
+holds(directly_observed(rob1,loc(ref_book2,c5),false),7).
+holds(directly_observed(rob1,loc(ref_book1,c5),false),7).
+holds(directly_observed(rob1,loc(ref_book2,c8),false),1).
+holds(directly_observed(rob1,loc(ref_book2,c6),false),4).
+holds(directly_observed(rob1,loc(ref_book1,c6),false),4).
+holds(directly_observed(rob1,loc(ref_book1,c7),false),10).
+holds(directly_observed(rob1,loc(ref_book2,c7),false),10).
+holds(directly_observed(rob1,loc(rob1,c7),true),9).
+holds(directly_observed(rob1,loc(ref_book1,c6),false),3).
+holds(directly_observed(rob1,loc(ref_book2,c6),false),3).
+holds(directly_observed(rob1,loc(rob1,c6),true),3).
+holds(directly_observed(rob1,loc(ref_book2,c7),false),9).
+holds(directly_observed(rob1,loc(ref_book1,c7),false),9).
+holds(directly_observed(rob1,loc(ref_book1,c5),false),6).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
@@ -243,4 +265,4 @@ holds(directly_observed(rob1,in_hand(rob1,ref_book1),false),2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-indirect_observation_at_step.
+holds(indirectly_observed(rob1,F,O),numSteps).
