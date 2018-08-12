@@ -41,10 +41,11 @@ def runAndWrite(initial_conditions_index):
 
 
 	known_world = my_world.getCoarseState()
+	initial_conditions = list(domain_info.coarseStateToAstractHoldsSet(known_world,0))
 	robot_refined_location = my_world.getRobotRefinedLocation()
 
-	print 'Trials: World coarse initial state: ' + str(known_world)
-	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, known_world, goal, max_plan_length)
+	print 'Trials: World coarse initial state: ' + str(initial_conditions)
+	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
 
 	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.run()
 
