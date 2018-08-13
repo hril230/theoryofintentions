@@ -611,32 +611,44 @@ holds(my_goal,I) :- holds(loc(green_box,zoneG),I), -holds(in_hand(rob1,green_box
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% *_*_*
-current_step(2).
+current_step(6).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% #_#_# beginning
-obs(in_hand(rob1,green_box),false,0).
-obs(loc(blue_box,zoneR),true,0).
-obs(loc(rob1,above),true,0).
-obs(loc(green_box,zoneR),true,0).
-obs(in_hand(rob1,blue_box),false,0).
+obs(loc(green_box,zoneG),true,5).
+obs(loc(green_box,zoneG),true,6).
+obs(in_hand(rob1,green_box),true,4).
+obs(in_hand(rob1,green_box),false,6).
+obs(loc(green_box,zoneR),true,3).
+obs(loc(green_box,zoneR),true,4).
+obs(loc(rob1,zoneR),true,3).
+obs(loc(rob1,zoneG),true,5).
 hpd(select(my_goal),true,0).
+hpd(start(1),true,1).
+hpd(move(rob1,zoneR),true,2).
+hpd(pickup(rob1,green_box),true,3).
+hpd(move(rob1,zoneG),true,4).
+hpd(put_down(rob1,green_box),true,5).
+attempt(start(1),1).
+attempt(move(rob1,zoneR),2).
+attempt(pickup(rob1,green_box),3).
+attempt(move(rob1,zoneG),4).
+attempt(put_down(rob1,green_box),5).
 activity_goal(1,my_goal).
 activity_component(1,1,move(rob1,zoneR)).
 activity_component(1,2,pickup(rob1,green_box)).
 activity_component(1,3,move(rob1,zoneG)).
 activity_component(1,4,put_down(rob1,green_box)).
 activity_length(1,4).
-attempt(start(1),1).
-hpd(start(1),true,1).
-obs(in_hand(rob1,blue_box),false,2).
-obs(in_hand(rob1,green_box),false,2).
-obs(loc(green_box,above),false,2).
-obs(loc(blue_box,above),false,2).
-explaining(2).
+holds(next_available_name(1),0).
+holds(loc(green_box,zoneR),0).
+holds(loc(rob1,above),0).
+holds(loc(blue_box,zoneR),0).
+holds(current_action_index(1,neg1),0).
+explanation(0,6).
 %% #_#_# end
 
 
@@ -658,6 +670,7 @@ intended_action.
 number_unobserved.
 selected_goal_holds.
 unobserved.
+holds(F,0).
 
 
 

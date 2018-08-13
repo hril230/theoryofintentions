@@ -638,6 +638,7 @@ intended_action.
 number_unobserved.
 selected_goal_holds.
 unobserved.
+holds(F,0).
 
 
 

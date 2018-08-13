@@ -1,11 +1,16 @@
 #const numSteps = 1.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This ASP is used to update the abstract belief of the ControllerToI.
+%% It does not have planning module.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #room = {zoneR, zoneG, zoneY, above}.
 #robot = {rob1}.
-#object = {blue_box, green_box}.
+#object = {green_box, blue_box}.
 #thing = #object + #robot.
 
 #boolean = {true, false}.
@@ -80,8 +85,7 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 -occurs(pickup(R, O1), I) :- holds(in_hand(R, O2), I).
 
 %% Cannot pick up an object if you are not in the same room.
--occurs(pickup(R, O), I) :- holds(loc(R, L1), I),
-			    holds(loc(O, L2), I), L1 != L2.
+-occurs(pickup(R, O), I) :- holds(loc(R, L), I), not holds(loc(O, L), I).
 
 %% An exogenous move of an object cannot be done to the same location.
 -occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
@@ -89,15 +93,8 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% An exogenous move of an object cannot happen if it is being in hand
 -occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
-%% Cannot move back to the 'above' location
+%% Cannot move back to the above location
 -occurs(move(R, above), I).
--occurs(exo_move(O, above), I).
-
-%%%%%%%%%%%%%%
-%% Defaults %%
-%%%%%%%%%%%%%%
-holds(loc(O,zoneR),0) :- #object(O), not -holds(loc(O,zoneR),0).
-holds(loc(O,zoneG),0) :- #object(O), -holds(loc(O,zoneR),0), not -holds(loc(O,zoneG),0).
 
 
 
@@ -146,9 +143,9 @@ diag(A,I) :- occurs(A,I),
 %% Attributes.
 next_to(zoneR,zoneG).
 next_to(zoneG,zoneY).
-next_to(zoneR, above).
-next_to(zoneG, above).
-next_to(zoneY, above).
+next_to(above,zoneR).
+next_to(above,zoneG).
+next_to(above,zoneY).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,11 +154,15 @@ next_to(zoneY, above).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-obs(loc(blue_box,zoneR),true,0).
-obs(in_hand(rob1,green_box),false,0).
-obs(loc(rob1,above),true,0).
-obs(loc(green_box,zoneR),true,0).
-obs(in_hand(rob1,blue_box),false,0).
+holds(loc(green_box,zoneG),0).
+holds(loc(blue_box,zoneR),0).
+holds(loc(rob1,zoneG),0).
+holds(in_hand(rob1,green_box),0).
+-holds(in_hand(rob1,blue_box),0).
+hpd(put_down(rob1,green_box), 0).
+obs(in_hand(rob1,green_box),false,1).
+obs(loc(green_box,zoneG),true,1).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
@@ -169,4 +170,3 @@ display
 diag(A,I).
 holds(F,numSteps).
 -holds(in_hand(rob1,B), numSteps).
-

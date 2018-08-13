@@ -1,30 +1,30 @@
 #!usr/bin/env python
 # -*- coding: utf-8 -*-
 import rospy
-#import baxter_interface
+import baxter_interface
 import argparse
 import sys
 import struct
 import copy
 import rospkg
-#import baxter_external_devices
-#from baxter_interface import CHECK_VERSION
-#from baxter_interface import Gripper
+import baxter_external_devices
+from baxter_interface import CHECK_VERSION
+from baxter_interface import Gripper
 from geometry_msgs.msg import (PoseStamped, Pose, Point, Quaternion)
 from std_msgs.msg import (Header, Empty)
-#from baxter_core_msgs.srv import (SolvePositionIK, SolvePositionIKRequest)
-#from gazebo_msgs.srv import (SpawnModel, DeleteModel)
-#from baxter_core_msgs.srv import (CloseCamera, ListCameras, OpenCamera)
+from baxter_core_msgs.srv import (SolvePositionIK, SolvePositionIKRequest)
+from gazebo_msgs.srv import (SpawnModel, DeleteModel)
+from baxter_core_msgs.srv import (CloseCamera, ListCameras, OpenCamera)
 import cv_bridge
 import time
-#from baxter_interface import CameraController
+from baxter_interface import CameraController
 from sensor_msgs.msg import Image
 import cv2
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from std_msgs.msg import String, Float32MultiArray, Float32
-#from PySide.QtCore import *
-#from PySide.QtGui import *
+from PySide.QtCore import *
+from PySide.QtGui import *
 from collections import namedtuple
 import logging
 import os
@@ -49,63 +49,60 @@ class Zone():
         self.x_coordinate = x_coordinate
         self.y_coordinate = y_coordinate
         self.name = name
-        self.pose = 'pose'
-        #self.pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = -0.07,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
-        self.mid_pose = 'mid_pose'
-        #self.mid_pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = -0.01,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
-        self.elevated_pose = 'elevated_pose'
-        #self.elevated_pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = 0.1,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
+        self.pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = -0.07,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
+        self.mid_pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = -0.01,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
+        self.elevated_pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = 0.1,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
 
 
 
@@ -114,84 +111,80 @@ class Zone():
 class Object():
     def __init__(self, name, x_coordinate, y_coordinate):
         self.name = name
-        self.pose = 'pose'
-        #self.pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = -0.07,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
-        self.elevated_pose = 'elevated_pose'
-        #self.elevated_pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = 0.1,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
+        self.pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = -0.07,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
+        self.elevated_pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = 0.1,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
 
     def set_location(self, x_coordinate, y_coordinate):
-        self.pose = 'pose'
-        #self.pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = -0.07,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
-        self.elevated_pose = 'elevated_pose'
-        #self.elevated_pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = x_coordinate,
-        #                y = y_coordinate,
-        #                z = 0.1,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
+        self.pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = -0.07,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
+        self.elevated_pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = x_coordinate,
+                        y = y_coordinate,
+                        z = 0.1,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
 
 
 
@@ -244,27 +237,27 @@ class Executer():
     def __init__(self):
         
         # initialize ROS node
-        #rospy.init_node("rsdk_ik_service_client")
+        rospy.init_node("rsdk_ik_service_client")
 
         # create an instance of baxter_interface's Limb class
-        limb_object = 'limb' #baxter_interface.Limb('left')
+        limb_object = baxter_interface.Limb('left')
         self.limb_object = limb_object
 
         # initialise and calibrate gripper object
-        gripper = 'gripper' #Gripper('left')
-        #gripper.calibrate()
-        #gripper.set_holding_force(100)
+        gripper = Gripper('left')
+        gripper.calibrate()
+        gripper.set_holding_force(100)
         self.gripper = gripper
 
         # get the arm's current joint angles
-        angles = 'angles' #limb_object.joint_angles()
-        #angles['left_s0']=0.0
-        #angles['left_s1']=0.0
-        #angles['left_e0']=0.0
-        #angles['left_e1']=0.0
-        #angles['left_w0']=0.0
-        #angles['left_w1']=0.0
-        #angles['left_w2']=0.0
+        angles = limb_object.joint_angles()
+        angles['left_s0']=0.0
+        angles['left_s1']=0.0
+        angles['left_e0']=0.0
+        angles['left_e1']=0.0
+        angles['left_w0']=0.0
+        angles['left_w1']=0.0
+        angles['left_w2']=0.0
         self.angles = angles
 
         # initialize locations
@@ -286,14 +279,14 @@ class Executer():
         # set camera resolution and set camera
         self.cam_res_one = 640
         self.cam_res_two = 400
-        left_camera = 'camera' #CameraController('left_hand_camera')
-        #left_camera.resolution = (self.cam_res_one, self.cam_res_two)
-        #left_camera.open()
+        left_camera = CameraController('left_hand_camera')
+        left_camera.resolution = (self.cam_res_one, self.cam_res_two)
+        left_camera.open()
 
         # get camera image and convert it to OpenCV format with bgr8 encoding
         self.camera_image = None
-        #camera_subscriber = rospy.Subscriber('cameras/left_hand_camera/image', Image, self.get_img)
-        #while self.camera_image is None: pass
+        camera_subscriber = rospy.Subscriber('cameras/left_hand_camera/image', Image, self.get_img)
+        while self.camera_image is None: pass
 
         # initialise other values
         self.current_refined_location = 'unknown_cell'
@@ -312,20 +305,44 @@ class Executer():
 
 
     def executeAction(self, action):
-        input = self.__getRealValues_as_obsList(0) + ['hpd('+ action +',0).']
-        happened = False
-        global search_complete
-        search_complete = False
-        global searched_cells
-        searched_cells = []
-        while (not happened and not search_complete): # plan and attempt new refined plans until all cells have been searched
-            refinedPlan = self.getRefinedPlan(action)
-            if refinedPlan != None: happened = self.executeRefinedPlan(refinedPlan)
-        self.executedSteps += 1
-        if not happened: self.history.append(action + " (FAILED) ")
-        else:
-            self.history.append(action)
-        return (self.__getActionObservations(action))
+
+        print ('\nexecuting refined action: ' + action)
+
+        # execute move actions
+        if 'move' in action:
+            for cell in self.cells:
+                if (action[10 : len(action)-1] == cell.name):
+                    self.move(cell)
+                    return True
+
+        # execute pickup actions
+        elif 'pickup' in action:
+            for obj in self.objects:
+                if (obj.name == action[12 : len(action)-1]):
+                    self.pickup(obj)
+                    return True
+
+        # execute put down actions
+        elif 'put_down' in action:
+            for cell in self.cells:
+                if (self.current_refined_location == cell.name):
+                    self.put_down(cell)
+                    return True
+
+        # execute test actions
+        elif 'test' in action:
+            hpd = self.test(action)
+            if (self.current_refined_location == 'c1') or (self.current_refined_location == 'c2') or (self.current_refined_location == 'c3') or (self.current_refined_location == 'c4'): self.current_location = 'zoneR'
+            elif (self.current_refined_location == 'c5') or (self.current_refined_location == 'c6') or (self.current_refined_location == 'c7') or (self.current_refined_location == 'c8'): self.current_location = 'zoneG'
+            elif (self.current_refined_location == 'c9') or (self.current_refined_location == 'c10') or (self.current_refined_location == 'c11') or (self.current_refined_location == 'c12'): self.current_location = 'zoneY'
+            self.RealValues[self.domain.LocationRobot_index] = self.current_location
+            if 'green_box' in self.currently_holding: self.RealValues[self.domain.LocationGreenBox_index] = self.current_location
+            elif 'blue_box' in self.currently_holding: self.RealValues[self.domain.LocationBlueBox_index] = self.current_location
+            return hpd
+
+        # warn user if the plan contains an action that this function isn't programmed for
+        else: print ('action not recognised')
+
 
 
 
@@ -407,10 +424,7 @@ class Executer():
 
         # determine the location of the green box
         green = BGR_colour(50, 80, 50, 10)
-        #x_coordinate, y_coordinate, green_box_zone = self.locate_object(green) TODO replace the below statements with this
-        x_coordinate = 0
-        y_coordinate = 0
-        green_box_zone = 'zoneR'
+        x_coordinate, y_coordinate, green_box_zone = self.locate_object(green)
         print ('The green box is in:')
         print (green_box_zone)
 
@@ -420,10 +434,7 @@ class Executer():
 
         # determine the location of the blue box
         blue = BGR_colour(200, 0, 30, 180)
-        #x_coordinate, y_coordinate, blue_box_zone = self.locate_object(blue) TODO replace the below statements with this
-        x_coordinate = 0
-        y_coordinate = 0
-        blue_box_zone = 'zoneR'
+        x_coordinate, y_coordinate, blue_box_zone = self.locate_object(blue)
         print ('The blue box is in:')
         print (blue_box_zone)
 
@@ -435,130 +446,6 @@ class Executer():
 
         initial_conditions = ['above', green_box_zone, blue_box_zone, 'false', 'false']
         return initial_conditions
-
-
-
-    # this function uses the refined_baxter_domain.txt file and SPARC to get a refined action plan
-    def getRefinedPlan(self, action):
-  
-        # use action and history to figure out the transition (initial_state, action, final_state)
-        # the location of the robot is relevant for move transitions
-        if 'move' in action:
-            initial_state = ['coarse_loc(rob1,' + self.RealValues[self.domain.LocationRobot_index] + ')']
-            final_state = ['coarse_loc(rob1,' + action[10:len(action)-1] + ')']
-
-        # the location of the robot and object, and the in_hand status of the object, are relevant for pickup transitions
-        elif 'pickup' in action:
-            obj = action[12:len(action)-1]
-            # include the in_hand status of the object
-            initial_state = ['-coarse_in_hand(rob1,' + obj + ')']
-            final_state = ['coarse_in_hand(rob1,' + obj + ')']
-            # include the location of the robot
-            rob_loc = 'coarse_loc(rob1,' + self.RealValues[self.domain.LocationRobot_index] + ')'
-            # include the location of the object
-            if 'green' in obj: obj_loc = 'coarse_loc(' + obj + ',' + self.RealValues[self.domain.LocationGreenBox_index] + ')'
-            elif 'blue' in obj: obj_loc = 'coarse_loc(' + obj + ',' + self.RealValues[self.domain.LocationBlueBox_index] + ')'
-            initial_state.append(rob_loc)
-            initial_state.append(obj_loc)
-            final_state.append('coarse_loc(rob1,' + obj_loc[12+len(obj):len(obj_loc)-1] + ')')
-            final_state.append(obj_loc)
-
-        # the in_hand status of the object is relevant for put_down transitions
-        elif 'put_down' in action:
-            initial_state = ['coarse_in_hand(rob1,' + action[14:len(action)-1] + ')']
-            final_state = ['-coarse_in_hand(rob1,' + action[14:len(action)-1] + ')']
-
-        # edit refined_asp to get temporary zoomed_asp file
-        self.zoom(initial_state, action, final_state)
-
-        # get refined answer set
-        os.system('java -jar sparc.jar zoomed_baxter_domain.txt -A > tmp')
-        refined_answer = open('tmp', 'r').read()
-        os.remove('tmp')
-
-        # stop running code if refined answer set is empty
-        if refined_answer == '\n': raw_input('No refined answer set, press enter if you wish to continue.\n')
-
-        refined_plans = (refined_answer.split('{'))[1:]
-        for i in range(len(refined_plans)):
-            refined_plans[i] = refined_plans[i].strip('{')
-            refined_plans[i] = refined_plans[i].strip('\n')
-            refined_plans[i] = refined_plans[i].strip('}')
-
-        refined_plan = refined_plans[0]
-
-        return refined_plan
-
-
-
-    def executeRefinedPlan(self, refined_plan):
-
-        # parse refined plan to get an ordered list of refined actions
-        refined_plan = refined_plan.replace(' ','')
-        refined_actions = refined_plan.split('occurs')
-        refined_actions.remove('')
-        for i in range(len(refined_actions)):
-            if not (i == len(refined_actions)-1):
-                refined_actions[i] = refined_actions[i][0:len(refined_actions[i])-1]
-        ordered_actions = []
-        for i in range(len(refined_actions)):
-            for action in refined_actions:
-                if (','+str(i)+')') in action: ordered_actions.append(action[1:len(action)-3])
-
-        # execute each action in refined plan and get relevant outputs
-        happened = True
-        for action in ordered_actions:
-            happened_refined = self.execute_refined_action(action)
-            if not happened_refined:
-                happened = False
-                break
-
-        return happened
-
-
-
-
-    # this function parses the intended action and calls the relevant refined function
-    def execute_refined_action(self, action):
-
-        print ('\nexecuting refined action: ' + action)
-
-        # execute move actions
-        if 'move' in action:
-            for cell in self.cells:
-                if (action[10 : len(action)-1] == cell.name):
-                    self.move(cell)
-                    return True
-
-        # execute pickup actions
-        elif 'pickup' in action:
-            for obj in self.objects:
-                if (obj.name == action[12 : len(action)-1]):
-                    self.pickup(obj)
-                    return True
-
-        # execute put down actions
-        elif 'put_down' in action:
-            for cell in self.cells:
-                if (self.current_refined_location == cell.name):
-                    self.put_down(cell)
-                    return True
-
-        # execute test actions
-        elif 'test' in action:
-            hpd = self.test(action)
-            if (self.current_refined_location == 'c1') or (self.current_refined_location == 'c2') or (self.current_refined_location == 'c3') or (self.current_refined_location == 'c4'): self.current_location = 'zoneR'
-            elif (self.current_refined_location == 'c5') or (self.current_refined_location == 'c6') or (self.current_refined_location == 'c7') or (self.current_refined_location == 'c8'): self.current_location = 'zoneG'
-            elif (self.current_refined_location == 'c9') or (self.current_refined_location == 'c10') or (self.current_refined_location == 'c11') or (self.current_refined_location == 'c12'): self.current_location = 'zoneY'
-            self.RealValues[self.domain.LocationRobot_index] = self.current_location
-            if 'green_box' in self.currently_holding: self.RealValues[self.domain.LocationGreenBox_index] = self.current_location
-            elif 'blue_box' in self.currently_holding: self.RealValues[self.domain.LocationBlueBox_index] = self.current_location
-            return hpd
-
-        # warn user if the plan contains an action that this function isn't programmed for
-        else: print ('action not recognised')
-
-
 
 
 
@@ -602,25 +489,24 @@ class Executer():
     def locate_object(self, colour):
 
         # this pose is used to look down at the workspace and detect objects
-        vertical_viewing_pose = 'pose'
-        #vertical_viewing_pose = {
-        #    'left': PoseStamped(
-        #        header=Header(stamp=rospy.Time.now(), frame_id='base'),
-        #        pose=Pose(
-        #            position=Point(
-        #                x = 0.4,
-        #                y = 0.26,
-        #                z = 0.4,
-        #            ),
-        #            orientation=Quaternion(
-        #                x = 0.0,
-        #                y = -2.0,
-        #                z = 0.0,
-        #                w = 0.0,
-        #            ),
-        #        ),
-        #    ),
-        #}
+        vertical_viewing_pose = {
+            'left': PoseStamped(
+                header=Header(stamp=rospy.Time.now(), frame_id='base'),
+                pose=Pose(
+                    position=Point(
+                        x = 0.4,
+                        y = 0.26,
+                        z = 0.4,
+                    ),
+                    orientation=Quaternion(
+                        x = 0.0,
+                        y = -2.0,
+                        z = 0.0,
+                        w = 0.0,
+                    ),
+                ),
+            ),
+        }
 
         # move arm to the desired coordinates
         self.ik_move(vertical_viewing_pose)
@@ -665,18 +551,18 @@ class Executer():
 
     # move arm to desired coordinates using inverse kinematics
     def ik_move(self, poses):
-        #ns = "ExternalTools/left/PositionKinematicsNode/IKService"
-        #iksvc = rospy.ServiceProxy(ns, SolvePositionIK)
-        #ikreq = SolvePositionIKRequest()   
-        #ikreq.pose_stamp.append(poses['left'])
-        #rospy.wait_for_service(ns, 5.0)
-        #resp = iksvc(ikreq)
-        #if (resp.isValid[0]):
-        #    # move to desired coordinates using the angles given by inverse kinematics
-        #    limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
-        #    self.limb_object.move_to_joint_positions(limb_joints)
-        #else:
-        #    print("INVALID POSE - No Valid Joint Solution Found.")
+        ns = "ExternalTools/left/PositionKinematicsNode/IKService"
+        iksvc = rospy.ServiceProxy(ns, SolvePositionIK)
+        ikreq = SolvePositionIKRequest()   
+        ikreq.pose_stamp.append(poses['left'])
+        rospy.wait_for_service(ns, 5.0)
+        resp = iksvc(ikreq)
+        if (resp.isValid[0]):
+            # move to desired coordinates using the angles given by inverse kinematics
+            limb_joints = dict(zip(resp.joints[0].name, resp.joints[0].position))
+            self.limb_object.move_to_joint_positions(limb_joints)
+        else:
+            print("INVALID POSE - No Valid Joint Solution Found.")
         pass
 
 
@@ -686,8 +572,7 @@ class Executer():
         # iterate through pixels in image and detect ones of a specific colour
         for pixel_x in range(self.cam_res_two):
             for pixel_y in range(self.cam_res_one):
-                #pixel_matches_colour = colour.match(pixel_x, pixel_y, self.camera_image)
-                pixel_matches_colour = True
+                pixel_matches_colour = colour.match(pixel_x, pixel_y, self.camera_image)
                 if pixel_matches_colour:
                     return pixel_x, pixel_y
         return 0, 0
@@ -707,6 +592,7 @@ class Executer():
         # moving the robot's arm never fails
         if ('loc' in fluent) and ('rob1' in fluent):
             self.current_refined_location = fluent[9:len(fluent)-1]
+            real_value = 'true'
             hpd = True
             print ('the robot is in cell ' + self.current_refined_location + '\n')
 
@@ -718,6 +604,7 @@ class Executer():
                 if blue_pixel_count > 50:
                     print ('the blue_box is in ' + self.current_refined_location)
                     self.RealValues[self.domain.LocationBlueBox_index] = self.current_location
+                    real_value = 'true'
                     hpd = True
                     for cell in self.cells:
                         if cell.name == self.current_refined_location:
@@ -726,6 +613,7 @@ class Executer():
                 else:
                     print ('the blue_box is not in ' + self.current_refined_location)
                     self.RealValues[self.domain.LocationBlueBox_index] = 'unknown'
+                    real_value = 'false'
                     hpd = False
             # if there are green pixels, the green box is in the current location
             elif 'green' in fluent:
@@ -733,6 +621,7 @@ class Executer():
                 if green_pixel_count > 50:
                     print ('the green_box is in ' + self.current_refined_location)
                     self.RealValues[self.domain.LocationGreenBox_index] = self.current_location
+                    real_value = 'true'
                     hpd = True
                     for cell in self.cells:
                         if cell.name == self.current_refined_location:
@@ -744,12 +633,14 @@ class Executer():
                     global search_complete
                     searched_cells.append(self.current_refined_location)
                     if search_complete: self.RealValues[self.domain.LocationGreenBox_index] = 'unknown'
+                    real_value = 'false'
                     hpd = False
 
         # putting an object down never fails
         elif ('false' in action and 'in_hand' in fluent):
             self.currently_holding = 'nothing'
             self.object_placed = True
+            real_value = 'false'
             hpd = True
             print ('the object is not in hand\n')
             if 'blue_box' in fluent:
@@ -762,10 +653,12 @@ class Executer():
         # picking up an object can fail and needs to be tested
         else:
             hpd = False
+            real_value = 'false'
             # test if there are pixels of the relevant colour close to the camera
             if 'blue_box' in fluent:
                 blue_pixel_count = self.tally_pixels(200, 0, 30, 180)
                 if blue_pixel_count > 0:
+                    real_value = 'true'
                     hpd = True
                     self.currently_holding = fluent[13:len(fluent)-1]
                     print ('the object is in hand\n')
@@ -778,6 +671,7 @@ class Executer():
             elif 'green_box' in fluent:
                 green_pixel_count = self.tally_pixels(150, 250, 150, 180)
                 if green_pixel_count > 0:
+                    real_value = 'true'
                     hpd = True
                     self.currently_holding = fluent[13:len(fluent)-1]
                     print ('the object is in hand\n')
@@ -788,7 +682,10 @@ class Executer():
                     self.RealValues[self.domain.LocationGreenBox_index] = 'unknown'
                     self.RealValues[self.domain.In_handGreenBox_index] = 'false'
 
-        return hpd
+        # record action observation
+        action_observation = 'holds(directly_observed(rob1,'+fluent+','+real_value+'),1)'
+
+        return hpd, action_observation
 
 
 
@@ -799,8 +696,7 @@ class Executer():
         pixel_count = 0
         for pixel_x in range(400):
             for pixel_y in range(640):
-                #pixel_matches_colour = colour.match(pixel_x, pixel_y, self.camera_image)
-                pixel_matches_colour = True
+                pixel_matches_colour = colour.match(pixel_x, pixel_y, self.camera_image)
                 if (pixel_x < 250) and (pixel_x > 100) and (pixel_y < 450) and (pixel_y > 300) and pixel_matches_colour: pixel_count = pixel_count + 1
         return pixel_count
 

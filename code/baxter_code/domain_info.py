@@ -88,3 +88,53 @@ class DomainInfo():
 			if (observation[0] == self.In_handBlueBox_index and observation[1] != 'unknown'):
 				obsSet.add('obs(in_hand(rob1,blue_box),' + observation[1]+ ','+ str(step) +').')
 		return obsSet
+
+	def coarseStateToAstractHoldsSet(self,state,step):
+		holdsSet = set([])
+		if(state[self.LocationRobot_index] != 'unknown'):
+			holdsSet.add('holds(loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
+		if(state[self.LocationGreenBox_index] != 'unknown'):
+			holdsSet.add('holds(loc(green_box,'+str(state[self.LocationGreenBox_index])+'),'+str(step)+').')
+		if(state[self.LocationBlueBox_index] != 'unknown'):
+			holdsSet.add('holds(loc(blue_box,'+str(state[self.LocationBlueBox_index])+'),'+str(step)+').')
+		if(state[self.In_handGreenBox_index] == 'true'):
+			holdsSet.add('holds(in_hand(rob1,green_box),'+str(step)+').')
+		elif(state[self.In_handGreenBox_index] == 'false'):
+			holdsSet.add('-holds(in_hand(rob1,green_box),'+str(step)+').')
+		if(state[self.In_handBlueBox_index] == 'true'):
+			holdsSet.add('holds(in_hand(rob1,blue_box),'+str(step)+').')
+		elif(state[self.In_handBlueBox_index] == 'false'):
+			holdsSet.add('-holds(in_hand(rob1,blue_box),'+str(step)+').')
+		return holdsSet
+
+	def directObservationToRefinedObs(self,directObservation,step):
+		directObservation = directObservation.replace('holds(directly_observed(rob1,','obs(')
+		directObservation = directObservation[:directObservation.rfind('),')]+','+str(step)+').\n'
+		return directObservation
+
+	def coarseStateToCoarseHoldsSet(self,state,step):
+		holdsSet = set([])
+		if(state[self.LocationRobot_index] != 'unknown'):
+			holdsSet.add('holds(coarse_loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
+		if(state[self.LocationGreenBox_index] != 'unknown'):
+			holdsSet.add('holds(coarse_loc(green_box,'+str(state[self.LocationGreenBox_index])+'),'+str(step)+').')
+		if(state[self.LocationBlueBox_index] != 'unknown'):
+			holdsSet.add('holds(coarse_loc(blue_box,'+str(state[self.LocationBlueBox_index])+'),'+str(step)+').')
+		if(state[self.In_handGreenBox_index] == 'true'):
+			holdsSet.add('holds(coarse_in_hand(rob1,green_box),'+str(step)+').')
+		if(state[self.In_handGreenBox_index] == 'false'):
+			holdsSet.add('-holds(coarse_in_hand(rob1,green_box),'+str(step)+').')
+		if(state[self.In_handBlueBox_index] == 'true'):
+			holdsSet.add('holds(coarse_in_hand(rob1,blue_box),'+str(step)+').')
+		if(state[self.In_handBlueBox_index] == 'false'):
+			holdsSet.add('-holds(coarse_in_hand(rob1,blue_box),'+str(step)+').')
+		return holdsSet
+
+	def indirectObservationsToObsSet(self,indirectObservationsSet,step):
+		newSet = set()
+		for a in indirectObservationsSet:
+			#a = a.replace('indirect_observation_at_step','obs').replace('coarse_','')
+			a = a.replace('holds(indirectly_observed(rob1,', 'obs(').replace('coarse_','')
+			a = a[:a.rfind('),')] + ','+str(step) +').'
+			newSet.add(a)
+		return newSet
