@@ -600,8 +600,8 @@ holds(loc(rob1,library),0).
 holds(loc(book1,library),0).
 holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book2),0).
-attempt(move(rob1,kitchen),3).
 obs(loc(rob1,kitchen),true,4).
+attempt(move(rob1,kitchen),3).
 explaining(4).
 
 

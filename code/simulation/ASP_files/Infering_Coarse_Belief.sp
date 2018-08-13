@@ -1,4 +1,4 @@
-#const numSteps = 2.
+#const numSteps = 4.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This ASP is used for inferring indirect observations from the direct observations set
@@ -237,10 +237,13 @@ holds(coarse_loc(book2,kitchen),0).
 holds(coarse_loc(rob1,library),0).
 holds(coarse_loc(book1,library),0).
 -holds(coarse_in_hand(rob1,book1),0).
-holds(loc(rob1,c4),0).
-holds(directly_observed(rob1,loc(ref_book1,c7),false),2).
-holds(directly_observed(rob1,loc(ref_book2,c7),false),2).
-holds(directly_observed(rob1,loc(rob1,c7),true),2).
+holds(loc(rob1,c3),0).
+holds(directly_observed(rob1,loc(ref_book2,c4),false),2).
+holds(directly_observed(rob1,loc(ref_book1,c4),false),2).
+holds(directly_observed(rob1,loc(rob1,c7),true),4).
+holds(directly_observed(rob1,loc(rob1,c4),true),2).
+holds(directly_observed(rob1,loc(ref_book1,c7),false),4).
+holds(directly_observed(rob1,loc(ref_book2,c7),false),4).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

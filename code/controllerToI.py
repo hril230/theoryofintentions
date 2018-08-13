@@ -42,28 +42,25 @@ class ControllerToI():
 
 
 
-		self.believes_goal_holds  = False
-		self.preASP_ToI_split = [] #it holds the content of preASP_ToI.txt as a list, with lines as elements
 
 		self.preparePreASPStringLists()
-
-		self.history_ToI_diagnosis = initial_conditions #holds the history input for ASP_ToI_Diagnosis
 		self.setInitialBelief(self.filteredPlainHistory(initial_conditions))
+		self.history_ToI_diagnosis = initial_conditions #holds the history input for ASP_ToI_Diagnosis
 		self.refined_location = refined_location
+
 		print 'ControllerToI \t\t initial coarse belief: '+ str(self.belief)
 		print 'Controller ToI \t\t initial refined location: ' + str(self.refined_location)
 
 
 	def run(self):
+		self.believes_goal_holds  = False
 		self.history_ToI_diagnosis.append("hpd(select(my_goal), true,0).")
 		self.diagnose()
-		finish = False
-		zoomed_history = Set()
-		refined_observations = Set()
-
+		finish = False # flag that breaks the loop that calls the ASP_ToI_Planning when finish == True
 		while(finish == False):
 			abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == 'finish'):
+				#check if the assuption that the goal has been reached is true.
 				if(self.executer.getGoalFeedback() == True):
 					self.history_ToI_diagnosis.append('finish')
 					print('ControllerToI: \t Belief: ' + str(self.belief))
@@ -71,6 +68,7 @@ class ControllerToI():
 					print('ControllerToI: \t Finish')
 					finish = True
 					break
+				# if it is false, count the correction and diagnose again
 				else:
 					self.goal_correction += 1
 					while(abstract_action == 'finish'):
@@ -84,7 +82,9 @@ class ControllerToI():
 				print 'ControllerToI: \t Goal is futile '
 				finish = True
 				break
-			self.history_ToI_diagnosis.append('attempt('+abstract_action+','+str(self.current_step)+').')
+
+			# if action is 'stop' it is because an unexpected action has happened and it needs to replan, so the number_activities should increase
+			# to pass this as an input to the ASP_ToI_Planning
 			if(abstract_action[0:4] == 'stop'):
 				self.number_activities += 1
 				self.number_steps += 1
@@ -95,17 +95,18 @@ class ControllerToI():
 				need_refined_plan = True
 				self.refine(abstract_action, self.belief, self.refined_location)
 				refined_plan_step = 0
-				initial_refined_location = self.refined_location
-				refined_observations = Set()
+				zoomed_history = Set() #holds all the history of the refined plan created wtih zoomed refined domain in form of 'hpd' and 'obs'
+				refined_observations = Set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
+				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
+																 #condition for the ASP that infers coarse observations from the refined direct observations
 				while(need_refined_plan):
-					zoomed_history = Set()
 					refined_occurrences = self.runZoomedDomain()
-					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences)
 					need_refined_plan = False
 					if refined_occurrences == ['']:
-						need_refined_plan == False
 						print 'ControllerToI \t\t no refined plan '
 						break
+					refined_occurrences.sort(key=self.getStep)
+					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
 					for refined_occurence in refined_occurrences:
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
@@ -139,11 +140,15 @@ class ControllerToI():
 				print('ControllerToI \t Abstract obs: ' +': ' + str(abstract_step_obs))
 				self.update_belief(abstract_action, abstract_step_obs)
 				self.history_ToI_diagnosis = self.history_ToI_diagnosis + abstract_step_obs
+			self.history_ToI_diagnosis.append('attempt('+abstract_action+','+str(self.current_step)+').')
 			self.current_step += 1
 			self.diagnose()
 		if(self.current_diagnosis != ''): self.history_ToI_diagnosis.append(self.current_diagnosis)
 		return (self.history_ToI_diagnosis, self.number_activities, self.goal_correction)
 
+
+	def getStep(self,occurrence):
+		return int(occurrence[occurrence.rfind(',')+1:-1])
 
 	def prepareRefinedObservations(self,observations,step):
 		if observations == Set(['']) or not observations: return observations
@@ -178,6 +183,7 @@ class ControllerToI():
 	def getStep(self, observation):
 		return int(observation[observation.rfind(',')+1:-1])
 
+
 	def addObsZoomedDomain(self,obsList,max_steps):
 		self.zoomed_asp_list = self.zoomed_asp_list[:self.zoomed_obs_index]+obsList+self.zoomed_asp_list[self.zoomed_obs_index:]
 		self.zoomed_asp_list[0] = '#const numSteps = ' + str(max_steps) +'.'
@@ -186,6 +192,10 @@ class ControllerToI():
 		f1.write(asp)
 		f1.close()
 
+	###########################################################################################
+	### this function runs the zoomed asp held in the file zoomed_domain_file.
+	### This file is updated with the refined history through the function addObsZoomedDomain
+	###########################################################################################
 	def runZoomedDomain(self):
 		'\nControllerToI: Running zoomed domain to get refined plan '
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A ',shell=True)
@@ -274,6 +284,7 @@ class ControllerToI():
 			elif(line == ""): pass
 			else:
 				self.input_for_planning.append(line + '.')
+
 		return
 
 
