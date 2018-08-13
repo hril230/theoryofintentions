@@ -1,9 +1,9 @@
-#const numSteps = 5. % maximum number of steps.
-#const max_len = 4. % maximum activity_length of an activity.
+#const numSteps = 8. % maximum number of steps.
+#const max_len = 7. % maximum activity_length of an activity.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% This ASP is used to plan with ToI and to Diagnose with ToI. 
+%% This ASP is used to plan with ToI and to Diagnose with ToI.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -568,7 +568,7 @@ next_to(office1,kitchen).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-%% @_@_@
+%% GOAL GOES HERE
 holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) .
 
 
@@ -576,26 +576,33 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
-%% *_*_*
-current_step(2).
+%% CURRENT STEP GOES HERE
+current_step(4).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% #_#_# beginning
+%% HISTORY GOES HERE
+obs(in_hand(rob1,book1),false,3).
+obs(loc(rob1,kitchen),true,4).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
+attempt(put_down(rob1,book1),2).
+attempt(move(rob1,kitchen),3).
 activity_goal(1,my_goal).
 activity_component(1,1,put_down(rob1,book1)).
-activity_length(1,1).
-explanation(0,2).
+activity_component(1,2,move(rob1,kitchen)).
+activity_component(1,3,pickup(rob1,book2)).
+activity_component(1,4,move(rob1,library)).
+activity_component(1,5,put_down(rob1,book2)).
+activity_length(1,5).
+explanation(0,4).
+holds(loc(book2,kitchen),0).
 holds(loc(rob1,library),0).
 holds(loc(book1,library),0).
-holds(loc(book2,library),0).
 holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book2),0).
-%% #_#_# end
 
 
 
