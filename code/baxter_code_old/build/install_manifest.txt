@@ -1,0 +1,6 @@
+/home/heather/ros_ws/install/_setup_util.py
+/home/heather/ros_ws/install/env.sh
+/home/heather/ros_ws/install/setup.bash
+/home/heather/ros_ws/install/setup.sh
+/home/heather/ros_ws/install/setup.zsh
+/home/heather/ros_ws/install/.rosinstall

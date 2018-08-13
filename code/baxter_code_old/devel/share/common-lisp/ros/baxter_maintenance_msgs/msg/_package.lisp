@@ -1,0 +1,19 @@
+(cl:defpackage baxter_maintenance_msgs-msg
+  (:use )
+  (:export
+   "<UPDATESOURCE>"
+   "UPDATESOURCE"
+   "<UPDATESTATUS>"
+   "UPDATESTATUS"
+   "<CALIBRATEARMDATA>"
+   "CALIBRATEARMDATA"
+   "<UPDATESOURCES>"
+   "UPDATESOURCES"
+   "<CALIBRATEARMENABLE>"
+   "CALIBRATEARMENABLE"
+   "<TAREENABLE>"
+   "TAREENABLE"
+   "<TAREDATA>"
+   "TAREDATA"
+  ))
+

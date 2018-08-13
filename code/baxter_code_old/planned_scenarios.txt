@@ -1,0 +1,8 @@
+Scenario One:
+Initial position for target objects is zoneA, goal is to move them to zoneC, everything goes as planned
+
+Scenario Two:
+Initial position for target objects is zoneA, goal is to move them to zoneC. After the robot has moved to zoneC (holding the first object) I'll exo-move the second object to zoneC. Traditional will not realise and will go to zoneA expecting the second object to be there, and will then diagnose that there was an exo-move and will eventually find the second object in zoneC. ToI will observe this when checking goal related fluents.
+
+Scenario Five:
+Initial position for target objects is zoneA, goal is to move them to zoneC. After the robot has placed first object and is fetching the second one I will exo-move the first object away from zoneC. Traditional planning will complete its plan and not realise it has failed. ToI will notice the exo-move when observing goal related fluents.
