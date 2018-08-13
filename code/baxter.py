@@ -18,12 +18,13 @@ executer = baxter_executor.Executer()
 ASP_subfolder = 'baxter_code/'
 domain_info = DomainInfo()
 known_world_state = executer.getInitialConditions()
+refined_location = 'unknown_cell'
 
 # run controller
 version = 'ToI'
 if version == 'traditional':
-    controller = controllerTraditionalPlanning.ControllerTraditionalPlanning(sparcPath, ASP_subfolder, domain_info, executer, known_world_state, goal, max_plan_length)
+    controller = controllerTraditionalPlanning.ControllerTraditionalPlanning(sparcPath, ASP_subfolder, domain_info, executer, refined_location, known_world_state, goal, max_plan_length)
     history, numberPlans, goal_correction = controller.run()
 elif version == 'ToI':
-    controller = controllerToI.ControllerToI(sparcPath, ASP_subfolder, domain_info, executer, known_world_state, goal, max_plan_length)
+    controller = controllerToI.ControllerToI(sparcPath, ASP_subfolder, domain_info, executer, refined_location, known_world_state, goal, max_plan_length)
     history_toi, numberPlans_toi, goal_correction_toi = controller.run()
