@@ -239,12 +239,11 @@ comp(ref_book2, book2).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
--holds(in_hand(rob1,ref_book1),0).
 holds(loc(ref_book1,c1),0).
-holds(loc(rob1,c7),0).
-holds(loc(ref_book2,c8),0).
+holds(loc(ref_book2,c1),0).
 -holds(in_hand(rob1,ref_book2),0).
-hpd(test(rob1,loc(ref_book2,c7),true),0).
+holds(loc(rob1,c1),0).
+holds(in_hand(rob1,ref_book1),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
