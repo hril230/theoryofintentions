@@ -13,7 +13,7 @@ results_file_name = "simulation/results/"
 
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
 
-goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
+goal = "holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I)."
 
 max_plan_length = 17
 
@@ -56,7 +56,11 @@ def runAndWrite(initial_conditions_index):
 	timeTaken = endTime - startTime
 
 	results = open('experimental_results.txt', 'w')
-	results.write('Time taken with zooming: ')
+	results.write('Initial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand] = ')
+	results.write(str(initial_state))
+	results.write('\nGoal: ')
+	results.write(goal)
+	results.write('\nTime taken with zooming: ')
 	results.write(str(timeTaken))
 
 
@@ -100,22 +104,32 @@ def createConditionsAndRun():
 	initial_conditions_index = 0
 	controlled_run = False
 
+	# set initial conditions
+	robot_refined_location = 'c4'
+	book1_refined_location = 'c2'
+	book2_refined_location = 'c2'
+	refined_in_handBook1 = 'false'
+	refined_in_handBook2 = 'false'
+	refined_in_handBook1Ref1, refined_in_handBook1Ref2, refined_in_handBook2Ref1, refined_in_handBook2Ref2 = 'false', 'false', 'false', 'false'
+	initial_state = [robot_refined_location , book1_refined_location, book2_refined_location, refined_in_handBook1, refined_in_handBook2, refined_in_handBook1Ref1, refined_in_handBook1Ref2, refined_in_handBook2Ref1, refined_in_handBook2Ref2]
+
+	# run experiment
+	runAndWrite(initial_conditions_index)
+	runAndWriteWithoutZooming(initial_conditions_index)
+
 
 	#Cases when rob1 is holding book1 (16 possible combinations)
-	for robot_coarse_location_as_cells in coarse_locations_as_cells:
-		robot_refined_location = random.choice(robot_coarse_location_as_cells)
-		for book2_coarse_location_as_cells in coarse_locations_as_cells:
-			book2_refined_location = random.choice(book2_coarse_location_as_cells)
-			initial_conditions_index +=1
-			if(controlled_run == True and initial_conditions_index != controlled_run_conditions): continue
-			book1_refined_location = robot_refined_location
-			refined_in_handBook1 = 'true'
-			refined_in_handBook2 = 'false'
-			initial_state = [robot_refined_location , book1_refined_location , book2_refined_location, refined_in_handBook1, refined_in_handBook2]
-			runAndWrite(initial_conditions_index)
-			runAndWriteWithoutZooming(initial_conditions_index)
-			break
-		break
+	#for robot_coarse_location_as_cells in coarse_locations_as_cells:
+	#	robot_refined_location = random.choice(robot_coarse_location_as_cells)
+	#	for book2_coarse_location_as_cells in coarse_locations_as_cells:
+	#		book2_refined_location = random.choice(book2_coarse_location_as_cells)
+	#		initial_conditions_index +=1
+	#		if(controlled_run == True and initial_conditions_index != controlled_run_conditions): continue
+	#		book1_refined_location = robot_refined_location
+	#		refined_in_handBook1 = 'true'
+	#		refined_in_handBook2 = 'false'
+	#		initial_state = [robot_refined_location , book1_refined_location , book2_refined_location, refined_in_handBook1, refined_in_handBook2]
+	#		runAndWrite(initial_conditions_index)
 
 	#Cases when rob1 is holding book2 (16 possible combinations)
 	#for robot_coarse_location_as_cells in coarse_locations_as_cells:

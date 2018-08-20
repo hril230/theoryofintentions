@@ -136,7 +136,7 @@ class ControllerToI():
 							self.executer.executeAction(refined_action)
 							refined_plan_step += 1
 				abstract_step_obs = list(self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step))
-				print('ControllerToI: \t Abstract action ' +abstract_action+' has finisehd at step ' + str(self.current_step))
+				print('ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
 				print('ControllerToI \t Abstract obs: ' +': ' + str(abstract_step_obs))
 				self.update_belief(abstract_action, abstract_step_obs)
 				self.history_ToI_diagnosis = self.history_ToI_diagnosis + abstract_step_obs
@@ -159,9 +159,9 @@ class ControllerToI():
 
 	def getObservationsRelevantGoal(self):
 		observations = Set()
-		result,observation1 = self.executer.test('test(rob1,loc(ref_book1,' + self.refined_location+ '),true)')
+		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
-		result,observation2 = self.executer.test('test(rob1,loc(ref_book2,' + self.refined_location+ '),true)')
+		result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
 		if 'holds' in observation2: observations.add(observation2)
 		return observations
 
@@ -206,7 +206,7 @@ class ControllerToI():
 		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
 
 	def getIndexesRelevantToGoal(self):
-		return Set([self.domain_info.LocationBook1_index, self.domain_info.LocationBook2_index, self.domain_info.In_handBook1_index, self.domain_info.In_handBook2_index])
+		return Set([self.domain_info.LocationBook1_index, self.domain_info.In_handBook1_index])
 
 	def runToIPlanning(self,input):
 		abstract_action = None
@@ -368,10 +368,10 @@ class ControllerToI():
 	# this action writes a zoomed ASP file
 	def zoom(self,initial_state, action, final_state):
 	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2'])
+		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1'])
 		coarse_objects = Sort('coarse_object', ['book1', 'book2'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16'])
-		objects = Sort('object', ['ref_book1', 'ref_book2'])
+		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9'])
+		objects = Sort('object', ['ref1_book1', 'ref2_book1', 'ref1_book2', 'ref2_book2'])
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
 		coarse_components = Sort('coarse_component', ['#coarse_place', '#coarse_object'])
@@ -383,13 +383,12 @@ class ControllerToI():
 		actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 
 	    # EDIT these instantiations of the Components class to change which refined objects are associated with which coarse ones
-		library_components = Components('library', ['c1', 'c2', 'c3', 'c4'])
-		kitchen_components = Components('kitchen', ['c5', 'c6', 'c7', 'c8'])
-		office1_components = Components('office1', ['c9', 'c10', 'c11', 'c12'])
-		office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
-		book1_components = Components('book1', ['ref_book1'])
-		book2_components = Components('book2', ['ref_book2'])
-		refinements = [library_components, kitchen_components, office1_components, office2_components, book1_components, book2_components]
+		library_components = Components('library', ['c1', 'c2', 'c3'])
+		kitchen_components = Components('kitchen', ['c4', 'c5', 'c6'])
+		office1_components = Components('office1', ['c7', 'c8', 'c9'])
+		book1_components = Components('book1', ['ref1_book1', 'ref2_book1'])
+		book2_components = Components('book2', ['ref1_book2', 'ref2_book2'])
+		refinements = [library_components, kitchen_components, office1_components, book1_components, book2_components]
 
 	    # initialise relevance lists
 		rel_initial_conditions = []
@@ -404,7 +403,7 @@ class ControllerToI():
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
 		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
-		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12','c13', 'c14', 'c15', 'c16' 'ref_boo1', 'ref_book2']
+		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'ref1_book1', 'ref2_book1', 'ref1_book2', 'ref2_book2']
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 
@@ -424,8 +423,10 @@ class ControllerToI():
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
-				if(self.belief[self.domain_info.In_handBook1_index] == 'true'): currently_holding = 'ref_book1'
-				elif(self.belief[self.domain_info.In_handBook2_index] == 'true'): currently_holding = 'ref_book2'
+				if(self.belief[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
+				elif(self.belief[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
+				elif(self.belief[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
+				elif(self.belief[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant

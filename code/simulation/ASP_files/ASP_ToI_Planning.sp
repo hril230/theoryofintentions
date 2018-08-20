@@ -1,5 +1,5 @@
-#const numSteps = 15. % maximum number of steps.
-#const max_len = 14. % maximum activity_length of an activity.
+#const numSteps = 23. % maximum number of steps.
+#const max_len = 22. % maximum activity_length of an activity.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,7 +12,7 @@ sorts
 #step = 0..numSteps.
 #integer = 0..numSteps.
 
-#room = {library, kitchen, office1, office2}.
+#room = {library, kitchen, office1}.
 #robot = {rob1}.
 #book = {book1, book2}.
 #object = #book.
@@ -156,8 +156,8 @@ impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
 %%%%%%%%%%%%%%
 %% Defaults %%
 %%%%%%%%%%%%%%
-holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
+%holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
+%holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
 
 
 
@@ -558,8 +558,7 @@ has_intention(I) :- intended_action(A,I).
 %%Attributes:
 %%%%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
-next_to(office2,office1).
-next_to(office1,kitchen).
+next_to(kitchen, office1).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 
@@ -569,7 +568,7 @@ next_to(office1,kitchen).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) .
+holds(my_goal,I) :- holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I).
 
 
 

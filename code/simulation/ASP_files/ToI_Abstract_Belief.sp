@@ -8,7 +8,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {library, kitchen, office1, office2}.
+#room = {library, kitchen, office1}.
 #robot = {rob1}.
 #book = {book1, book2}.
 #object = #book.
@@ -97,8 +97,8 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %%%%%%%%%%%%%%
 %% Defaults %%
 %%%%%%%%%%%%%%
-holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
+%holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
+%holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
 
 
 
@@ -145,9 +145,8 @@ diag(A,I) :- occurs(A,I),
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Attributes.
-next_to(office2,office1).
-next_to(office1,kitchen).
 next_to(kitchen,library).
+next_to(kitchen,office1).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,12 +155,12 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-holds(loc(rob1,library),0).
-holds(loc(book1,library),0).
+-holds(in_hand(rob1,book1),0).
 holds(loc(book2,library),0).
-holds(in_hand(rob1,book1),0).
+holds(loc(book1,library),0).
+holds(loc(rob1,kitchen),0).
 -holds(in_hand(rob1,book2),0).
-hpd(put_down(rob1,book1), 0).
+hpd(move(rob1,library), 0).
 ,1).
 
 

@@ -1,5 +1,5 @@
-#const numSteps = 5. % maximum number of steps.
-#const max_len = 4. % maximum activity_length of an activity.
+#const numSteps = 7. % maximum number of steps.
+#const max_len = 6. % maximum activity_length of an activity.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,7 +12,7 @@ sorts
 #step = 0..numSteps.
 #integer = 0..numSteps.
 
-#room = {library, kitchen, office1, office2}.
+#room = {library, kitchen, office1}.
 #robot = {rob1}.
 #book = {book1, book2}.
 #object = #book.
@@ -156,8 +156,8 @@ impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
 %%%%%%%%%%%%%%
 %% Defaults %%
 %%%%%%%%%%%%%%
-holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
+%holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
+%holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
 
 
 
@@ -558,8 +558,7 @@ has_intention(I) :- intended_action(A,I).
 %%Attributes:
 %%%%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
-next_to(office2,office1).
-next_to(office1,kitchen).
+next_to(kitchen, office1).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 
@@ -569,7 +568,7 @@ next_to(office1,kitchen).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) .
+holds(my_goal,I) :- holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I).
 
 
 
@@ -587,15 +586,18 @@ current_step(3).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
 activity_goal(1,my_goal).
-activity_component(1,1,put_down(rob1,book1)).
-activity_length(1,1).
-holds(loc(book1,library),0).
+activity_component(1,1,move(rob1,library)).
+activity_component(1,2,pickup(rob1,book1)).
+activity_component(1,3,move(rob1,kitchen)).
+activity_component(1,4,put_down(rob1,book1)).
+activity_length(1,4).
 holds(loc(book2,library),0).
-holds(loc(rob1,library),0).
-holds(in_hand(rob1,book1),0).
+holds(loc(book1,library),0).
+holds(loc(rob1,kitchen),0).
+-holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book2),0).
 ,3).
-attempt(put_down(rob1,book1),2).
+attempt(move(rob1,library),2).
 explaining(3).
 
 

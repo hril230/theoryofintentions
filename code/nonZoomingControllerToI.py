@@ -159,9 +159,9 @@ class NonZoomingControllerToI():
 
 	def getObservationsRelevantGoal(self):
 		observations = Set()
-		result,observation1 = self.executer.test('test(rob1,loc(ref_book1,' + self.refined_location+ '),true)')
+		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
-		result,observation2 = self.executer.test('test(rob1,loc(ref_book2,' + self.refined_location+ '),true)')
+		result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
 		if 'holds' in observation2: observations.add(observation2)
 		return observations
 
@@ -206,7 +206,7 @@ class NonZoomingControllerToI():
 		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
 
 	def getIndexesRelevantToGoal(self):
-		return Set([self.domain_info.LocationBook1_index, self.domain_info.LocationBook2_index, self.domain_info.In_handBook1_index, self.domain_info.In_handBook2_index])
+		return Set([self.domain_info.LocationBook1_index, self.domain_info.In_handBook1_index])
 
 	def runToIPlanning(self,input):
 		abstract_action = None
@@ -368,10 +368,10 @@ class NonZoomingControllerToI():
 	# in this file the zoom function has been altered so that, rather than zooming, they include the entire refined domain
 	def zoom(self,initial_state, action, final_state):
 	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2'])
+		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1'])
 		coarse_objects = Sort('coarse_object', ['book1', 'book2'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16'])
-		objects = Sort('object', ['ref_book1', 'ref_book2'])
+		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9'])
+		objects = Sort('object', ['ref1_book1', 'ref2_book1', 'ref1_book2', 'ref2_book2'])
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
 		coarse_components = Sort('coarse_component', ['#coarse_place', '#coarse_object'])
@@ -383,13 +383,12 @@ class NonZoomingControllerToI():
 		actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 
 	    # EDIT these instantiations of the Components class to change which refined objects are associated with which coarse ones
-		library_components = Components('library', ['c1', 'c2', 'c3', 'c4'])
-		kitchen_components = Components('kitchen', ['c5', 'c6', 'c7', 'c8'])
-		office1_components = Components('office1', ['c9', 'c10', 'c11', 'c12'])
-		office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
-		book1_components = Components('book1', ['ref_book1'])
-		book2_components = Components('book2', ['ref_book2'])
-		refinements = [library_components, kitchen_components, office1_components, office2_components, book1_components, book2_components]
+		library_components = Components('library', ['c1', 'c2', 'c3'])
+		kitchen_components = Components('kitchen', ['c4', 'c5', 'c6'])
+		office1_components = Components('kitchen', ['c7', 'c8', 'c9'])
+		book1_components = Components('book1', ['ref1_book1', 'ref2_book1'])
+		book2_components = Components('book2', ['ref1_book2', 'ref2_book2'])
+		refinements = [library_components, kitchen_components, office1_components, book1_components, book2_components]
 
 	    # initialise relevance lists
 		rel_initial_conditions = []
@@ -403,7 +402,7 @@ class NonZoomingControllerToI():
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
 		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
-		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12','c13', 'c14', 'c15', 'c16' 'ref_boo1', 'ref_book2']
+		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'book1', 'book2', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'ref1_book1', 'ref2_book1', 'ref1_book2', 'ref2_book2']
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 
@@ -420,8 +419,10 @@ class NonZoomingControllerToI():
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
-				if(self.belief[self.domain_info.In_handBook1_index] == 'true'): currently_holding = 'ref_book1'
-				elif(self.belief[self.domain_info.In_handBook2_index] == 'true'): currently_holding = 'ref_book2'
+				if(self.belief[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
+				elif(self.belief[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
+				elif(self.belief[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
+				elif(self.belief[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant
@@ -430,9 +431,8 @@ class NonZoomingControllerToI():
 				rel_final_conditions.append(condition)
 
 	    # add all object constants in the domain to the list of relevant object constants
-		for const in irrelevant_obj_consts:
-			irrelevant_obj_consts.remove(const)
-			rel_obj_consts.append(const)
+		for const in irrelevant_obj_consts: rel_obj_consts.append(const)
+		for const in rel_obj_consts: irrelevant_obj_consts.remove(const)
 
 	    # add refined components of relevant object constants
 		for const in rel_obj_consts:

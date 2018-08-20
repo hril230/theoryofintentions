@@ -1,1 +1,4 @@
-Time taken with zooming: 0:00:05.582862
+Initial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand] = ['c4', 'c2', 'c2', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I).
+Time taken with zooming: 0:00:51.758434
+Time taken without zooming: 0:00:18.162349
