@@ -13,7 +13,7 @@ results_file_name = "simulation/results/"
 
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
 
-goal = "holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I)."
+goal = "holds(loc(book1,kitchen),I), holds(loc(book2,kitchen),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I)."
 
 max_plan_length = 17
 
@@ -105,9 +105,9 @@ def createConditionsAndRun():
 	controlled_run = False
 
 	# set initial conditions
-	robot_refined_location = 'c4'
-	book1_refined_location = 'c2'
-	book2_refined_location = 'c2'
+	robot_refined_location = 'c9'
+	book1_refined_location = 'c9'
+	book2_refined_location = 'c9'
 	refined_in_handBook1 = 'false'
 	refined_in_handBook2 = 'false'
 	refined_in_handBook1Ref1, refined_in_handBook1Ref2, refined_in_handBook2Ref1, refined_in_handBook2Ref2 = 'false', 'false', 'false', 'false'

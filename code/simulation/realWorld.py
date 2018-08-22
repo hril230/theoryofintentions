@@ -69,17 +69,7 @@ class World(object):
 
 	def executeAction(self,action):
 		happened = False
-		#exo_action = ''
-
-		################################## for testing proposes only ##################################
-		#if('test(rob1,loc(ref1_book1' in action and self.RefinedState[self.domain_info.LocationBook1_index]!='c1' and self.RefinedState[self.domain_info.In_handBook1_index] == 'false'):
-		#	self.executeAction('exo_move(ref1_book1,c1)')
-		#	print('%%%%%%%%% realWorld -      exo_action happened in realWorld.py : exo_move(ref1_book1,c1)')
-		######################################################################################################
-
 		input = list(self.domain_info.refinedStateToRefinedHoldsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
-		#if(self.exo_action_happened == False): exo_action = self.__getRandomExoAction(action)
-		#if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
 		answer = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
@@ -89,12 +79,7 @@ class World(object):
 		else:
 			happened = True
 			self.__updateStateFromAnswer(answer)
-			if self.RefinedState[4] == 'true': sys.exit()
 			self.history.append(action)
-			#if(exo_action != ''):
-			#	self.history.append(exo_action)
-			#	self.exo_action_happened = True
-			#	print('%%%%%%%%% realWorld -      exo_action happened in realWorld.py :  '+exo_action)
 	 	return self.__getDirectObservation(answer)
 
 	def __getDirectObservation(self,answer):
@@ -113,9 +98,9 @@ class World(object):
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
 		return answer.rstrip().strip('{').strip('}')
 
-	def achievedGoal(self):
+	def achievedGoal(self): # TODO edit here to change goal
 		if(self.CoarseState[self.domain_info.LocationBook1_index] != 'kitchen'): return 'false'
-		elif(self.CoarseState[self.domain_info.LocationBook2_index] != 'library'): return 'false'
+		elif(self.CoarseState[self.domain_info.LocationBook2_index] != 'kitchen'): return 'false'
 		elif(self.CoarseState[self.domain_info.In_handBook1_index] == 'true'): return 'false'
 		elif(self.CoarseState[self.domain_info.In_handBook2_index] == 'true'): return 'false'
 		else: return 'true'

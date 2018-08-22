@@ -4,6 +4,7 @@ import subprocess
 import re
 import numpy
 import random
+import sys
 from itertools import groupby
 
 class ControllerToI():
@@ -93,12 +94,12 @@ class ControllerToI():
 				print  'ControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
 				print  'ControllerToI \t\t next abstrac action: ' + abstract_action
 				need_refined_plan = True
-				self.refine(abstract_action, self.belief, self.refined_location)
+				self.refine(abstract_action, self.refined_location)
 				refined_plan_step = 0
 				zoomed_history = Set() #holds all the history of the refined plan created wtih zoomed refined domain in form of 'hpd' and 'obs'
 				refined_observations = Set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
-																 #condition for the ASP that infers coarse observations from the refined direct observations
+																 #condition for the ASP that infers coarse observations from the refined direct observations	
 				while(need_refined_plan):
 					refined_occurrences = self.runZoomedDomain()
 					need_refined_plan = False
@@ -106,14 +107,14 @@ class ControllerToI():
 						print 'ControllerToI \t\t no refined plan '
 						break
 					refined_occurrences.sort(key=self.getStep)
-					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
+					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])	
 					for refined_occurence in refined_occurrences:
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
 						if occurrence_step != refined_plan_step: continue
 						print('ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
 						if 'test' in refined_action:
- 							action_test_result, action_observation = self.executer.test(refined_action)
+ 							action_test_result, action_observation = self.executer.test(refined_action)	
 							zoomed_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
 							refined_plan_step += 1
 							print('ControllerToI \t\t test result: ' + str(action_test_result))
@@ -133,7 +134,9 @@ class ControllerToI():
 								self.addObsZoomedDomain(list(zoomed_history),refined_plan_step+6)
 								break
 						else:
+							previous_belief = self.belief[:]
 							self.executer.executeAction(refined_action)
+							self.belief = previous_belief
 							refined_plan_step += 1
 				abstract_step_obs = list(self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step))
 				print('ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
@@ -165,7 +168,7 @@ class ControllerToI():
 		if 'holds' in observation2: observations.add(observation2)
 		return observations
 
-	def infer_abstract_obs_from_refined_observations(self,initial_refined_location,refined_observations_list, step ):
+	def infer_abstract_obs_from_refined_observations(self,initial_refined_location,refined_observations_list, step):
 		initial_state = list(self.domain_info.coarseStateToCoarseHoldsSet(self.belief,0)) + ['holds(loc(rob1,'+initial_refined_location+'),0).']
 		history_index = self.preASP_infering_coarse_belief_split.index(self.history_marker)
 		new_preASP_infering_coarse_belief_split = self.preASP_infering_coarse_belief_split[:history_index +1] + initial_state + refined_observations_list +self.preASP_infering_coarse_belief_split[history_index +1:]
@@ -177,7 +180,6 @@ class ControllerToI():
 		print('\nControllerToI: Inferring coarse obs from refined history ')
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_infering_coarse_belief_file +' -A ',shell=True)
 		observations  = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
-
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
 	def getStep(self, observation):
@@ -344,10 +346,10 @@ class ControllerToI():
 
 
 	# this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
-	def refine(self,action,belief,refined_location):
+	def refine(self, action, refined_location):
 		initial_state = Set()
 		final_state = Set()
-		coarse_location = belief[self.domain_info.LocationRobot_index]
+		coarse_location = self.belief[self.domain_info.LocationRobot_index]
 	    # use action and history to figure out the transition (initial_state, action, final_state)
 	    # the location of the robot is relevant for move transitions
 		action_object = action[action.find(',')+1:-1]
@@ -423,10 +425,10 @@ class ControllerToI():
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
-				if(self.belief[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
-				elif(self.belief[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
-				elif(self.belief[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
-				elif(self.belief[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
+				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant

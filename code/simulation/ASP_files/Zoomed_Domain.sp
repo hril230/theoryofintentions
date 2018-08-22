@@ -244,13 +244,13 @@ comp(ref2_book2, book2).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,library),I).
+goal(I) :- holds(coarse_loc(rob1,kitchen),I).
 
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c4), 0).
+holds(loc(rob1,c9), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

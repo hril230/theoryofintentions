@@ -222,12 +222,12 @@ comp(ref2_book2, book2).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
--holds(coarse_in_hand(rob1,book2),0).
-holds(coarse_loc(book2,library),0).
-holds(coarse_loc(book1,library),0).
-holds(coarse_loc(rob1,kitchen),0).
+holds(coarse_in_hand(rob1,book2),0).
+holds(coarse_loc(book1,office1),0).
+holds(coarse_loc(book2,office1),0).
+holds(coarse_loc(rob1,office1),0).
 -holds(coarse_in_hand(rob1,book1),0).
-holds(loc(rob1,c4),0).
+holds(loc(rob1,c9),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

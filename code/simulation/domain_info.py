@@ -14,7 +14,10 @@ class DomainInfo():
 		self.In_handBook1_Ref2_index = 6
 		self.In_handBook2_Ref1_index = 7
 		self.In_handBook2_Ref2_index = 8
-		self.num_indexes = 9
+		self.num_coarse_indexes = 5
+		self.num_refined_indexes = 9
+		self.coarse_state = ['false'] * self.num_coarse_indexes
+		self.refined_state = ['false'] * self.num_refined_indexes
 
 	def observations_to_obs_set(self, observations, robotLocation, step):
 		obsSet = Set()
@@ -39,87 +42,86 @@ class DomainInfo():
 
 	def abstractAnswerToCoarseState(self,answer):
 		answer = answer.rstrip().strip('{').strip('}')
-		state = ['false'] * self.num_indexes
 		for holds in answer.split(', '):
 			if holds[0] == '-':
 				fluent = holds[7:holds.rfind(',')]
 				if(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): state[self.In_handBook1_index] = 'false'
-					if(split_fluent[1] == 'book2'): state[self.In_handBook2_index] = 'false'
+					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'false'
+					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
 				if(fluent[0:4] == 'loc('):
 					fluent = fluent[4:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[0] == 'rob1'): state[self.LocationRobot_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book1'):state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book2'): state[self.LocationBook2_index] = split_fluent[1]
+					if(split_fluent[0] == 'rob1'): self.coarse_state[self.LocationRobot_index] = split_fluent[1]
+					elif(split_fluent[0] == 'book1'): self.coarse_state[self.LocationBook1_index] = split_fluent[1]
+					elif(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
 				elif(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): state[self.In_handBook1_index] = 'true'
-					if(split_fluent[1] == 'book2'): state[self.In_handBook2_index] = 'true'
-		return state
+					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'true'
+					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
+		return self.coarse_state
 
 	def refinedAnswerToRefinedState(self,answer):
 		answer = answer.split('}')
 		answer = answer[0]
 		answer = answer.rstrip().strip('{').strip('}')
-		state = ['false'] * self.num_indexes
-		in_hand_ref1_book1 = False
-		in_hand_ref2_book1 = False
-		in_hand_ref1_book2 = False
-		in_hand_ref2_book2 = False
+		self.refined_state[self.In_handBook1_Ref1_index] = 'false'
+		self.refined_state[self.In_handBook1_Ref2_index] = 'false'
+		self.refined_state[self.In_handBook2_Ref1_index] = 'false'
+		self.refined_state[self.In_handBook2_Ref2_index] = 'false'
 		for holds in answer.split(', '):
 			if not (holds[0] == '-'):
 				fluent = holds[6:holds.rfind(',')]
  				if(fluent[0:4] == 'loc('):
 					fluent = fluent[4:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[0] == 'rob1'): state[self.LocationRobot_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref1_book1'):state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref2_book1'):state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref1_book2'): state[self.LocationBook2_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref2_book2'): state[self.LocationBook2_index] = split_fluent[1]
+					if(split_fluent[0] == 'rob1'): self.refined_state[self.LocationRobot_index] = split_fluent[1]
+					elif(split_fluent[0] == 'ref1_book1'): self.refined_state[self.LocationBook1_index] = split_fluent[1]
+					elif(split_fluent[0] == 'ref2_book1'): self.refined_state[self.LocationBook1_index] = split_fluent[1]
+					elif(split_fluent[0] == 'ref1_book2'): self.refined_state[self.LocationBook2_index] = split_fluent[1]
+					elif(split_fluent[0] == 'ref2_book2'): self.refined_state[self.LocationBook2_index] = split_fluent[1]
 				elif(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'ref1_book1'): state[self.In_handBook1_Ref1_index] = 'true'
-					if(split_fluent[1] == 'ref2_book1'): state[self.In_handBook1_Ref2_index] = 'true'
-					if(split_fluent[1] == 'ref1_book2'): state[self.In_handBook2_Ref1_index] = 'true'
-					if(split_fluent[1] == 'ref2_book2'): state[self.In_handBook2_Ref2_index] = 'true'
-		if (state[self.In_handBook1_Ref1_index] == 'true') or (state[self.In_handBook1_Ref2_index] == 'true'): state[self.In_handBook1_index] = 'true'
-		else: state[self.In_handBook1_index] = 'false'
-		if (state[self.In_handBook2_Ref1_index] == 'true') or (state[self.In_handBook2_Ref2_index] == 'true'): state[self.In_handBook2_index] = 'true'
-		else: state[self.In_handBook2_index] = 'false'
-		return state
+					if(split_fluent[1] == 'ref1_book1'): self.refined_state[self.In_handBook1_Ref1_index] = 'true'
+					if(split_fluent[1] == 'ref2_book1'): self.refined_state[self.In_handBook1_Ref2_index] = 'true'
+					if(split_fluent[1] == 'ref1_book2'): self.refined_state[self.In_handBook2_Ref1_index] = 'true'
+					if(split_fluent[1] == 'ref2_book2'): self.refined_state[self.In_handBook2_Ref2_index] = 'true'
+		if (self.refined_state[self.In_handBook1_Ref1_index] == 'true') or (self.refined_state[self.In_handBook1_Ref2_index] == 'true'):
+			self.refined_state[self.In_handBook1_index] = 'true'
+		else: self.refined_state[self.In_handBook1_index] = 'false'
+		if (self.refined_state[self.In_handBook2_Ref1_index] == 'true') or (self.refined_state[self.In_handBook2_Ref2_index] == 'true'):
+			self.refined_state[self.In_handBook2_index] = 'true'
+		else: self.refined_state[self.In_handBook2_index] = 'false'
+		return self.refined_state
 
 	def refinedAnswerToCoarseState(self,answer):
-		state = ['false'] * self.num_indexes
 		for holds in answer.split(', '):
 			if holds[0] == '-':
 				fluent = holds[7:holds.rfind(',')]
 				if(fluent[0:15] == 'coarse_in_hand('):
 					fluent = fluent[15:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): state[self.In_handBook1_index] = 'false'
-					if(split_fluent[1] == 'book2'): state[self.In_handBook2_index] = 'false'
+					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'false'
+					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
 				if(fluent[0:11] == 'coarse_loc('):
 					fluent = fluent[11:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[0] == 'rob1'): state[self.LocationRobot_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book1'):state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book2'): state[self.LocationBook2_index] = split_fluent[1]
+					if(split_fluent[0] == 'rob1'): self.coarse_state[self.LocationRobot_index] = split_fluent[1]
+					elif(split_fluent[0] == 'book1'): self.coarse_state[self.LocationBook1_index] = split_fluent[1]
+					elif(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
 				elif(fluent[0:15] == 'coarse_in_hand('):
 					fluent = fluent[15:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): state[self.In_handBook1_index] = 'true'
-					if(split_fluent[1] == 'book2'): state[self.In_handBook2_index] = 'true'
-		return state
+					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'true'
+					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
+		return self.coarse_state
 
 
 	def coarseStateToAstractHoldsSet(self,state,step):

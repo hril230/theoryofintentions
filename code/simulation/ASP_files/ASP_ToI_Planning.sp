@@ -1,5 +1,5 @@
-#const numSteps = 23. % maximum number of steps.
-#const max_len = 22. % maximum activity_length of an activity.
+#const numSteps = 24. % maximum number of steps.
+#const max_len = 23. % maximum activity_length of an activity.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -568,7 +568,7 @@ next_to(kitchen, office1).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I).
+holds(my_goal,I) :- holds(loc(book1,kitchen),I), holds(loc(book2,kitchen),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I).
 
 
 
@@ -576,7 +576,7 @@ holds(my_goal,I) :- holds(loc(book1,kitchen),I), -holds(in_hand(rob1,book1),I).
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(3).
+current_step(4).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%

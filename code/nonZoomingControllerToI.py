@@ -419,10 +419,10 @@ class NonZoomingControllerToI():
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
-				if(self.belief[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
-				elif(self.belief[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
-				elif(self.belief[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
-				elif(self.belief[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
+				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant
