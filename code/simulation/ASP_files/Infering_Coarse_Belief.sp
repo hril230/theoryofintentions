@@ -1,4 +1,4 @@
-#const numSteps = 0.
+#const numSteps = 2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This ASP is used for inferring indirect observations from the direct observations set
@@ -10,12 +10,12 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library,kitchen,office1}.
+#coarse_place = {library,kitchen}.
 #robot = {rob1}.
-#coarse_object = {book1,book2}.
-#object = {ref1_book1, ref2_book1, ref1_book2, ref2_book2}.
+#coarse_object = {book1}.
+#object = {ref1_book1}.
 #coarse_thing = #coarse_object + #robot.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9}.
+#place = {c1, c2, c3, c4}.
 #thing = #object + #robot.
 
 #step = 0..numSteps.
@@ -185,35 +185,16 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %% Attributes.
 next_to(c1, c2).
 next_to(c2, c3).
-next_to(c1, c3).
-
-next_to(c4, c5).
-next_to(c5, c6).
-next_to(c4, c6).
-
-next_to(c7, c8).
-next_to(c8, c9).
-next_to(c7, c9).
-
 next_to(c3, c4).
-next_to(c6, c7).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
 comp(c1, library).
 comp(c2, library).
-comp(c3, library).
+comp(c3, kitchen).
 comp(c4, kitchen).
-comp(c5, kitchen).
-comp(c6, kitchen).
-comp(c7, office1).
-comp(c8, office1).
-comp(c9, office1).
 comp(ref1_book1, book1).
-comp(ref2_book1, book1).
-comp(ref1_book2, book2).
-comp(ref2_book2, book2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -222,12 +203,12 @@ comp(ref2_book2, book2).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(coarse_in_hand(rob1,book2),0).
-holds(coarse_loc(book1,office1),0).
-holds(coarse_loc(book2,office1),0).
-holds(coarse_loc(rob1,office1),0).
--holds(coarse_in_hand(rob1,book1),0).
-holds(loc(rob1,c9),0).
+holds(coarse_loc(rob1,library),0).
+holds(coarse_loc(book1,library),0).
+holds(coarse_in_hand(rob1,book1),0).
+holds(loc(rob1,c2),0).
+holds(directly_observed(rob1,loc(ref1_book1,c3),true),2).
+holds(directly_observed(rob1,loc(rob1,c3),true),2).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

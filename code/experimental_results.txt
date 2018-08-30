@@ -1,4 +1,0 @@
-Initial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand] = ['c9', 'c9', 'c9', 'false', 'false', 'false', 'false', 'false', 'false']
-Goal: holds(loc(book1,kitchen),I), holds(loc(book2,kitchen),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I).
-Time taken with zooming: 0:01:18.741628
-Time taken without zooming: 0:01:05.192345

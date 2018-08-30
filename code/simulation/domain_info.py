@@ -1,21 +1,15 @@
 from sets import Set
 class DomainInfo():
 
-	CoarseLocations = ['library','kitchen']
-	CoarseLocationsAsCells = [['c1','c2'],['c3','c4']]
-	RefinedLocations = ['c1','c2','c3','c4']
+	CoarseLocations = ['library', 'kitchen']
+	CoarseLocationsAsCells = [['c1', 'c2'], ['c3', 'c4']]
 	def __init__(self):
 		self.LocationRobot_index = 0
 		self.LocationBook1_index = 1
-		self.LocationBook2_index = 2
-		self.In_handBook1_index = 3
-		self.In_handBook2_index = 4
-		self.In_handBook1_Ref1_index = 5
-		self.In_handBook1_Ref2_index = 6
-		self.In_handBook2_Ref1_index = 7
-		self.In_handBook2_Ref2_index = 8
-		self.num_coarse_indexes = 5
-		self.num_refined_indexes = 9
+		self.In_handBook1_index = 2
+		self.In_handBook1_Ref1_index = 3
+		self.num_coarse_indexes = 3
+		self.num_refined_indexes = 4
 		self.coarse_state = ['false'] * self.num_coarse_indexes
 		self.refined_state = ['false'] * self.num_refined_indexes
 
@@ -29,15 +23,15 @@ class DomainInfo():
 					obsSet.add('obs(loc(book1,' +str(observation[1])+ '),true,'+ str(step) +').')
 				else:
 					obsSet.add('obs(loc(book1,' +str(robotLocation)+ '),false,'+ str(step) +').')
-			if (observation[0] == self.LocationBook2_index):
-				if(observation[1] != 'unknown'):
-					obsSet.add('obs(loc(book2,' +str(observation[1])+ '),true,'+ str(step) +').')
-				else:
-					obsSet.add('obs(loc(book2,' +str(robotLocation)+ '),false,'+ str(step) +').')
+			#if (observation[0] == self.LocationBook2_index):
+			#	if(observation[1] != 'unknown'):
+			#		obsSet.add('obs(loc(book2,' +str(observation[1])+ '),true,'+ str(step) +').')
+			#	else:
+			#		obsSet.add('obs(loc(book2,' +str(robotLocation)+ '),false,'+ str(step) +').')
 			if (observation[0] == self.In_handBook1_index and observation[1] != 'unknown'):
 				obsSet.add('obs(in_hand(rob1,book1),' + observation[1]+ ','+ str(step) +').')
-			if (observation[0] == self.In_handBook2_index and observation[1] != 'unknown'):
-				obsSet.add('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
+			#if (observation[0] == self.In_handBook2_index and observation[1] != 'unknown'):
+			#	obsSet.add('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
 		return obsSet
 
 	def abstractAnswerToCoarseState(self,answer):
@@ -49,7 +43,7 @@ class DomainInfo():
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
 					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'false'
-					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
+					#if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
 				if(fluent[0:4] == 'loc('):
@@ -57,12 +51,12 @@ class DomainInfo():
 					split_fluent = fluent.split(',')
 					if(split_fluent[0] == 'rob1'): self.coarse_state[self.LocationRobot_index] = split_fluent[1]
 					elif(split_fluent[0] == 'book1'): self.coarse_state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
+					#elif(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
 				elif(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
 					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'true'
-					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
+					#if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
 		return self.coarse_state
 
 	def refinedAnswerToRefinedState(self,answer):
@@ -70,9 +64,9 @@ class DomainInfo():
 		answer = answer[0]
 		answer = answer.rstrip().strip('{').strip('}')
 		self.refined_state[self.In_handBook1_Ref1_index] = 'false'
-		self.refined_state[self.In_handBook1_Ref2_index] = 'false'
-		self.refined_state[self.In_handBook2_Ref1_index] = 'false'
-		self.refined_state[self.In_handBook2_Ref2_index] = 'false'
+		#self.refined_state[self.In_handBook1_Ref2_index] = 'false'
+		#self.refined_state[self.In_handBook2_Ref1_index] = 'false'
+		#self.refined_state[self.In_handBook2_Ref2_index] = 'false'
 		for holds in answer.split(', '):
 			if not (holds[0] == '-'):
 				fluent = holds[6:holds.rfind(',')]
@@ -81,22 +75,22 @@ class DomainInfo():
 					split_fluent = fluent.split(',')
 					if(split_fluent[0] == 'rob1'): self.refined_state[self.LocationRobot_index] = split_fluent[1]
 					elif(split_fluent[0] == 'ref1_book1'): self.refined_state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref2_book1'): self.refined_state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref1_book2'): self.refined_state[self.LocationBook2_index] = split_fluent[1]
-					elif(split_fluent[0] == 'ref2_book2'): self.refined_state[self.LocationBook2_index] = split_fluent[1]
+					#elif(split_fluent[0] == 'ref2_book1'): self.refined_state[self.LocationBook1_index] = split_fluent[1]
+					#elif(split_fluent[0] == 'ref1_book2'): self.refined_state[self.LocationBook2_index] = split_fluent[1]
+					#elif(split_fluent[0] == 'ref2_book2'): self.refined_state[self.LocationBook2_index] = split_fluent[1]
 				elif(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
 					if(split_fluent[1] == 'ref1_book1'): self.refined_state[self.In_handBook1_Ref1_index] = 'true'
-					if(split_fluent[1] == 'ref2_book1'): self.refined_state[self.In_handBook1_Ref2_index] = 'true'
-					if(split_fluent[1] == 'ref1_book2'): self.refined_state[self.In_handBook2_Ref1_index] = 'true'
-					if(split_fluent[1] == 'ref2_book2'): self.refined_state[self.In_handBook2_Ref2_index] = 'true'
-		if (self.refined_state[self.In_handBook1_Ref1_index] == 'true') or (self.refined_state[self.In_handBook1_Ref2_index] == 'true'):
+					#if(split_fluent[1] == 'ref2_book1'): self.refined_state[self.In_handBook1_Ref2_index] = 'true'
+					#if(split_fluent[1] == 'ref1_book2'): self.refined_state[self.In_handBook2_Ref1_index] = 'true'
+					#if(split_fluent[1] == 'ref2_book2'): self.refined_state[self.In_handBook2_Ref2_index] = 'true'
+		if (self.refined_state[self.In_handBook1_Ref1_index] == 'true'):# or (self.refined_state[self.In_handBook1_Ref2_index] == 'true'):
 			self.refined_state[self.In_handBook1_index] = 'true'
 		else: self.refined_state[self.In_handBook1_index] = 'false'
-		if (self.refined_state[self.In_handBook2_Ref1_index] == 'true') or (self.refined_state[self.In_handBook2_Ref2_index] == 'true'):
-			self.refined_state[self.In_handBook2_index] = 'true'
-		else: self.refined_state[self.In_handBook2_index] = 'false'
+		#if (self.refined_state[self.In_handBook2_Ref1_index] == 'true') or (self.refined_state[self.In_handBook2_Ref2_index] == 'true'):
+		#	self.refined_state[self.In_handBook2_index] = 'true'
+		#else: self.refined_state[self.In_handBook2_index] = 'false'
 		return self.refined_state
 
 	def refinedAnswerToCoarseState(self,answer):
@@ -107,7 +101,7 @@ class DomainInfo():
 					fluent = fluent[15:-1]
 					split_fluent = fluent.split(',')
 					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'false'
-					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
+					#if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
 				if(fluent[0:11] == 'coarse_loc('):
@@ -115,12 +109,12 @@ class DomainInfo():
 					split_fluent = fluent.split(',')
 					if(split_fluent[0] == 'rob1'): self.coarse_state[self.LocationRobot_index] = split_fluent[1]
 					elif(split_fluent[0] == 'book1'): self.coarse_state[self.LocationBook1_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
+					#elif(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
 				elif(fluent[0:15] == 'coarse_in_hand('):
 					fluent = fluent[15:-1]
 					split_fluent = fluent.split(',')
 					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'true'
-					if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
+					#if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
 		return self.coarse_state
 
 
@@ -130,16 +124,16 @@ class DomainInfo():
 			holdsSet.add('holds(loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
 		if(state[self.LocationBook1_index] != 'unknown'):
 			holdsSet.add('holds(loc(book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
-		if(state[self.LocationBook2_index] != 'unknown'):
-			holdsSet.add('holds(loc(book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		#if(state[self.LocationBook2_index] != 'unknown'):
+		#	holdsSet.add('holds(loc(book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
 		if(state[self.In_handBook1_index] == 'true'):
 			holdsSet.add('holds(in_hand(rob1,book1),'+str(step)+').')
 		elif(state[self.In_handBook1_index] == 'false'):
 			holdsSet.add('-holds(in_hand(rob1,book1),'+str(step)+').')
-		if(state[self.In_handBook2_index] == 'true'):
-			holdsSet.add('holds(in_hand(rob1,book2),'+str(step)+').')
-		elif(state[self.In_handBook2_index] == 'false'):
-			holdsSet.add('-holds(in_hand(rob1,book2),'+str(step)+').')
+		#if(state[self.In_handBook2_index] == 'true'):
+		#	holdsSet.add('holds(in_hand(rob1,book2),'+str(step)+').')
+		#elif(state[self.In_handBook2_index] == 'false'):
+		#	holdsSet.add('-holds(in_hand(rob1,book2),'+str(step)+').')
 		return holdsSet
 
 
@@ -149,16 +143,16 @@ class DomainInfo():
 			holdsSet.add('holds(coarse_loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
 		if(state[self.LocationBook1_index] != 'unknown'):
 			holdsSet.add('holds(coarse_loc(book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
-		if(state[self.LocationBook2_index] != 'unknown'):
-			holdsSet.add('holds(coarse_loc(book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		#if(state[self.LocationBook2_index] != 'unknown'):
+		#	holdsSet.add('holds(coarse_loc(book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
 		if(state[self.In_handBook1_index] == 'true'):
 			holdsSet.add('holds(coarse_in_hand(rob1,book1),'+str(step)+').')
 		if(state[self.In_handBook1_index] == 'false'):
 			holdsSet.add('-holds(coarse_in_hand(rob1,book1),'+str(step)+').')
-		if(state[self.In_handBook2_index] == 'true'):
-			holdsSet.add('holds(coarse_in_hand(rob1,book2),'+str(step)+').')
-		if(state[self.In_handBook2_index] == 'false'):
-			holdsSet.add('-holds(coarse_in_hand(rob1,book2),'+str(step)+').')
+		#if(state[self.In_handBook2_index] == 'true'):
+		#	holdsSet.add('holds(coarse_in_hand(rob1,book2),'+str(step)+').')
+		#if(state[self.In_handBook2_index] == 'false'):
+		#	holdsSet.add('-holds(coarse_in_hand(rob1,book2),'+str(step)+').')
 		return holdsSet
 
 
@@ -168,26 +162,26 @@ class DomainInfo():
 			holdsSet.add('holds(loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
 		if(state[self.LocationBook1_index] != 'unknown'):
 			holdsSet.add('holds(loc(ref1_book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
-			holdsSet.add('holds(loc(ref2_book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
-		if(state[self.LocationBook2_index] != 'unknown'):
-			holdsSet.add('holds(loc(ref1_book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
-			holdsSet.add('holds(loc(ref2_book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		#	holdsSet.add('holds(loc(ref2_book1,'+str(state[self.LocationBook1_index])+'),'+str(step)+').')
+		#if(state[self.LocationBook2_index] != 'unknown'):
+		#	holdsSet.add('holds(loc(ref1_book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
+		#	holdsSet.add('holds(loc(ref2_book2,'+str(state[self.LocationBook2_index])+'),'+str(step)+').')
 		if(state[self.In_handBook1_Ref1_index] == 'true'):
 			holdsSet.add('holds(in_hand(rob1,ref1_book1),'+str(step)+').')
-		if(state[self.In_handBook1_Ref2_index] == 'true'):
-			holdsSet.add('holds(in_hand(rob1,ref2_book1),'+str(step)+').')
+		#if(state[self.In_handBook1_Ref2_index] == 'true'):
+		#	holdsSet.add('holds(in_hand(rob1,ref2_book1),'+str(step)+').')
 		if(state[self.In_handBook1_Ref1_index] == 'false'):
 			holdsSet.add('-holds(in_hand(rob1,ref1_book1),'+str(step)+').')
-		if(state[self.In_handBook1_Ref2_index] == 'false'):
-			holdsSet.add('-holds(in_hand(rob1,ref2_book1),'+str(step)+').')
-		if(state[self.In_handBook2_Ref1_index] == 'true'):
-			holdsSet.add('holds(in_hand(rob1,ref1_book2),'+str(step)+').')
-		if(state[self.In_handBook2_Ref2_index] == 'true'):
-			holdsSet.add('holds(in_hand(rob1,ref2_book2),'+str(step)+').')
-		if(state[self.In_handBook2_Ref1_index] == 'false'):
-			holdsSet.add('-holds(in_hand(rob1,ref1_book2),'+str(step)+').')
-		if(state[self.In_handBook2_Ref2_index] == 'false'):
-			holdsSet.add('-holds(in_hand(rob1,ref2_book2),'+str(step)+').')
+		#if(state[self.In_handBook1_Ref2_index] == 'false'):
+		#	holdsSet.add('-holds(in_hand(rob1,ref2_book1),'+str(step)+').')
+		#if(state[self.In_handBook2_Ref1_index] == 'true'):
+		#	holdsSet.add('holds(in_hand(rob1,ref1_book2),'+str(step)+').')
+		#if(state[self.In_handBook2_Ref2_index] == 'true'):
+		#	holdsSet.add('holds(in_hand(rob1,ref2_book2),'+str(step)+').')
+		#if(state[self.In_handBook2_Ref1_index] == 'false'):
+		#	holdsSet.add('-holds(in_hand(rob1,ref1_book2),'+str(step)+').')
+		#if(state[self.In_handBook2_Ref2_index] == 'false'):
+		#	holdsSet.add('-holds(in_hand(rob1,ref2_book2),'+str(step)+').')
 		return holdsSet
 
 	def indirectObservationsToObsSet(self,indirectObservationsSet,step):
@@ -212,11 +206,11 @@ class DomainInfo():
 			fluent = condition[condition.find('(') + 1: condition.rfind(',')]
 			if 'in_hand' in fluent:
 				if 'book1' in fluent: indexes.add(self.In_handBook1_index)
-				elif 'book2' in fluent: indexes.add(self.In_handBook2_index)
+				#elif 'book2' in fluent: indexes.add(self.In_handBook2_index)
 			elif 'loc' in fluent:
 				if 'rob1' in fluent: indexes.add(self.LocationRobot_index)
 				elif 'book1' in fluent: indexes.add(self.LocationBook1_index)
-				elif 'book2' in fluent: indexes.add(self.LocationBook2_index)
+				#elif 'book2' in fluent: indexes.add(self.LocationBook2_index)
 		return indexes
 
 	def getObsFromAnswerObservations(self,answer):
@@ -240,16 +234,16 @@ class DomainInfo():
 			if('book1' in action):
 				relevant_indexes.add(self.In_handBook1_index)
 				relevant_indexes.add(self.LocationBook1_index)
-			if('book2' in action):
-				relevant_indexes.add(self.In_handBook2_index)
-				relevant_indexes.add(self.LocationBook2_index)
+			#if('book2' in action):
+			#	relevant_indexes.add(self.In_handBook2_index)
+			#	relevant_indexes.add(self.LocationBook2_index)
 		return relevant_indexes
 
 	def getFluentIndex(self,fluent):
 		if 'loc' in fluent:
 			if 'rob' in fluent: return self.LocationRobot_index
 			if 'book1' in fluent: return self.LocationBook1_index
-			if 'book2' in fluent: return self.LocationBook2_index
+			#if 'book2' in fluent: return self.LocationBook2_index
 		if 'in_hand' in fluent:
 			if 'book1' in fluent: return self.In_handBook1_index
-			if 'book2' in fluent: return self.In_handBook2_index
+			#if 'book2' in fluent: return self.In_handBook2_index

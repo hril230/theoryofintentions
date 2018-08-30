@@ -100,9 +100,9 @@ class World(object):
 
 	def achievedGoal(self): # TODO edit here to change goal
 		if(self.CoarseState[self.domain_info.LocationBook1_index] != 'kitchen'): return 'false'
-		elif(self.CoarseState[self.domain_info.LocationBook2_index] != 'kitchen'): return 'false'
-		elif(self.CoarseState[self.domain_info.In_handBook1_index] == 'true'): return 'false'
-		elif(self.CoarseState[self.domain_info.In_handBook2_index] == 'true'): return 'false'
+		#if(self.CoarseState[self.domain_info.LocationBook2_index] != 'library'): return 'false'
+		#elif(self.CoarseState[self.domain_info.In_handBook1_index] == 'true'): return 'false'
+		#elif(self.CoarseState[self.domain_info.In_handBook2_index] == 'true'): return 'false'
 		else: return 'true'
 
 	def getGoalFeedback(self):
