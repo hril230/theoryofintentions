@@ -1,4 +1,4 @@
-#const numSteps = 6. % maximum number of steps.
+#const numSteps = 8. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This ASP is used for zooming. This ASP contains planning.
@@ -10,14 +10,13 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library, kitchen}.
+#coarse_place = {library, kitchen, office1, office2}.
 #robot = {rob1}.
-#coarse_object = {book1}.
-#object = {ref1_book1}.
+#coarse_object = {book1, book2, book3}.
+#object = {ref1_book1, ref2_book1, ref3_book1, ref1_book2, ref2_book2, ref3_book2, ref1_book3, ref2_book3, ref3_book3}.
 #coarse_thing = #coarse_object + #robot.
-#place = {c1, c2, c3, c4}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
 #thing = #object + #robot.
-
 #step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
@@ -154,7 +153,6 @@ occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
 occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
 %occurs(test(rob1, F, true), I) :- -holds(F, I-1), holds(F, I), #physical_inertial_fluent(F).
 %occurs(test(rob1, F, false), I) :- holds(F, I-1), -holds(F, I), #physical_inertial_fluent(F), not -occurs(test(rob1, F, false), I).
-%-occurs(test(R, F, O), 0). % cannot test in the first step
 
 
 
@@ -212,15 +210,47 @@ something_happened(I) :- occurs(A, I).
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
+next_to(c4, c5).
+next_to(c5, c6).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c8, c9).
+next_to(c9, c10).
+next_to(c10, c11).
+next_to(c11, c12).
+next_to(c12, c13).
+next_to(c13, c14).
+next_to(c14, c15).
+next_to(c15, c16).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
 comp(c1, library).
 comp(c2, library).
-comp(c3, kitchen).
-comp(c4, kitchen).
+comp(c3, library).
+comp(c4, library).
+comp(c5, kitchen).
+comp(c6, kitchen).
+comp(c7, kitchen).
+comp(c8, kitchen).
+comp(c9, office1).
+comp(c10, office1).
+comp(c11, office1).
+comp(c12, office1).
+comp(c13, office2).
+comp(c14, office2).
+comp(c15, office2).
+comp(c16, office2).
 comp(ref1_book1, book1).
+comp(ref2_book1, book1).
+comp(ref3_book1, book1).
+comp(ref1_book2, book2).
+comp(ref2_book2, book2).
+comp(ref3_book2, book2).
+comp(ref1_book3, book3).
+comp(ref2_book3, book3).
+comp(ref3_book3, book3).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -229,15 +259,31 @@ comp(ref1_book1, book1).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,kitchen),I).
+goal(I) :- holds(coarse_in_hand(rob1,book2),I).
 
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(in_hand(rob1,ref1_book1), 0).
-holds(loc(rob1,c2), 0).
-holds(loc(ref1_book1,c2), 0).
+holds(loc(ref1_book1,c10), 0).
+-holds(in_hand(rob1,ref1_book2), 0).
+holds(loc(ref2_book1,c10), 0).
+-holds(in_hand(rob1,ref1_book3), 0).
+holds(loc(ref3_book3,c5), 0).
+holds(loc(ref1_book3,c5), 0).
+-holds(in_hand(rob1,ref3_book1), 0).
+-holds(in_hand(rob1,ref1_book1), 0).
+-holds(in_hand(rob1,ref3_book2), 0).
+-holds(in_hand(rob1,ref2_book1), 0).
+-holds(in_hand(rob1,ref3_book3), 0).
+holds(loc(ref3_book2,c9), 0).
+holds(loc(ref2_book2,c9), 0).
+holds(loc(ref2_book3,c5), 0).
+-holds(in_hand(rob1,ref2_book3), 0).
+holds(loc(ref3_book1,c10), 0).
+holds(loc(rob1,c10), 0).
+-holds(in_hand(rob1,ref2_book2), 0).
+holds(loc(ref1_book2,c9), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

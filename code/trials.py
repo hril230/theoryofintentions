@@ -13,7 +13,7 @@ results_file_name = "simulation/results/"
 
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
 
-goal = "holds(loc(book1,kitchen),I)."
+goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), holds(loc(book3,office2),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I), -holds(in_hand(rob1,book3),I)."
 
 max_plan_length = 17
 
@@ -56,7 +56,7 @@ def runAndWrite(initial_conditions_index):
 	timeTaken = endTime - startTime
 
 	results = open('experimental_results.txt', 'w')
-	results.write('Initial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand] = ')
+	results.write('Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand] = ')
 	results.write(str(initial_state))
 	results.write('\nGoal: ')
 	results.write(goal)
@@ -105,11 +105,17 @@ def createConditionsAndRun():
 	controlled_run = False
 
 	# set initial conditions
-	robot_refined_location = 'c4'
-	book1_refined_location = 'c2'
+	robot_refined_location = 'c10'
+	book1_refined_location = 'c10'
+	book2_refined_location = 'c9'
+	book3_refined_location = 'c5'
 	refined_in_handBook1 = 'false'
-	refined_in_handBook1Ref1 = 'false'
-	initial_state = [robot_refined_location , book1_refined_location, refined_in_handBook1, refined_in_handBook1Ref1]
+	refined_in_handBook2 = 'false'
+	refined_in_handBook3 = 'false'
+	refined_in_handBook1Ref1, refined_in_handBook1Ref2, refined_in_handBook1Ref3 = 'false', 'false', 'false'
+	refined_in_handBook2Ref1, refined_in_handBook2Ref2, refined_in_handBook2Ref3 = 'false', 'false', 'false'
+	refined_in_handBook3Ref1, refined_in_handBook3Ref2, refined_in_handBook3Ref3 = 'false', 'false', 'false'
+	initial_state = [robot_refined_location , book1_refined_location, book2_refined_location, book3_refined_location, refined_in_handBook1, refined_in_handBook2, refined_in_handBook3, refined_in_handBook1Ref1, refined_in_handBook1Ref2, refined_in_handBook1Ref3, refined_in_handBook2Ref1, refined_in_handBook2Ref2, refined_in_handBook2Ref3, refined_in_handBook3Ref1, refined_in_handBook3Ref2, refined_in_handBook3Ref3]
 
 	# run experiment
 	#runAndWrite(initial_conditions_index)
