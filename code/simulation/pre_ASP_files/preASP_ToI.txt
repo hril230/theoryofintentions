@@ -12,9 +12,9 @@ sorts
 #step = 0..numSteps.
 #integer = 0..numSteps.
 
-#room = {library, kitchen, office1, office2}.
+#room = {library, kitchen, office1}.
 #robot = {rob1}.
-#book = {book1, book2, book3}.
+#book = {book1, book2}.
 #object = #book.
 #thing = #object + #robot.
 #positive_index = 1..max_len.
@@ -559,7 +559,6 @@ has_intention(I) :- intended_action(A,I).
 %%%%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
 next_to(kitchen, office1).
-next_to(office1, office2).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 

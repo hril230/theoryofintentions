@@ -1,4 +1,4 @@
-#const numSteps = 18.
+#const numSteps = 4.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This ASP is used for inferring indirect observations from the direct observations set
@@ -10,12 +10,12 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library,kitchen,office1,office2}.
+#coarse_place = {library,kitchen,office1}.
 #robot = {rob1}.
-#coarse_object = {book1,book2,book3}.
-#object = {ref1_book1,ref2_book1,ref3_book1, ref1_book2,ref2_book2,ref3_book2, ref1_book3,ref2_book3,ref3_book3}.
+#coarse_object = {book1,book2}.
+#object = {ref1_book1,ref2_book1,ref1_book2,ref2_book2}.
 #coarse_thing = #coarse_object + #robot.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9}.
 #thing = #object + #robot.
 
 #step = 0..numSteps.
@@ -191,13 +191,6 @@ next_to(c5, c6).
 next_to(c6, c7).
 next_to(c7, c8).
 next_to(c8, c9).
-next_to(c9, c10).
-next_to(c10, c11).
-next_to(c11, c12).
-next_to(c12, c13).
-next_to(c13, c14).
-next_to(c14, c15).
-next_to(c15, c16).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
@@ -205,28 +198,16 @@ next_to(c15, c16).
 comp(c1, library).
 comp(c2, library).
 comp(c3, library).
-comp(c4, library).
+comp(c4, kitchen).
 comp(c5, kitchen).
 comp(c6, kitchen).
-comp(c7, kitchen).
-comp(c8, kitchen).
+comp(c7, office1).
+comp(c8, office1).
 comp(c9, office1).
-comp(c10, office1).
-comp(c11, office1).
-comp(c12, office1).
-comp(c13, office2).
-comp(c14, office2).
-comp(c15, office2).
-comp(c16, office2).
 comp(ref1_book1, book1).
 comp(ref2_book1, book1).
-comp(ref3_book1, book1).
 comp(ref1_book2, book2).
 comp(ref2_book2, book2).
-comp(ref3_book2, book2).
-comp(ref1_book3, book3).
-comp(ref2_book3, book3).
-comp(ref3_book3, book3).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -235,78 +216,18 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
--holds(in_hand(rob1,ref2_book3),0).
-holds(loc(ref2_book1,c5),0).
+-holds(coarse_in_hand(rob1,book2),0).
+holds(coarse_loc(book2,kitchen),0).
+holds(coarse_loc(rob1,office1),0).
+holds(coarse_loc(book1,library),0).
+-holds(coarse_in_hand(rob1,book1),0).
 holds(loc(rob1,c8),0).
--holds(in_hand(rob1,ref1_book3),0).
--holds(in_hand(rob1,ref3_book3),0).
--holds(in_hand(rob1,ref2_book1),0).
--holds(in_hand(rob1,ref3_book2),0).
--holds(in_hand(rob1,ref1_book1),0).
--holds(in_hand(rob1,ref1_book2),0).
--holds(in_hand(rob1,ref3_book1),0).
-holds(loc(ref3_book3,c9),0).
-holds(loc(ref1_book2,c4),0).
-holds(loc(ref3_book1,c5),0).
-holds(loc(ref3_book2,c4),0).
--holds(in_hand(rob1,ref2_book2),0).
-holds(loc(ref1_book3,c9),0).
-holds(loc(ref2_book3,c9),0).
-holds(loc(ref1_book1,c5),0).
-holds(loc(ref2_book2,c4),0).
-holds(loc(rob1,c8),0).
-holds(directly_observed(rob1,loc(ref1_book2,c7),false),8).
-holds(directly_observed(rob1,loc(ref1_book2,c8),false),1).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),11).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),10).
-holds(directly_observed(rob1,loc(ref1_book3,c7),false),7).
-holds(directly_observed(rob1,loc(ref1_book1,c5),true),18).
-holds(directly_observed(rob1,loc(rob1,c7),true),5).
-holds(directly_observed(rob1,loc(ref2_book1,c7),false),6).
-holds(directly_observed(rob1,loc(ref2_book1,c8),false),3).
-holds(directly_observed(rob1,loc(ref1_book1,c5),true),15).
-holds(directly_observed(rob1,loc(ref1_book1,c7),false),6).
-holds(directly_observed(rob1,loc(ref1_book2,c5),false),18).
-holds(directly_observed(rob1,loc(ref1_book3,c8),false),3).
-holds(directly_observed(rob1,loc(ref1_book1,c8),false),1).
-holds(directly_observed(rob1,loc(ref3_book1,c7),false),8).
-holds(directly_observed(rob1,loc(ref1_book3,c6),false),11).
-holds(directly_observed(rob1,in_hand(rob1,ref1_book1),true),18).
-holds(directly_observed(rob1,loc(ref3_book1,c8),false),2).
-holds(directly_observed(rob1,loc(ref1_book1,c5),true),16).
-holds(directly_observed(rob1,loc(rob1,c5),true),15).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),12).
-holds(directly_observed(rob1,loc(ref2_book1,c6),false),11).
-holds(directly_observed(rob1,loc(ref1_book1,c7),false),8).
-holds(directly_observed(rob1,loc(ref1_book1,c7),false),7).
-holds(directly_observed(rob1,loc(ref1_book3,c6),false),10).
-holds(directly_observed(rob1,loc(ref1_book2,c7),false),7).
-holds(directly_observed(rob1,loc(ref1_book1,c6),false),10).
-holds(directly_observed(rob1,loc(ref1_book2,c8),false),2).
-holds(directly_observed(rob1,loc(ref1_book3,c5),false),15).
-holds(directly_observed(rob1,loc(ref1_book3,c6),false),12).
-holds(directly_observed(rob1,loc(ref1_book2,c5),false),15).
-holds(directly_observed(rob1,loc(ref1_book2,c5),false),16).
-holds(directly_observed(rob1,loc(ref1_book1,c8),false),2).
-holds(directly_observed(rob1,loc(ref1_book1,c7),false),5).
-holds(directly_observed(rob1,loc(ref1_book2,c8),false),3).
-holds(directly_observed(rob1,loc(ref1_book3,c7),false),6).
-holds(directly_observed(rob1,loc(ref1_book3,c8),false),2).
-holds(directly_observed(rob1,loc(ref3_book1,c6),false),13).
-holds(directly_observed(rob1,loc(ref1_book3,c8),false),1).
-holds(directly_observed(rob1,loc(ref1_book3,c7),false),8).
-holds(directly_observed(rob1,loc(ref1_book2,c7),false),6).
-holds(directly_observed(rob1,loc(ref1_book3,c5),false),18).
-holds(directly_observed(rob1,loc(ref1_book3,c6),false),13).
-holds(directly_observed(rob1,loc(ref1_book1,c6),false),11).
-holds(directly_observed(rob1,loc(rob1,c6),true),10).
-holds(directly_observed(rob1,loc(ref1_book1,c8),false),3).
-holds(directly_observed(rob1,loc(ref1_book3,c7),false),5).
-holds(directly_observed(rob1,loc(ref1_book3,c5),false),16).
-holds(directly_observed(rob1,loc(ref1_book2,c7),false),5).
-holds(directly_observed(rob1,loc(ref1_book1,c6),false),12).
-holds(directly_observed(rob1,loc(ref1_book1,c6),false),13).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),13).
+holds(directly_observed(rob1,loc(ref1_book1,c7),false),2).
+holds(directly_observed(rob1,loc(rob1,c7),true),2).
+holds(directly_observed(rob1,loc(ref1_book2,c6),true),4).
+holds(directly_observed(rob1,loc(ref1_book2,c7),false),2).
+holds(directly_observed(rob1,loc(rob1,c6),true),4).
+holds(directly_observed(rob1,loc(ref1_book1,c6),false),4).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
