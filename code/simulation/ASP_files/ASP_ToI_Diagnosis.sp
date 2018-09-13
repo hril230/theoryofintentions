@@ -12,9 +12,9 @@ sorts
 #step = 0..numSteps.
 #integer = 0..numSteps.
 
-#room = {library, kitchen, office1}.
+#room = {library, kitchen, office1, office2, storage_cupboard}.
 #robot = {rob1}.
-#book = {book1, book2}.
+#book = {book1, book2, book3, book4}.
 #object = #book.
 #thing = #object + #robot.
 #positive_index = 1..max_len.
@@ -559,6 +559,8 @@ has_intention(I) :- intended_action(A,I).
 %%%%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
 next_to(kitchen, office1).
+next_to(office1, office2).
+next_to(office2, storage_cupboard).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 
@@ -568,7 +570,7 @@ next_to(kitchen, office1).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,kitchen),I), holds(in_hand(rob1,book2),I).
+holds(my_goal,I) :- holds(loc(book1,office1),I), holds(loc(book2,storage_cupboard),I), holds(loc(book3,kitchen),I), holds(loc(book4,kitchen),I), -holds(in_hand(rob1,book1),I), holds(in_hand(rob1,book2),I), -holds(in_hand(rob1,book3),I), -holds(in_hand(rob1,book4),I).
 
 
 
@@ -576,28 +578,24 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,kitchen),I), ho
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(3).
+current_step(1).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-hpd(select(my_goal),true,0).
-attempt(start(1),1).
-activity_goal(1,my_goal).
-activity_component(1,1,move(rob1,kitchen)).
-activity_component(1,2,pickup(rob1,book2)).
-activity_length(1,2).
-holds(loc(book1,library),0).
-holds(loc(book2,kitchen),0).
-holds(loc(rob1,office1),0).
+holds(loc(rob1,storage_cupboard),0).
+holds(loc(book4,office1),0).
+holds(loc(book2,library),0).
+holds(loc(book1,storage_cupboard),0).
+-holds(in_hand(rob1,book4),0).
+holds(in_hand(rob1,book1),0).
+holds(loc(book3,office2),0).
+-holds(in_hand(rob1,book3),0).
 -holds(in_hand(rob1,book2),0).
--holds(in_hand(rob1,book1),0).
-obs(loc(book2,kitchen),true,3).
-obs(loc(rob1,kitchen),true,3).
-attempt(move(rob1,kitchen),2).
-explaining(3).
+hpd(select(my_goal), true,0).
+explaining(1).
 
 
 

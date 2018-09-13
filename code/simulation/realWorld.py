@@ -80,7 +80,8 @@ class World(object):
 			happened = True
 			self.__updateStateFromAnswer(answer)
 			self.history.append(action)
-	 	return self.__getDirectObservation(answer)
+		direct_observation = self.__getDirectObservation(answer)
+	 	return direct_observation
 
 	def __getDirectObservation(self,answer):
 		answer = answer.rstrip().strip('{').strip('}')
