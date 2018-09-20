@@ -4,6 +4,7 @@ import subprocess
 import re
 import numpy
 import random
+import global_variables
 from itertools import groupby
 import sys
 
@@ -46,11 +47,12 @@ class NonZoomingControllerToI():
 		self.history_ToI_diagnosis = initial_conditions #holds the history input for ASP_ToI_Diagnosis
 		self.refined_location = refined_location
 
-		print 'ControllerToI \t\t initial coarse belief: '+ str(self.belief)
-		print 'Controller ToI \t\t initial refined location: ' + str(self.refined_location)
+		print 'Non-zooming ControllerToI \t\t initial coarse belief: '+ str(self.belief)
+		print 'Non-zooming Controller ToI \t\t initial refined location: ' + str(self.refined_location)
 
 
 	def run(self):
+		global_variables.error = False
 		self.believes_goal_holds  = False
 		self.history_ToI_diagnosis.append("hpd(select(my_goal), true,0).")
 		self.diagnose()
@@ -61,23 +63,23 @@ class NonZoomingControllerToI():
 				#check if the assuption that the goal has been reached is true.
 				if(self.executer.getGoalFeedback() == True):
 					self.history_ToI_diagnosis.append('finish')
-					print('ControllerToI: \t Belief: ' + str(self.belief))
-					print('ControllerToI: \t Feedback from the workd: Belief is True')
-					print('ControllerToI: \t Finish')
+					print('Non-zooming ControllerToI: \t Belief: ' + str(self.belief))
+					print('Non-zooming ControllerToI: \t Feedback from the workd: Belief is True')
+					print('Non-zooming ControllerToI: \t Finish')
 					finish = True
 					break
 				# if it is false, count the correction and diagnose again
 				else:
 					self.goal_correction += 1
 					while(abstract_action == 'finish'):
-						print('ControllerToI: \t Belief: ' + str(self.belief))
-						print('ControllerToI: \t Feedback from the workd: Belief is False')
+						print('Non-zooming ControllerToI: \t Belief: ' + str(self.belief))
+						print('Non-zooming ControllerToI: \t Feedback from the workd: Belief is False')
 						self.history_ToI_diagnosis.append('obs(my_goal,false,'+str(self.current_step)+').')
 						self.diagnose()
 						abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == None):
 				self.history_ToI_diagnosis.append("Goal is futile")
-				print 'ControllerToI: \t Goal is futile '
+				print 'Non-zooming ControllerToI: \t Goal is futile '
 				finish = True
 				break
 
@@ -88,8 +90,8 @@ class NonZoomingControllerToI():
 				self.number_steps += 1
 			elif(abstract_action[0:5] == 'start'): pass
 			else:
-				print  'ControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
-				print  'ControllerToI \t\t next abstract action: ' + abstract_action
+				print  'Non-zooming ControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
+				print  'Non-zooming ControllerToI \t\t next abstract action: ' + abstract_action
 				need_refined_plan = True
 				self.refine(abstract_action, self.belief, self.refined_location)
 				refined_plan_step = 0
@@ -101,24 +103,23 @@ class NonZoomingControllerToI():
 					refined_occurrences = self.runZoomedDomain()
 					need_refined_plan = False
 					if refined_occurrences == ['']:
-						print 'ControllerToI \t\t no refined plan '
-						time.sleep(600) # TODO remove, for testing purposes only
+						print 'Non-zooming ControllerToI \t\t no refined plan '
 						break
 					refined_occurrences.sort(key=self.getStep)
-					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
+					print 'Non-zooming ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
 					for refined_occurence in refined_occurrences:
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
 						if occurrence_step != refined_plan_step: continue
-						print('ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
+						print('Non-zooming ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
 						if 'test' in refined_action:
  							action_test_result, action_observation = self.executer.test(refined_action)
 							zoomed_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
 							refined_plan_step += 1
-							print('ControllerToI \t\t test result: ' + str(action_test_result))
+							print('Non-zooming ControllerToI \t\t test result: ' + str(action_test_result))
 							if(action_test_result==True and 'loc(rob1' in refined_action):
 								self.refined_location = action_observation.split(',')[2][:-1]
-								print 'ControllerToI \t\t refined location: '+self.refined_location
+								print 'Non-zooming ControllerToI \t\t refined location: '+self.refined_location
 
 							refined_observations_step = self.getObservationsRelevantGoal()
 							refined_observations_step.add(action_observation)
@@ -127,7 +128,7 @@ class NonZoomingControllerToI():
 							zoomed_observation_step = self.domain_info.directObservationToRefinedObs(action_observation, refined_plan_step)
 							zoomed_history.add(zoomed_observation_step)
 							if(action_test_result == False):
-								print 'ControllerToI \t\t need another refined plan '
+								print 'Non-zooming ControllerToI \t\t need another refined plan '
 								need_refined_plan = True
 								self.addObsZoomedDomain(list(zoomed_history),refined_plan_step+6)
 								break
@@ -136,9 +137,11 @@ class NonZoomingControllerToI():
 							self.executer.executeAction(refined_action)
 							self.belief = previous_belief
 							refined_plan_step += 1
-				abstract_step_obs = list(self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step))
-				print('ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
-				print('ControllerToI \t Abstract obs: ' +': ' + str(abstract_step_obs))
+				unlisted_abstract_step_obs = self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step)
+				if global_variables.error: return
+				abstract_step_obs = list(unlisted_abstract_step_obs)
+				print('Non-zooming ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
+				print('Non-zooming ControllerToI \t Abstract obs: ' +': ' + str(abstract_step_obs))
 				self.update_belief(abstract_action, abstract_step_obs)
 				self.history_ToI_diagnosis = self.history_ToI_diagnosis + abstract_step_obs
 			self.history_ToI_diagnosis.append('attempt('+abstract_action+','+str(self.current_step)+').')
@@ -161,10 +164,12 @@ class NonZoomingControllerToI():
 		observations = Set()
 		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
-		result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
-		if 'holds' in observation2: observations.add(observation2)
-		result,observation3 = self.executer.test('test(rob1,loc(ref1_book3,' + self.refined_location+ '),true)')
-		if 'holds' in observation3: observations.add(observation3)
+		#result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
+		#if 'holds' in observation2: observations.add(observation2)
+		#result,observation3 = self.executer.test('test(rob1,loc(ref1_book3,' + self.refined_location+ '),true)')
+		#if 'holds' in observation3: observations.add(observation3)
+		#result,observation4 = self.executer.test('test(rob1,loc(ref1_book4,' + self.refined_location+ '),true)')
+		#if 'holds' in observation4: observations.add(observation4)
 		return observations
 
 	def infer_abstract_obs_from_refined_observations(self,initial_refined_location,refined_observations_list, step):
@@ -176,8 +181,11 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_infering_coarse_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print('\nControllerToI: Inferring coarse obs from refined history ')
+		print('\nNon-zooming ControllerToI: Inferring coarse obs from refined history ')
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_infering_coarse_belief_file +' -A ',shell=True)
+		if not '{' in answer_set:
+			global_variables.error = True
+			return
 		observations  = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
@@ -201,6 +209,9 @@ class NonZoomingControllerToI():
 	def runZoomedDomain(self):
 		'\nControllerToI: Running zoomed domain to get refined plan '
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A ',shell=True)
+		if not '{' in answer_set:
+			global_variables.error = True
+			return
 		plan = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return plan
 
@@ -221,7 +232,7 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_ToI_planning_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: \t\t Finding next intended action'
+		print '\nNon-zooming ControllerToI: \t\t Finding next intended action'
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
 		while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and self.number_steps < self.current_step + self.max_plan_length+3):
 			current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
@@ -230,7 +241,7 @@ class NonZoomingControllerToI():
 			f1 = open(self.asp_ToI_planning_file, 'w')
 			f1.write(asp)
 			f1.close()
-			print '\nControllerToI: Increasing variable number_steps and creating a ToI Plan'
+			print '\nNon-zooming ControllerToI: Increasing variable number_steps and creating a ToI Plan'
 			answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
 			self.number_steps +=1
 	        possibleAnswers = answerSet.rstrip().split('\n\n')
@@ -262,7 +273,7 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_ToI_diagnosing_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: Diagnosing ToI with current obs'
+		print '\nNon-zooming ControllerToI: Diagnosing ToI with current obs'
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_diagnosing_file +' -A ',shell=True)
 		answers = answerSet.rstrip().split('\n\n')
 		if self.current_diagnosis in answerSet:
@@ -281,7 +292,7 @@ class NonZoomingControllerToI():
 				if(self.current_diagnosis != line):
 					self.update_belief(line[line.find('(')+1:line.rfind(',')],[])
 					self.current_diagnosis = line
-					print('controllerToI			new diagnosis: ' + self.current_diagnosis)
+					print('Non-zooming controllerToI		new diagnosis: ' + self.current_diagnosis)
 			elif("selected_goal_holds" in line): pass
 			elif(line == ""): pass
 			else:
@@ -323,12 +334,15 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_abstract_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: Updating belief'
+		print '\nNon-zooming ControllerToI: Updating belief'
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
+		if not '{' in output:
+			global_variables.error = True
+			return
 		output = output.rstrip().strip('{').strip('}')
 		if 'holds' in output:
 			self.belief = self.domain_info.abstractAnswerToCoarseState(output)
-		print 'ControllerToI \t\t updated belief: ' + str(self.belief)
+		print 'Non-zooming ControllerToI \t\t updated belief: ' + str(self.belief)
 
 
 	def setInitialBelief(self,input):
@@ -338,7 +352,7 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_abstract_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: Setting initial belief'
+		print '\nNon-zooming ControllerToI: Setting initial belief'
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
 		output = output.rstrip().strip('{').strip('}')
 		self.belief = self.domain_info.abstractAnswerToCoarseState(output)
@@ -357,31 +371,31 @@ class NonZoomingControllerToI():
 		initial_state.add('coarse_loc(rob1,' + coarse_location + ')')
 		if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true': initial_state.add('in_hand(rob1,ref1_book1)')
 		else: initial_state.add('-in_hand(rob1,ref1_book1)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true': initial_state.add('in_hand(rob1,ref2_book1)')
-		else: initial_state.add('-in_hand(rob1,ref2_book1)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true': initial_state.add('in_hand(rob1,ref3_book1)')
-		else: initial_state.add('-in_hand(rob1,ref3_book1)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true': initial_state.add('in_hand(rob1,ref1_book2)')
-		else: initial_state.add('-in_hand(rob1,ref1_book2)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true': initial_state.add('in_hand(rob1,ref2_book2)')
-		else: initial_state.add('-in_hand(rob1,ref2_book2)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true': initial_state.add('in_hand(rob1,ref3_book2)')
-		else: initial_state.add('-in_hand(rob1,ref3_book2)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true': initial_state.add('in_hand(rob1,ref1_book3)')
-		else: initial_state.add('-in_hand(rob1,ref1_book3)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true': initial_state.add('in_hand(rob1,ref2_book3)')
-		else: initial_state.add('-in_hand(rob1,ref2_book3)')
-		if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true': initial_state.add('in_hand(rob1,ref3_book3)')
-		else: initial_state.add('-in_hand(rob1,ref3_book3)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true': initial_state.add('in_hand(rob1,ref2_book1)')
+		#else: initial_state.add('-in_hand(rob1,ref2_book1)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true': initial_state.add('in_hand(rob1,ref3_book1)')
+		#else: initial_state.add('-in_hand(rob1,ref3_book1)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true': initial_state.add('in_hand(rob1,ref1_book2)')
+		#else: initial_state.add('-in_hand(rob1,ref1_book2)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true': initial_state.add('in_hand(rob1,ref2_book2)')
+		#else: initial_state.add('-in_hand(rob1,ref2_book2)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true': initial_state.add('in_hand(rob1,ref3_book2)')
+		#else: initial_state.add('-in_hand(rob1,ref3_book2)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true': initial_state.add('in_hand(rob1,ref1_book3)')
+		#else: initial_state.add('-in_hand(rob1,ref1_book3)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true': initial_state.add('in_hand(rob1,ref2_book3)')
+		#else: initial_state.add('-in_hand(rob1,ref2_book3)')
+		#if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true': initial_state.add('in_hand(rob1,ref3_book3)')
+		#else: initial_state.add('-in_hand(rob1,ref3_book3)')
 		initial_state.add('loc(ref1_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
-		initial_state.add('loc(ref2_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
-		initial_state.add('loc(ref3_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
-		initial_state.add('loc(ref1_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
-		initial_state.add('loc(ref2_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
-		initial_state.add('loc(ref3_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
-		initial_state.add('loc(ref1_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
-		initial_state.add('loc(ref2_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
-		initial_state.add('loc(ref3_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
+		#initial_state.add('loc(ref2_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
+		#initial_state.add('loc(ref3_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
+		#initial_state.add('loc(ref1_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
+		#initial_state.add('loc(ref2_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
+		#initial_state.add('loc(ref3_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
+		#initial_state.add('loc(ref1_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
+		#initial_state.add('loc(ref2_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
+		#initial_state.add('loc(ref3_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
 		if 'move' in action:
 			final_state.add('coarse_loc(rob1,' + action_object + ')')
 		elif 'pickup' in action:
@@ -395,10 +409,10 @@ class NonZoomingControllerToI():
 	def zoom(self,initial_state, action, final_state):
 
 	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2'])
-		coarse_objects = Sort('coarse_object', ['book1', 'book2', 'book3'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16'])
-		objects = Sort('object', ['ref1_book1', 'ref2_book1', 'ref3_book1', 'ref1_book2', 'ref2_book2', 'ref3_book2', 'ref1_book3', 'ref2_book3', 'ref3_book3'])
+		coarse_places = Sort('coarse_place', ['library', 'kitchen'])#, 'office1'])#, 'office2'])
+		coarse_objects = Sort('coarse_object', ['book1'])#, 'book2'])#, 'book3'])
+		places = Sort('place', ['c1', 'c2', 'c3', 'c4'])#, 'c5', 'c6', 'c7', 'c8', 'c9'])#, 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16'])
+		objects = Sort('object', ['ref1_book1'])#, 'ref2_book1', 'ref1_book2', 'ref2_book2'])#'ref1_book3', 'ref2_book3', 'ref3_book3'])
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
 		coarse_components = Sort('coarse_component', ['#coarse_place', '#coarse_object'])
@@ -410,14 +424,14 @@ class NonZoomingControllerToI():
 		actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 
 	    # EDIT these instantiations of the Components class to change which refined objects are associated with which coarse ones
-		library_components = Components('library', ['c1', 'c2', 'c3', 'c4'])
-		kitchen_components = Components('kitchen', ['c5', 'c6', 'c7', 'c8'])
-		office1_components = Components('office1', ['c9', 'c10', 'c11', 'c12'])
-		office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
-		book1_components = Components('book1', ['ref1_book1', 'ref2_book1', 'ref3_book1'])
-		book2_components = Components('book2', ['ref1_book2', 'ref2_book2', 'ref3_book2'])
-		book3_components = Components('book3', ['ref1_book3', 'ref2_book3', 'ref3_book3'])
-		refinements = [library_components, kitchen_components, office1_components, office2_components, book1_components, book2_components, book3_components]
+		library_components = Components('library', ['c1', 'c2'])#, 'c3'])#, 'c4'])
+		kitchen_components = Components('kitchen', ['c3', 'c4'])#, 'c6'])#, 'c8'])
+		#office1_components = Components('office1', ['c7', 'c8', 'c9'])#, 'c12'])
+		#office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
+		book1_components = Components('book1', ['ref1_book1'])#, 'ref2_book1'])#, 'ref3_book1'])
+		#book2_components = Components('book2', ['ref1_book2', 'ref2_book2'])#, 'ref3_book2'])
+		#book3_components = Components('book3', ['ref1_book3', 'ref2_book3', 'ref3_book3'])
+		refinements = [library_components, kitchen_components, book1_components]
 
 	    # initialise relevance lists
 		rel_initial_conditions = []
@@ -431,7 +445,7 @@ class NonZoomingControllerToI():
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
 		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
-		irrelevant_obj_consts = ['library', 'kitchen', 'office1', 'office2', 'book1', 'book2', 'book3', 'c1,', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'ref1_book1', 'ref2_book1', 'ref3_book1', 'ref1_book2', 'ref2_book2', 'ref3_book2', 'ref1_book3', 'ref2_book3', 'ref3_book3']
+		irrelevant_obj_consts = ['library', 'kitchen', 'book1', 'c1,', 'c2', 'c3', 'c4', 'ref1_book1']#, 'ref2_book1', 'ref1_book2', 'ref2_book2']
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 
@@ -445,14 +459,14 @@ class NonZoomingControllerToI():
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
 				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true'): currently_holding = 'ref3_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true'): currently_holding = 'ref3_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true'): currently_holding = 'ref1_book3'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true'): currently_holding = 'ref2_book3'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true'): currently_holding = 'ref3_book3'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true'): currently_holding = 'ref3_book1'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true'): currently_holding = 'ref3_book2'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true'): currently_holding = 'ref1_book3'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true'): currently_holding = 'ref2_book3'
+				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true'): currently_holding = 'ref3_book3'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant

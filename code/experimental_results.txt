@@ -1,0 +1,351 @@
+
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c3', 'c5', 'c7', 'c14', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:03:27.027975
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 2
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c2', 'c7', 'c5', 'c9', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,kitchen),I).
+Plan: 
+Time taken with zooming: 0:01:40.310392
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 3
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c16', 'c8', 'c6', 'c13', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,library),I).
+Plan: 
+Time taken with zooming: 0:02:53.328636
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 4
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c10', 'c12', 'c7', 'c4', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+Plan: 
+Time taken with zooming: 0:03:15.393155
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 5
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'c12', 'c8', 'true', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,kitchen),I).
+Plan: 
+Time taken with zooming: 0:00:01.677232
+Time taken without zooming: 0:00:01.806311
+
+Trial number: 6
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c16', 'c1', 'c10', 'c4', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office1),I).
+Plan: 
+Time taken with zooming: 0:01:59.238680
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 7
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c2', 'c16', 'c3', 'c2', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,kitchen),I).
+Plan: 
+Time taken with zooming: 0:00:43.225070
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 8
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c15', 'c11', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office1),I).
+Plan: 
+Time taken with zooming: 0:04:31.158311
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 9
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c2', 'c6', 'c9', 'c7', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: 
+Time taken with zooming: 0:03:06.152834
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 10
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'c3', 'c12', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office1),I).
+Plan: 
+Time taken with zooming: 0:01:28.400548
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 11
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c9', 'c8', 'c8', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,office2),I).
+Plan: 
+Time taken with zooming: 0:03:04.752629
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 12
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c5', 'c9', 'c14', 'c5', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'true', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: 
+Time taken with zooming: 0:02:37.706301
+Time taken without zooming: 0:08:57.302582
+
+Trial number: 13
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c12', 'c16', 'c5', 'c10', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,library),I).
+Plan: 
+Time taken with zooming: 0:03:46.128585
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 14
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c9', 'c4', 'c12', 'c9', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'true', 'false', 'false']
+Goal: holds(loc(book1,office1),I).
+Plan: 
+Time taken with zooming: 0:03:46.504091
+Time taken without zooming: 0:17:14.432050
+
+Trial number: 15
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c4', 'c8', 'c16', 'c15', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: 
+Time taken with zooming: 0:00:05.056055
+Time taken without zooming: 0:00:05.163603
+
+Trial number: 16
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c15', 'c5', 'c7', 'c7', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+Plan: 
+Time taken with zooming: 0:05:28.423314
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 17
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c7', 'c9', 'c15', 'c8', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+Plan: 
+Time taken with zooming: 0:05:02.191248
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 18
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c10', 'c8', 'c7', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:03:20.132312
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 19
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c15', 'c15', 'c9', 'c13', 'true', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+Plan: 
+Time taken with zooming: 0:00:06.460024
+Time taken without zooming: 0:00:06.346813
+
+Trial number: 20
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c16', 'c7', 'c11', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,office1),I).
+Plan: 
+Time taken with zooming: 0:06:29.056703
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 21
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c11', 'c11', 'c12', 'c6', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,office1),I).
+Plan: 
+Time taken with zooming: 0:00:07.164358
+Time taken without zooming: 0:00:07.058851
+
+Trial number: 22
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'c14', 'c12', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,library),I).
+Plan: 
+Time taken with zooming: 0:12:15.947836
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 23
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c11', 'c16', 'c2', 'c6', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,kitchen),I).
+Plan: 
+Time taken with zooming: 0:00:08.012416
+Time taken without zooming: 0:00:07.728203
+
+Trial number: 24
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c5', 'c13', 'c15', 'c7', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:00:07.688694
+Time taken without zooming: 0:00:07.878162
+
+Trial number: 25
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c7', 'c14', 'c16', 'c14', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+Plan: 
+Time taken with zooming: 0:00:07.643803
+Time taken without zooming: 0:00:07.974731
+
+Trial number: 26
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c5', 'c14', 'c1', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'true', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: 
+Time taken with zooming: 0:04:19.933182
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 27
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c11', 'c3', 'c14', 'c13', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,library),I).
+Plan: 
+Time taken with zooming: 0:10:08.932096
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 28
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c3', 'c8', 'c6', 'c11', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,library),I).
+Plan: 
+Time taken with zooming: 0:06:37.884622
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 29
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'c12', 'c8', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: 
+Time taken with zooming: 0:12:19.030864
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 30
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c15', 'c8', 'c12', 'c6', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,library),I).
+Plan: 
+Time taken with zooming: 0:09:12.045591
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 31
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c16', 'c4', 'c8', 'c5', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,library),I).
+Plan: 
+Time taken with zooming: 0:18:14.027029
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 32
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c16', 'c12', 'c12', 'c16', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: 
+Time taken with zooming: 0:11:57.394250
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 33
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c9', 'c1', 'c9', 'c8', 'false', 'true', 'false', 'false', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office1),I).
+Plan: 
+Time taken with zooming: 0:05:18.687823
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 34
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c14', 'c13', 'c8', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,office2),I).
+Plan: 
+Time taken with zooming: 0:00:14.501409
+Time taken without zooming: 0:00:13.852155
+
+Trial number: 35
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c12', 'c4', 'c16', 'c13', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: 
+Time taken with zooming: 0:10:57.646233
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 36
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c7', 'c8', 'c9', 'c14', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,kitchen),I).
+Plan: 
+Time taken with zooming: 0:01:48.131809
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 37
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c9', 'c3', 'c9', 'c12', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:02:47.232208
+Time taken without zooming: 0:02:03.272603
+
+Trial number: 38
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c3', 'c12', 'c6', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,office1),I).
+Plan: 
+Time taken with zooming: 0:01:27.037347
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 39
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c8', 'c7', 'c15', 'c14', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,kitchen),I).
+Plan: 
+Time taken with zooming: 0:03:19.887027
+Time taken without zooming: 0:02:58.384536
+
+Trial number: 40
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c7', 'c11', 'c2', 'c15', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: 
+Time taken with zooming: 0:03:02.621388
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 41
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c7', 'c11', 'c12', 'c7', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: 
+Time taken with zooming: 0:05:04.136226
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 42
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c6', 'c2', 'c5', 'c9', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:07:32.728944
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 43
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c10', 'c15', 'c13', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: 
+Time taken with zooming: 0:07:31.024504
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 44
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c4', 'c12', 'c6', 'c7', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office1),I).
+Plan: 
+Time taken with zooming: 0:00:07.203768
+Time taken without zooming: 0:00:06.892134
+
+Trial number: 45
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c1', 'c8', 'c4', 'c10', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:09:50.814716
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 46
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c9', 'c9', 'c5', 'c11', 'true', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,office2),I).
+Plan: 
+Time taken with zooming: 0:01:56.424484
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 47
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c16', 'c9', 'c8', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: 
+Time taken with zooming: 0:09:18.867305
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 48
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c9', 'c4', 'c9', 'c3', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office1),I).
+Plan: 
+Time taken with zooming: 0:09:29.101166
+Time taken without zooming: 0:08:30.563407
+
+Trial number: 49
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c10', 'c7', 'c6', 'c5', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+Plan: 
+Time taken with zooming: 0:12:37.612888
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes
+
+Trial number: 50
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c2', 'c12', 'c4', 'c13', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,kitchen),I).
+Plan: 
+Time taken with zooming: 0:12:14.216494
+Time taken without zooming: TIMEOUT: running the non-zooming controller took longer than 20 minutes

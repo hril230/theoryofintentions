@@ -11,12 +11,12 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library,kitchen,office1,office2,storage_cupboard}.
+#coarse_place = {library,kitchen}.%,office1}.%,office2}.%,storage_cupboard}.
 #robot = {rob1}.
-#coarse_object = {book1,book2,book3,book4}.
-#object = {ref1_book1,ref2_book1,ref3_book1,ref4_book1, ref1_book2,ref2_book2,ref3_book2,ref4_book2, ref1_book3,ref2_book3,ref3_book3,ref4_book3, ref1_book4,ref2_book4,ref3_book4,ref4_book4}.
+#coarse_object = {book1}.%,book2}.%,book3}.%,book4}.
+#object = {ref1_book1}.%,ref2_book1, ref1_book2,ref2_book2}.%, ref1_book3,ref2_book3,ref3_book3}.%, ref1_book4,ref2_book4,ref3_book4,ref4_book4}.
 #coarse_thing = #coarse_object + #robot.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25}.
+#place = {c1, c2, c3, c4}.%, c5, c6, c7, c8, c9}.%, c10, c11, c12, c13, c14, c15, c16}.%, c17, c18, c19, c20, c21, c22, c23, c24, c25}.
 #thing = #object + #robot.
 
 #step = 0..numSteps.
@@ -193,73 +193,73 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
-next_to(c4, c5).
-next_to(c5, c6).
-next_to(c6, c7).
-next_to(c7, c8).
-next_to(c8, c9).
-next_to(c9, c10).
-next_to(c10, c11).
-next_to(c11, c12).
-next_to(c12, c13).
-next_to(c13, c14).
-next_to(c14, c15).
-next_to(c15, c16).
-next_to(c16, c17).
-next_to(c17, c18).
-next_to(c18, c19).
-next_to(c19, c20).
-next_to(c20, c21).
-next_to(c21, c22).
-next_to(c22, c23).
-next_to(c23, c24).
-next_to(c24, c25).
+%next_to(c4, c5).
+%next_to(c5, c6).
+%next_to(c6, c7).
+%next_to(c7, c8).
+%next_to(c8, c9).
+%next_to(c9, c10).
+%next_to(c10, c11).
+%next_to(c11, c12).
+%next_to(c12, c13).
+%next_to(c13, c14).
+%next_to(c14, c15).
+%next_to(c15, c16).
+%next_to(c16, c17).
+%next_to(c17, c18).
+%next_to(c18, c19).
+%next_to(c19, c20).
+%next_to(c20, c21).
+%next_to(c21, c22).
+%next_to(c22, c23).
+%next_to(c23, c24).
+%next_to(c24, c25).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
 comp(c1, library).
 comp(c2, library).
-comp(c3, library).
-comp(c4, library).
-comp(c5, library).
-comp(c6, kitchen).
-comp(c7, kitchen).
-comp(c8, kitchen).
-comp(c9, kitchen).
-comp(c10, kitchen).
-comp(c11, office1).
-comp(c12, office1).
-comp(c13, office1).
-comp(c14, office1).
-comp(c15, office1).
-comp(c16, office2).
-comp(c17, office2).
-comp(c18, office2).
-comp(c19, office2).
-comp(c20, office2).
-comp(c21, storage_cupboard).
-comp(c22, storage_cupboard).
-comp(c23, storage_cupboard).
-comp(c24, storage_cupboard).
-comp(c25, storage_cupboard).
+%comp(c3, library).
+%comp(c4, library).
+%comp(c5, library).
+comp(c3, kitchen).
+comp(c4, kitchen).
+%comp(c6, kitchen).
+%comp(c8, kitchen).
+%comp(c10, kitchen).
+%comp(c7, office1).
+%comp(c8, office1).
+%comp(c9, office1).
+%comp(c12, office1).
+%comp(c15, office1).
+%comp(c13, office2).
+%comp(c14, office2).
+%comp(c15, office2).
+%comp(c16, office2).
+%comp(c20, office2).
+%comp(c21, storage_cupboard).
+%comp(c22, storage_cupboard).
+%comp(c23, storage_cupboard).
+%comp(c24, storage_cupboard).
+%comp(c25, storage_cupboard).
 
 comp(ref1_book1, book1).
-comp(ref2_book1, book1).
-comp(ref3_book1, book1).
-comp(ref4_book1, book1).
-comp(ref1_book2, book2).
-comp(ref2_book2, book2).
-comp(ref3_book2, book2).
-comp(ref4_book2, book2).
-comp(ref1_book3, book3).
-comp(ref2_book3, book3).
-comp(ref3_book3, book3).
-comp(ref4_book3, book3).
-comp(ref1_book4, book4).
-comp(ref2_book4, book4).
-comp(ref3_book4, book4).
-comp(ref4_book4, book4).
+%comp(ref2_book1, book1).
+%comp(ref3_book1, book1).
+%comp(ref4_book1, book1).
+%comp(ref1_book2, book2).
+%comp(ref2_book2, book2).
+%comp(ref3_book2, book2).
+%comp(ref4_book2, book2).
+%comp(ref1_book3, book3).
+%comp(ref2_book3, book3).
+%comp(ref3_book3, book3).
+%comp(ref4_book3, book3).
+%comp(ref1_book4, book4).
+%comp(ref2_book4, book4).
+%comp(ref3_book4, book4).
+%comp(ref4_book4, book4).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -268,39 +268,10 @@ comp(ref4_book4, book4).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref1_book4,c14),0).
-holds(loc(ref3_book3,c17),0).
--holds(in_hand(rob1,ref3_book3),0).
--holds(in_hand(rob1,ref2_book1),0).
-holds(loc(ref1_book1,c25),0).
--holds(in_hand(rob1,ref3_book2),0).
--holds(in_hand(rob1,ref1_book2),0).
-holds(loc(ref4_book3,c17),0).
-holds(loc(ref3_book4,c14),0).
--holds(in_hand(rob1,ref1_book4),0).
-holds(loc(ref4_book1,c25),0).
--holds(in_hand(rob1,ref4_book2),0).
-holds(loc(ref1_book3,c17),0).
-holds(loc(ref2_book4,c14),0).
-holds(loc(ref2_book1,c25),0).
--holds(in_hand(rob1,ref3_book4),0).
-holds(loc(rob1,c25),0).
--holds(in_hand(rob1,ref1_book3),0).
-holds(loc(ref2_book3,c17),0).
-holds(loc(ref2_book2,c1),0).
--holds(in_hand(rob1,ref2_book4),0).
--holds(in_hand(rob1,ref3_book1),0).
-holds(loc(ref4_book2,c1),0).
--holds(in_hand(rob1,ref2_book2),0).
-holds(loc(ref4_book4,c14),0).
-holds(loc(ref3_book2,c1),0).
--holds(in_hand(rob1,ref4_book4),0).
-holds(loc(ref3_book1,c25),0).
-holds(loc(ref1_book2,c1),0).
--holds(in_hand(rob1,ref2_book3),0).
--holds(in_hand(rob1,ref4_book1),0).
 holds(in_hand(rob1,ref1_book1),0).
--holds(in_hand(rob1,ref4_book3),0).
+holds(loc(ref1_book1,c2),0).
+holds(loc(rob1,c2),0).
+hpd(test(rob1,loc(ref1_book1,c2),true),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

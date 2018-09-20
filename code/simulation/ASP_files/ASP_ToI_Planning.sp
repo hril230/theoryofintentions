@@ -1,5 +1,5 @@
-#const numSteps = 20. % maximum number of steps.
-#const max_len = 19. % maximum activity_length of an activity.
+#const numSteps = 5. % maximum number of steps.
+#const max_len = 4. % maximum activity_length of an activity.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,9 +12,9 @@ sorts
 #step = 0..numSteps.
 #integer = 0..numSteps.
 
-#room = {library, kitchen, office1, office2, storage_cupboard}.
+#room = {library, kitchen}.%, office1}.%, office2}.%, storage_cupboard}.
 #robot = {rob1}.
-#book = {book1, book2, book3, book4}.
+#book = {book1}.%, book2}.%, book3}.%, book4}.
 #object = #book.
 #thing = #object + #robot.
 #positive_index = 1..max_len.
@@ -558,8 +558,8 @@ has_intention(I) :- intended_action(A,I).
 %%Attributes:
 %%%%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
-next_to(kitchen, office1).
-next_to(office1, office2).
+%next_to(kitchen, office1).
+%next_to(office1, office2).
 %next_to(office2, storage_cupboard).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
@@ -570,30 +570,41 @@ next_to(office1, office2).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book1,office1),I), holds(loc(book2,office2),I), holds(loc(book3,kitchen),I), holds(loc(book4,kitchen),I), -holds(in_hand(rob1,book1),I), holds(in_hand(rob1,book2),I), -holds(in_hand(rob1,book3),I), -holds(in_hand(rob1,book4),I).
+holds(my_goal,I) :- holds(loc(book1,library),I).
+
+
 
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(1).
+current_step(5).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
+obs(loc(book1,library),true,5).
+obs(loc(rob1,kitchen),true,3).
+obs(loc(rob1,kitchen),true,4).
+obs(loc(book1,kitchen),true,4).
+obs(in_hand(rob1,book1),true,4).
+obs(loc(rob1,library),true,5).
 hpd(select(my_goal),true,0).
-holds(loc(rob1,storage_cupboard),0).
-holds(loc(book4,office1),0).
-holds(loc(book2,library),0).
-holds(loc(book1,storage_cupboard),0).
-holds(loc(book3,office2),0).
-holds(in_hand(rob1,book1),0).
--holds(in_hand(rob1,book2),0).
--holds(in_hand(rob1,book3),0).
--holds(in_hand(rob1,book4),0).
-explanation(0,1).
+attempt(start(1),1).
+attempt(move(rob1,kitchen),2).
+attempt(pickup(rob1,book1),3).
+attempt(move(rob1,library),4).
+activity_goal(1,my_goal).
+activity_component(1,1,move(rob1,kitchen)).
+activity_component(1,2,pickup(rob1,book1)).
+activity_component(1,3,move(rob1,library)).
+activity_length(1,3).
+holds(loc(book1,kitchen),0).
+holds(loc(rob1,library),0).
+-holds(in_hand(rob1,book1),0).
+explanation(0,5).
 
 
 
