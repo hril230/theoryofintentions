@@ -1,0 +1,1319 @@
+
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:05.514350
+Time taken without zooming: 0:00:06.210595
+Ratio: 1.12626057468
+
+Trial number: 2
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.062140
+Time taken without zooming: 0:00:12.382060
+Ratio: 1.11931868517
+
+Trial number: 3
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.411820
+Time taken without zooming: 0:00:15.819892
+Ratio: 1.0264778592
+
+Trial number: 4
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.729495
+Time taken without zooming: 0:00:01.855076
+Ratio: 1.07261136921
+
+Trial number: 5
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.183091
+Time taken without zooming: 0:00:11.996687
+Ratio: 1.07275233654
+
+Trial number: 6
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:12.997562
+Time taken without zooming: 0:00:16.957233
+Ratio: 1.30464720999
+
+Trial number: 7
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.439971
+Time taken without zooming: 0:00:16.973932
+Ratio: 1.26294409415
+
+Trial number: 8
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.778467
+Time taken without zooming: 0:00:01.862389
+Ratio: 1.04718783087
+
+Trial number: 9
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.858817
+Time taken without zooming: 0:00:01.765917
+Ratio: 0.950021976343
+
+Trial number: 10
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.839730
+Time taken without zooming: 0:00:01.854848
+Ratio: 1.00821751018
+
+Trial number: 11
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.130511
+Time taken without zooming: 0:00:15.981819
+Ratio: 1.05626432577
+
+Trial number: 12
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.920218
+Time taken without zooming: 0:00:01.632891
+Ratio: 0.850367510356
+
+Trial number: 13
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.916888
+Time taken without zooming: 0:00:17.186112
+Ratio: 1.23491056334
+
+Trial number: 14
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.980534
+Time taken without zooming: 0:00:02.457681
+Ratio: 1.24091835838
+
+Trial number: 15
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.283825
+Time taken without zooming: 0:00:02.174529
+Ratio: 0.952143443565
+
+Trial number: 16
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.941437
+Time taken without zooming: 0:00:18.280679
+Ratio: 1.22348867783
+
+Trial number: 17
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.712991
+Time taken without zooming: 0:00:13.771150
+Ratio: 1.28546266864
+
+Trial number: 18
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.445115
+Time taken without zooming: 0:00:01.489661
+Ratio: 1.03082522844
+
+Trial number: 19
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.464774
+Time taken without zooming: 0:00:01.482181
+Ratio: 1.01188374452
+
+Trial number: 20
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.389756
+Time taken without zooming: 0:00:14.631723
+Ratio: 1.09275501361
+
+Trial number: 21
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.507004
+Time taken without zooming: 0:00:01.673108
+Ratio: 1.11022133982
+
+Trial number: 22
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.443179
+Time taken without zooming: 0:00:01.484674
+Ratio: 1.02875249709
+
+Trial number: 23
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.042570
+Time taken without zooming: 0:00:01.905860
+Ratio: 0.933069613281
+
+Trial number: 24
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.438226
+Time taken without zooming: 0:00:01.681020
+Ratio: 0.689443882561
+
+Trial number: 25
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.136678
+Time taken without zooming: 0:00:13.346883
+Ratio: 1.19846178546
+
+Trial number: 26
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.414621
+Time taken without zooming: 0:00:01.484120
+Ratio: 1.04912906001
+
+Trial number: 27
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.956696
+Time taken without zooming: 0:00:12.903219
+Ratio: 1.07916258806
+
+Trial number: 28
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.410403
+Time taken without zooming: 0:00:01.472585
+Ratio: 1.04408810815
+
+Trial number: 29
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.517109
+Time taken without zooming: 0:00:19.260125
+Ratio: 1.24121864453
+
+Trial number: 30
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.412223
+Time taken without zooming: 0:00:01.413829
+Ratio: 1.00113721417
+
+Trial number: 31
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.468269
+Time taken without zooming: 0:00:01.417234
+Ratio: 0.96524138288
+
+Trial number: 32
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.499337
+Time taken without zooming: 0:00:19.212875
+Ratio: 1.23959334519
+
+Trial number: 33
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.426116
+Time taken without zooming: 0:00:14.804097
+Ratio: 1.29563685508
+
+Trial number: 34
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.449789
+Time taken without zooming: 0:00:17.924354
+Ratio: 1.24045783644
+
+Trial number: 35
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.945306
+Time taken without zooming: 0:00:12.642176
+Ratio: 1.05833839669
+
+Trial number: 36
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.444854
+Time taken without zooming: 0:00:01.415764
+Ratio: 0.979866477859
+
+Trial number: 37
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.727031
+Time taken without zooming: 0:00:16.952510
+Ratio: 1.58035434036
+
+Trial number: 38
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.971637
+Time taken without zooming: 0:00:01.759501
+Ratio: 0.892406157929
+
+Trial number: 39
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:07.630719
+Time taken without zooming: 0:00:10.048083
+Ratio: 1.31679373857
+
+Trial number: 40
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.079673
+Time taken without zooming: 0:00:02.768847
+Ratio: 1.33138575151
+
+Trial number: 41
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:18.534997
+Time taken without zooming: 0:00:17.937251
+Ratio: 0.967750412908
+
+Trial number: 42
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.248213
+Time taken without zooming: 0:00:02.328166
+Ratio: 1.03556291152
+
+Trial number: 43
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.559468
+Time taken without zooming: 0:00:02.814044
+Ratio: 1.80448973624
+
+Trial number: 44
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.233750
+Time taken without zooming: 0:00:01.421537
+Ratio: 0.63639037493
+
+Trial number: 45
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.766294
+Time taken without zooming: 0:00:02.250700
+Ratio: 1.27424992668
+
+Trial number: 46
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.709068
+Time taken without zooming: 0:00:14.636585
+Ratio: 1.06765718866
+
+Trial number: 47
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.550807
+Time taken without zooming: 0:00:01.536846
+Ratio: 0.990997590287
+
+Trial number: 48
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.550280
+Time taken without zooming: 0:00:01.832104
+Ratio: 1.18178909616
+
+Trial number: 49
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.267730
+Time taken without zooming: 0:00:01.930429
+Ratio: 0.851260511613
+
+Trial number: 50
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:21.079237
+Time taken without zooming: 0:00:26.766976
+Ratio: 1.2698266071
+
+
+
+
+
+Zooming Controller Only:
+
+
+Trial number: 51
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.490237
+
+Trial number: 52
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.588957
+
+Trial number: 53
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.587229
+
+Trial number: 54
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.918669
+
+Trial number: 55
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.006297
+
+Trial number: 56
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.581145
+
+Trial number: 57
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.266507
+
+Trial number: 58
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.583881
+
+Trial number: 59
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.559172
+
+Trial number: 60
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.677038
+
+Trial number: 61
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.496197
+
+Trial number: 62
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.678098
+
+Trial number: 63
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.624801
+
+Trial number: 64
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.571142
+
+Trial number: 65
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.647965
+
+Trial number: 66
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.649141
+
+Trial number: 67
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:12.015039
+
+Trial number: 68
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.701578
+
+Trial number: 69
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.643919
+
+Trial number: 70
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.643359
+
+Trial number: 71
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.668014
+
+Trial number: 72
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:05.976262
+
+Trial number: 73
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.672072
+
+Trial number: 74
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:06.030484
+
+Trial number: 75
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.431014
+
+Trial number: 76
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.906875
+
+Trial number: 77
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.931674
+
+Trial number: 78
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.625087
+
+Trial number: 79
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.346843
+
+Trial number: 80
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.692093
+
+Trial number: 81
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.656105
+
+Trial number: 82
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.932611
+
+Trial number: 83
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.966261
+
+Trial number: 84
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.668512
+
+Trial number: 85
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.698249
+
+Trial number: 86
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.695160
+
+Trial number: 87
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.683175
+
+Trial number: 88
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.588239
+
+Trial number: 89
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.661126
+
+Trial number: 90
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.433211
+
+Trial number: 91
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.728130
+
+Trial number: 92
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.857590
+
+Trial number: 93
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.589930
+
+Trial number: 94
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.673253
+
+Trial number: 95
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.664621
+
+Trial number: 96
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.696751
+
+Trial number: 97
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.643911
+
+Trial number: 98
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.816424
+
+Trial number: 99
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.636774
+
+Trial number: 100
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:07.211181
+
+Trial number: 101
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.102326
+
+Trial number: 102
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.632395
+
+Trial number: 103
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.649035
+
+Trial number: 104
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.675551
+
+Trial number: 105
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.707214
+
+Trial number: 106
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.692147
+
+Trial number: 107
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.630416
+
+Trial number: 108
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.645451
+
+Trial number: 109
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.655984
+
+Trial number: 110
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.635944
+
+Trial number: 111
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:07.317243
+
+Trial number: 112
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.101793
+
+Trial number: 113
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:06.037384
+
+Trial number: 114
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.446876
+
+Trial number: 115
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.775002
+
+Trial number: 116
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.693931
+
+Trial number: 117
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.639400
+
+Trial number: 118
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:07.307466
+
+Trial number: 119
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.647189
+
+Trial number: 120
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.617945
+
+Trial number: 121
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.831240
+
+Trial number: 122
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.690853
+
+Trial number: 123
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:12.134777
+
+Trial number: 124
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.750031
+
+Trial number: 125
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.680588
+
+Trial number: 126
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.678000
+
+Trial number: 127
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.669821
+
+Trial number: 128
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.674730
+
+Trial number: 129
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.700304
+
+Trial number: 130
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.657613
+
+Trial number: 131
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:05.969380
+
+Trial number: 132
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.837719
+
+Trial number: 133
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.914430
+
+Trial number: 134
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.652576
+
+Trial number: 135
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:13.740053
+
+Trial number: 136
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.637520
+
+Trial number: 137
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.045742
+
+Trial number: 138
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:02.902102
+
+Trial number: 139
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:16.873480
+
+Trial number: 140
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:12.453410
+
+Trial number: 141
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.432420
+
+Trial number: 142
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.453282
+
+Trial number: 143
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.435639
+
+Trial number: 144
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.485871
+
+Trial number: 145
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.430836
+
+Trial number: 146
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:12.171310
+
+Trial number: 147
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.809718
+
+Trial number: 148
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.410736
+
+Trial number: 149
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.427914
+
+Trial number: 150
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.502026
+
+Trial number: 151
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.417783
+
+Trial number: 152
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.547323
+
+Trial number: 153
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.791742
+
+Trial number: 154
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.445369
+
+Trial number: 155
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.417860
+
+Trial number: 156
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.496191
+
+Trial number: 157
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:09.315369
+
+Trial number: 158
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.770685
+
+Trial number: 159
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:05.133772
+
+Trial number: 160
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.497474
+
+Trial number: 161
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.346463
+
+Trial number: 162
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.562705
+
+Trial number: 163
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.655115
+
+Trial number: 164
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.366701
+
+Trial number: 165
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.863291
+
+Trial number: 166
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.427451
+
+Trial number: 167
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.380007
+
+Trial number: 168
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.105017
+
+Trial number: 169
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.372427
+
+Trial number: 170
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.438651
+
+Trial number: 171
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.128909
+
+Trial number: 172
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.449952
+
+Trial number: 173
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.364248
+
+Trial number: 174
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.379693
+
+Trial number: 175
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:12.062283
+
+Trial number: 176
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.363777
+
+Trial number: 177
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.538868
+
+Trial number: 178
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.436170
+
+Trial number: 179
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.403999
+
+Trial number: 180
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.070196
+
+Trial number: 181
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.482385
+
+Trial number: 182
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.390099
+
+Trial number: 183
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:06.103245
+
+Trial number: 184
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:14.371473
+
+Trial number: 185
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:10.015296
+
+Trial number: 186
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.620884
+
+Trial number: 187
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken with zooming: 0:00:08.960954
+
+Trial number: 188
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.438671
+
+Trial number: 189
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.439409
+
+Trial number: 190
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.476427
+
+Trial number: 191
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'true', 'true']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:05.099367
+
+Trial number: 192
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.372234
+
+Trial number: 193
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.582612
+
+Trial number: 194
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c2', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.515607
+
+Trial number: 195
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c2', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_length(1,1), intended_action(start(1),1)}
+Time taken with zooming: 0:00:05.111036
+
+Trial number: 196
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c1', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.398098
+
+Trial number: 197
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:15.723256
+
+Trial number: 198
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c2', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken with zooming: 0:00:11.698745
+
+Trial number: 199
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'true', 'true']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.384497
+
+Trial number: 200
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c4', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), selected_goal_holds(my_goal,1), intended_action(finish,1)}
+Time taken with zooming: 0:00:01.370536
+
+
+
+
+
+STATISTICS
+Complexity level one has two rooms with two cells each, and one object with one refined part.
+Ratio mean: 1.10648384705044
+Ratio standard deviation: 0.19500365444597345
+Minimum planning time with zooming: 1.363777 seconds
+Maximum planning time with zooming: 21.079237 seconds

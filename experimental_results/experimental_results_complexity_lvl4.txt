@@ -1,0 +1,5 @@
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book4_loc, book1_in_hand, book2_in_hand, book3_in_hand, book4_in_hand, refined_object_parts_in_hand] = ['c6', 'c13', 'c14', 'c5', 'c25', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I), holds(loc(book2,library),I), holds(loc(book3,office1),I), holds(loc(book4,library),I), holds(in_hand(rob1,book2),I), -holds(in_hand(rob1,book3),I).
+Plan: 
+Time taken with zooming: 0:59:51.701957

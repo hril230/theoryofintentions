@@ -172,12 +172,12 @@ class ControllerToI():
 		observations = Set()
 		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
-		#result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
-		#if 'holds' in observation2: observations.add(observation2)
-		#result,observation3 = self.executer.test('test(rob1,loc(ref1_book3,' + self.refined_location+ '),true)')
-		#if 'holds' in observation3: observations.add(observation3)
-		#result,observation4 = self.executer.test('test(rob1,loc(ref1_book4,' + self.refined_location+ '),true)')
-		#if 'holds' in observation4: observations.add(observation4)
+		result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
+		if 'holds' in observation2: observations.add(observation2)
+		result,observation3 = self.executer.test('test(rob1,loc(ref1_book3,' + self.refined_location+ '),true)')
+		if 'holds' in observation3: observations.add(observation3)
+		result,observation4 = self.executer.test('test(rob1,loc(ref1_book4,' + self.refined_location+ '),true)')
+		if 'holds' in observation4: observations.add(observation4)
 		return observations
 
 	def infer_abstract_obs_from_refined_observations(self,initial_refined_location,refined_observations_list, step):
@@ -394,10 +394,10 @@ class ControllerToI():
 	def zoom(self,initial_state, action, final_state):
 
 	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['library', 'kitchen'])#, 'office1'])#, 'office2'])#, 'storage_cupboard'])
-		coarse_objects = Sort('coarse_object', ['book1'])#, 'book2'])#, 'book3'])#, 'book4'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4'])#, 'c5', 'c6', 'c7', 'c8', 'c9'])#, 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16'])#, 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25'])
-		objects = Sort('object', ['ref1_book1'])#, 'ref2_book1', 'ref1_book2', 'ref2_book2'])
+		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2', 'storage_cupboard'])
+		coarse_objects = Sort('coarse_object', ['book1', 'book2', 'book3', 'book4'])
+		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25'])
+		objects = Sort('object', ['ref1_book1', 'ref2_book1', 'ref3_book1', 'ref4_book1', 'ref1_book2', 'ref2_book2', 'ref3_book2', 'ref4_book2', 'ref1_book3', 'ref2_book3', 'ref3_book3', 'ref4_book3', 'ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4'])
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
 		coarse_components = Sort('coarse_component', ['#coarse_place', '#coarse_object'])
@@ -409,16 +409,16 @@ class ControllerToI():
 		actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 
 	    # EDIT these instantiations of the Components class to change which refined objects are associated with which coarse ones
-		library_components = Components('library', ['c1', 'c2'])#, 'c3'])#, 'c4'])
-		kitchen_components = Components('kitchen', ['c3', 'c4'])#, 'c6'])#, 'c8'])
-		#office1_components = Components('office1', ['c7', 'c8', 'c9'])#, 'c12'])
-		#office2_components = Components('office2', ['c13', 'c14', 'c15', 'c16'])
-		#storage_cupboard_components = Components('storage_cupboard', ['c21', 'c22', 'c23', 'c24', 'c25'])
-		book1_components = Components('book1', ['ref1_book1'])#, 'ref2_book1'])#, 'ref3_book1'])#, 'ref4_book1'])
-		#book2_components = Components('book2', ['ref1_book2', 'ref2_book2'])#, 'ref3_book2'])#, 'ref4_book2'])
-		#book3_components = Components('book3', ['ref1_book3', 'ref2_book3', 'ref3_book3'])#, 'ref4_book3'])
-		#book4_components = Components('book4', ['ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4'])
-		refinements = [library_components, kitchen_components, book1_components]
+		library_components = Components('library', ['c1', 'c2', 'c3', 'c4', 'c5'])
+		kitchen_components = Components('kitchen', ['c6', 'c7', 'c8', 'c9', 'c10'])
+		office1_components = Components('office1', ['c11', 'c12', 'c13', 'c14', 'c15'])
+		office2_components = Components('office2', ['c16', 'c17', 'c18', 'c19', 'c20'])
+		storage_cupboard_components = Components('storage_cupboard', ['c21', 'c22', 'c23', 'c24', 'c25'])
+		book1_components = Components('book1', ['ref1_book1', 'ref2_book1', 'ref3_book1', 'ref4_book1'])
+		book2_components = Components('book2', ['ref1_book2', 'ref2_book2', 'ref3_book2', 'ref4_book2'])
+		book3_components = Components('book3', ['ref1_book3', 'ref2_book3', 'ref3_book3', 'ref4_book3'])
+		book4_components = Components('book4', ['ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4'])
+		refinements = [library_components, kitchen_components, office1_components, office2_components, storage_cupboard_components, book1_components, book2_components, book3_components, book4_components]
 
 	    # initialise relevance lists
 		rel_initial_conditions = []
@@ -433,7 +433,10 @@ class ControllerToI():
 
 	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
 		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
-		irrelevant_obj_consts = ['library', 'kitchen', 'book1', 'c1,', 'c2,', 'c3', 'c4', 'ref1_book1']
+		irrelevant_obj_consts = coarse_places.constants + coarse_objects.constants + places.constants + objects.constants
+		for i in range(len(irrelevant_obj_consts)):
+			if irrelevant_obj_consts[i] == 'c1': irrelevant_obj_consts[i] = 'c1,'
+			elif irrelevant_obj_consts[i] == 'c2': irrelevant_obj_consts[i] = 'c2,'
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 
@@ -453,30 +456,30 @@ class ControllerToI():
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
 			if ('loc' in rel_initial_conditions[i]) and ('book1' in rel_initial_conditions[i]):
 				rel_initial_conditions[i] = 'loc(ref1_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')'
-			#if ('loc' in rel_initial_conditions[i]) and ('book2' in rel_initial_conditions[i]):
-			#	rel_initial_conditions[i] = 'loc(ref1_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')'
-			#if ('loc' in rel_initial_conditions[i]) and ('book3' in rel_initial_conditions[i]):
-			#	rel_initial_conditions[i] = 'loc(ref1_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')'
-			#if ('loc' in rel_initial_conditions[i]) and ('book4' in rel_initial_conditions[i]):
-			#	rel_initial_conditions[i] = 'loc(ref1_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')'
+			if ('loc' in rel_initial_conditions[i]) and ('book2' in rel_initial_conditions[i]):
+				rel_initial_conditions[i] = 'loc(ref1_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')'
+			if ('loc' in rel_initial_conditions[i]) and ('book3' in rel_initial_conditions[i]):
+				rel_initial_conditions[i] = 'loc(ref1_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')'
+			if ('loc' in rel_initial_conditions[i]) and ('book4' in rel_initial_conditions[i]):
+				rel_initial_conditions[i] = 'loc(ref1_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
 				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true'): currently_holding = 'ref3_book1'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref4_index] == 'true'): currently_holding = 'ref4_book1'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true'): currently_holding = 'ref3_book2'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref4_index] == 'true'): currently_holding = 'ref4_book2'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true'): currently_holding = 'ref1_book3'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true'): currently_holding = 'ref2_book3'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true'): currently_holding = 'ref3_book3'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref4_index] == 'true'): currently_holding = 'ref4_book3'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref1_index] == 'true'): currently_holding = 'ref1_book4'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref2_index] == 'true'): currently_holding = 'ref2_book4'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref3_index] == 'true'): currently_holding = 'ref3_book4'
-				#elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'): currently_holding = 'ref4_book4'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true'): currently_holding = 'ref3_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref4_index] == 'true'): currently_holding = 'ref4_book1'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true'): currently_holding = 'ref3_book2'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref4_index] == 'true'): currently_holding = 'ref4_book2'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true'): currently_holding = 'ref1_book3'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true'): currently_holding = 'ref2_book3'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true'): currently_holding = 'ref3_book3'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref4_index] == 'true'): currently_holding = 'ref4_book3'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref1_index] == 'true'): currently_holding = 'ref1_book4'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref2_index] == 'true'): currently_holding = 'ref2_book4'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref3_index] == 'true'): currently_holding = 'ref3_book4'
+				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'): currently_holding = 'ref4_book4'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 	    # determine which final conditions are relevant
@@ -656,7 +659,7 @@ class ControllerToI():
 				for fluent in irrelevant_fluents: # don't include axioms with irrelevant fluents
 					if fluent in line: line_relevant = False
 				for act in irrelevant_actions: # don't include axioms with irrelevant actions
-					if act in line: line_relevant = False
+					if act in line:	line_relevant = False
 				if line_relevant: self.zoomed_asp_list.append(line)
 
 		self.zoomed_obs_index = self.zoomed_asp_list.index('%% End of History:\n') - 2

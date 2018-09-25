@@ -81,6 +81,7 @@ class World(object):
 			self.__updateStateFromAnswer(answer)
 			self.history.append(action)
 		direct_observation = self.__getDirectObservation(answer)
+		print (direct_observation)
 	 	return direct_observation
 
 	def __getDirectObservation(self,answer):
