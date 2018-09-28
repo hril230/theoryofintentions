@@ -19,6 +19,17 @@ max_plan_length = 17
 
 def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 
+	results = open('experimental_results.txt', 'a')
+	results.write('\n\nTrial number: ' + str(trial_number))
+	if global_variables.complexity_level == 1: results.write('\nInitial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ')
+	elif global_variables.complexity_level == 2: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand, refined_object_parts_in_hand] = ')
+	elif global_variables.complexity_level == 3: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ')
+	elif global_variables.complexity_level == 4: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book4_loc, book1_in_hand, book2_in_hand, book3_in_hand, book4_in_hand, refined_object_parts_in_hand] = ')
+	results.write(str(initial_state))
+	results.write('\nGoal: ')
+	results.write(goal)
+	results.close()
+
 	startTime = datetime.now()
 
 	print 'Trials: Initial_conditions_index: ' +str(initial_conditions_index)
@@ -53,17 +64,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 		if not (seconds_taken < 1200): timeTaken = 'TIMEOUT: running the controller took longer than 20 minutes'
 
 	results = open('experimental_results.txt', 'a')
-	results.write('\n\nTrial number: ' + str(trial_number))
-	if global_variables.complexity_level == 1: results.write('\nInitial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ')
-	elif global_variables.complexity_level == 2: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand, refined_object_parts_in_hand] = ')
-	elif global_variables.complexity_level == 3: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ')
-	elif global_variables.complexity_level == 4: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book4_loc, book1_in_hand, book2_in_hand, book3_in_hand, book4_in_hand, refined_object_parts_in_hand] = ')
-	results.write(str(initial_state))
-	results.write('\nGoal: ')
-	results.write(goal)
-	results.write('\nPlan: ')
-	results.write(controllerToI.abstract_action_plan)
-	results.write('\nTime taken with zooming: ')
+	results.write('\nTotal time taken with zooming: ')
 	results.write(str(timeTaken))
 	results.close()
 
@@ -106,7 +107,7 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 		if not (seconds_taken < 1200): timeTaken = 'TIMEOUT: running the non-zooming controller took longer than 20 minutes'
 
 	results = open('experimental_results.txt', 'a')
-	results.write('\nTime taken without zooming: ')
+	results.write('\nTotal time taken without zooming: ')
 	results.write(str(timeTaken))
 	results.close()
 
@@ -181,8 +182,8 @@ def createConditionsAndRun(trial_number):
 
 if __name__ == "__main__":
 	global_variables.init()
-	global_variables.complexity_level = 4 # TODO change this number to change the complexity level
+	global_variables.complexity_level = 1 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 1
+	number_runs = 50
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

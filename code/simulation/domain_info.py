@@ -6,7 +6,8 @@ class DomainInfo():
 		self.LocationRobot_index = 0
 		self.LocationBook1_index = 1
 		if complexity_level == 1:
-			self.In_handBook1_Ref1_index = 2
+			self.In_handBook1_index = 2
+			self.In_handBook1_Ref1_index = 3
 		elif complexity_level == 2:
 			self.LocationBook2_index = 2
 			self.In_handBook1_index = 3

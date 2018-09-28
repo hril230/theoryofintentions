@@ -100,13 +100,22 @@ class NonZoomingControllerToI():
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
 																 #condition for the ASP that infers coarse observations from the refined direct observations
 				while(need_refined_plan):
+					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_occurrences = self.runZoomedDomain()
+					endTime = datetime.now()
+					timeTaken = endTime - startTime
 					need_refined_plan = False
 					if refined_occurrences == ['']:
 						print 'Non-zooming ControllerToI \t\t no refined plan '
 						break
 					refined_occurrences.sort(key=self.getStep)
 					print 'Non-zooming ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
+					# store refined plan
+					results = open('experimental_results.txt', 'a')
+					results.write('\nAbstract action: ' + str(abstract_action))
+					results.write('\nTime taken to create refined plan: ' + str(timeTaken))
+					results.write('\nRefined plan (computed without zooming): ' + str(refined_occurrences))
+					results.close()	
 					for refined_occurence in refined_occurrences:
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])

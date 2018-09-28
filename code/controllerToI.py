@@ -95,7 +95,11 @@ class ControllerToI():
 			if(abstract_action[0:4] == 'stop'):
 				self.number_activities += 1
 				self.number_steps += 1
-			elif(abstract_action[0:5] == 'start'): pass
+			elif(abstract_action[0:5] == 'start'):
+				results = open('experimental_results.txt', 'a')
+				results.write('\nAbstract action plan: ')
+				results.write(self.abstract_action_plan)
+				results.close()
 			else:
 				print  '\nControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
 				print  'ControllerToI \t\t next abstract action: ' + abstract_action
@@ -107,14 +111,23 @@ class ControllerToI():
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
 																 #condition for the ASP that infers coarse observations from the refined direct observations	
 				while(need_refined_plan):
+					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_occurrences = self.runZoomedDomain()
+					endTime = datetime.now()
+					timeTaken = endTime - startTime
 					need_refined_plan = False
 					if (refined_occurrences == ['']) or (refined_occurrences == None):
 						print 'ControllerToI \t\t no refined plan '
 						global_variables.error = True
 						return
 					refined_occurrences.sort(key=self.getStep)
-					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])	
+					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
+					# store refined plan
+					results = open('experimental_results.txt', 'a')
+					results.write('\nAbstract action: ' + str(abstract_action))
+					results.write('\nTime taken to create refined plan: ' + str(timeTaken))
+					results.write('\nRefined plan (computed with zooming): ' + str(refined_occurrences))
+					results.close()
 					for i in range(len(refined_occurrences)):
 						refined_occurence = refined_occurrences[i]
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
