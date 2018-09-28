@@ -2,15 +2,16 @@ from sets import Set
 import subprocess
 import random
 import sys
-preASP_refined_world_file = 'simulation/pre_ASP_files/preASP_refined_world.txt'
-asp_World_file = 'simulation/ASP_files/ASP_World.sp'
-asp_Refined_World_file = 'simulation/ASP_files/ASP_Refined_World.sp'
 history_marker = '%% HISTORY GOES HERE'
 display_marker = 'display'
+asp_World_file = 'simulation/ASP_files/ASP_World.sp'
+asp_Refined_World_file = 'simulation/ASP_files/ASP_Refined_World.sp'
 
 
 class World(object):
-	def __init__(self,thisPath,world_initial_state, this_seed, new_domain_info):
+	def __init__(self,thisPath,world_initial_state, new_domain_info):
+		self.domain_info = new_domain_info	
+		preASP_refined_world_file = 'simulation/pre_ASP_files/complexity_level_' + str(self.domain_info.complexity_level) + '/preASP_refined_world.txt'
 		reader = open(preASP_refined_world_file, 'r')
 		pre_asp = reader.read()
 		reader.close()
@@ -22,10 +23,7 @@ class World(object):
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
 		self.sparcPath = thisPath
-		self.domain_info = new_domain_info
-		random.seed(this_seed)
 		obs_list = list(self.domain_info.refinedStateToRefinedHoldsSet(world_initial_state,0))
-		print('updating world state from initial state in ASP: ')
 		output = self.__runASPDomain(obs_list)
 		self.__updateStateFromAnswer(output)
 

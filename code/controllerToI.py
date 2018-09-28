@@ -19,10 +19,10 @@ class ControllerToI():
 		self.max_plan_length = max_plan_length
 
 		## used for creating ASP files
-		self.preASP_ToI_file = ASP_subfolder+'pre_ASP_files/preASP_ToI.txt' # Unsed for planning and diagnosis with ToI
-		self.preASP_refined_domain_file = ASP_subfolder + 'pre_ASP_files/preASP_refined_domain.txt' # used for zooming
-		self.preASP_abstract_domain_file = ASP_subfolder + 'pre_ASP_files/preASP_abstract_domain.txt' # used for updating controller Belief
-		self.preASP_refined_domain_no_planning_file = ASP_subfolder+ 'pre_ASP_files/preASP_refined_domain_no_planning.txt' # used for infering coarse observations
+		self.preASP_ToI_file = ASP_subfolder+'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI.txt' # Unsed for planning and diagnosis with ToI
+		self.preASP_refined_domain_file = ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_domain.txt' # used for zooming
+		self.preASP_abstract_domain_file = ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_domain.txt' # used for updating controller Belief
+		self.preASP_refined_domain_no_planning_file = ASP_subfolder+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_domain_no_planning.txt' # used for infering coarse observations
 
 		## used for paths and names of the ASP files created
 		self.asp_ToI_planning_file = ASP_subfolder+'ASP_files/ASP_ToI_Planning.sp'
@@ -172,12 +172,15 @@ class ControllerToI():
 		observations = Set()
 		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
-		result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
-		if 'holds' in observation2: observations.add(observation2)
-		result,observation3 = self.executer.test('test(rob1,loc(ref1_book3,' + self.refined_location+ '),true)')
-		if 'holds' in observation3: observations.add(observation3)
-		result,observation4 = self.executer.test('test(rob1,loc(ref1_book4,' + self.refined_location+ '),true)')
-		if 'holds' in observation4: observations.add(observation4)
+		if global_variables.complexity_level > 1:
+			result,observation2 = self.executer.test('test(rob1,loc(ref1_book2,' + self.refined_location+ '),true)')
+			if 'holds' in observation2: observations.add(observation2)
+		if global_variables.complexity_level > 2:
+			result,observation3 = self.executer.test('test(rob1,loc(ref1_book3,' + self.refined_location+ '),true)')
+			if 'holds' in observation3: observations.add(observation3)
+		if global_variables.complexity_level > 3:
+			result,observation4 = self.executer.test('test(rob1,loc(ref1_book4,' + self.refined_location+ '),true)')
+			if 'holds' in observation4: observations.add(observation4)
 		return observations
 
 	def infer_abstract_obs_from_refined_observations(self,initial_refined_location,refined_observations_list, step):
@@ -262,7 +265,6 @@ class ControllerToI():
 		for line in split_answer:
 			if("intended_action" in line):
 				abstract_action = line[16:line.rfind(',')]
-			#elif("number_unobserved" in line): continue
 			elif("selected_goal_holds" in line):
 				self.believes_goal_holds = True
 			else:
@@ -390,14 +392,24 @@ class ControllerToI():
 		self.zoom(list(initial_state), action, list(final_state))
 
 
-	# this action writes a zoomed ASP file
+	# this function writes a zoomed ASP file
 	def zoom(self,initial_state, action, final_state):
 
-	    # EDIT these lists to change the domain
-		coarse_places = Sort('coarse_place', ['library', 'kitchen', 'office1', 'office2', 'storage_cupboard'])
-		coarse_objects = Sort('coarse_object', ['book1', 'book2', 'book3', 'book4'])
-		places = Sort('place', ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25'])
-		objects = Sort('object', ['ref1_book1', 'ref2_book1', 'ref3_book1', 'ref4_book1', 'ref1_book2', 'ref2_book2', 'ref3_book2', 'ref4_book2', 'ref1_book3', 'ref2_book3', 'ref3_book3', 'ref4_book3', 'ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4'])
+		# use complexity level to determine what is included in each sort
+		total_coarse_places_list = ['library', 'kitchen', 'office1', 'office2', 'storage_cupboard']
+		coarse_places_list = total_coarse_places_list[0:global_variables.complexity_level+1]
+		total_coarse_objects_list = ['book1', 'book2', 'book3', 'book4']
+		coarse_objects_list = total_coarse_objects_list[0:global_variables.complexity_level]
+		total_places_list = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25']
+		places_list = total_places_list[0:(global_variables.complexity_level+1)**2]
+		total_objects_list = ['ref1_book1', 'ref2_book1', 'ref1_book2', 'ref2_book2', 'ref3_book1', 'ref3_book2', 'ref1_book3', 'ref2_book3', 'ref3_book3', 'ref4_book1', 'ref4_book2', 'ref4_book3', 'ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4']
+		objects_list = total_objects_list[0:global_variables.complexity_level**2]
+
+		# set up sorts
+		coarse_places = Sort('coarse_place', coarse_places_list)
+		coarse_objects = Sort('coarse_object', coarse_objects_list)
+		places = Sort('place', places_list)
+		objects = Sort('object', objects_list)
 		coarse_things = Sort('coarse_thing', ['#coarse_object', '#robot'])
 		things = Sort('thing', ['#object', '#robot'])
 		coarse_components = Sort('coarse_component', ['#coarse_place', '#coarse_object'])
@@ -408,19 +420,51 @@ class ControllerToI():
 		defined_fluents = ['coarse_loc(#coarse_thing,#coarse_place)', 'coarse_in_hand(#robot,#coarse_object)']
 		actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 
-	    # EDIT these instantiations of the Components class to change which refined objects are associated with which coarse ones
-		library_components = Components('library', ['c1', 'c2', 'c3', 'c4', 'c5'])
-		kitchen_components = Components('kitchen', ['c6', 'c7', 'c8', 'c9', 'c10'])
-		office1_components = Components('office1', ['c11', 'c12', 'c13', 'c14', 'c15'])
-		office2_components = Components('office2', ['c16', 'c17', 'c18', 'c19', 'c20'])
-		storage_cupboard_components = Components('storage_cupboard', ['c21', 'c22', 'c23', 'c24', 'c25'])
-		book1_components = Components('book1', ['ref1_book1', 'ref2_book1', 'ref3_book1', 'ref4_book1'])
-		book2_components = Components('book2', ['ref1_book2', 'ref2_book2', 'ref3_book2', 'ref4_book2'])
-		book3_components = Components('book3', ['ref1_book3', 'ref2_book3', 'ref3_book3', 'ref4_book3'])
-		book4_components = Components('book4', ['ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4'])
-		refinements = [library_components, kitchen_components, office1_components, office2_components, storage_cupboard_components, book1_components, book2_components, book3_components, book4_components]
+		# use complexity level to determine which refined components are matched to which coarse-level object constants
+		cell_num = 1
+		library_components_list = []
+		for i in range(global_variables.complexity_level+1):
+			library_components_list.append('c'+str(cell_num))
+			cell_num = cell_num + 1
+		kitchen_components_list = []
+		for i in range(global_variables.complexity_level+1):
+			kitchen_components_list.append('c'+str(cell_num))
+			cell_num = cell_num + 1
+		office1_components_list = []
+		for i in range(global_variables.complexity_level+1):
+			office1_components_list.append('c'+str(cell_num))
+			cell_num = cell_num + 1
+		office2_components_list = []
+		for i in range(global_variables.complexity_level+1):
+			office2_components_list.append('c'+str(cell_num))
+			cell_num = cell_num + 1
+		storage_cupboard_components_list = []
+		for i in range(global_variables.complexity_level+1):
+			storage_cupboard_components_list.append('c'+str(cell_num))
+			cell_num = cell_num + 1
+		total_book1_components_list = ['ref1_book1', 'ref2_book1', 'ref3_book1', 'ref4_book1']
+		book1_components_list = total_book1_components_list[0:global_variables.complexity_level]
+		total_book2_components_list = ['ref1_book2', 'ref2_book2', 'ref3_book2', 'ref4_book2']
+		book2_components_list = total_book2_components_list[0:global_variables.complexity_level]
+		total_book3_components_list = ['ref1_book3', 'ref2_book3', 'ref3_book3', 'ref4_book3']
+		book3_components_list = total_book3_components_list[0:global_variables.complexity_level]
+		total_book4_components_list = ['ref1_book4', 'ref2_book4', 'ref3_book4', 'ref4_book4']
+		book4_components_list = total_book4_components_list[0:global_variables.complexity_level]
 
-	    # initialise relevance lists
+		# match refined components to coarse-level object constants
+		library_components = Components('library', library_components_list)
+		kitchen_components = Components('kitchen', kitchen_components_list)
+		office1_components = Components('office1', office1_components_list)
+		office2_components = Components('office2', office2_components_list)
+		storage_cupboard_components = Components('storage_cupboard', storage_cupboard_components_list)
+		book1_components = Components('book1', book1_components_list)
+		book2_components = Components('book2', book2_components_list)
+		book3_components = Components('book3', book3_components_list)
+		book4_components = Components('book4', book4_components_list)
+		total_refinements = [library_components, kitchen_components, book1_components, office1_components, book2_components, office2_components, book3_components, storage_cupboard_components, book4_components]
+		refinements = total_refinements[0:global_variables.complexity_level*2+1]
+
+	    	# initialise relevance lists
 		rel_initial_conditions = []
 		rel_final_conditions = []
 		rel_conditions = []
@@ -431,7 +475,7 @@ class ControllerToI():
 		rel_defined_fluents = []
 		rel_actions = ['test(#robot,#physical_inertial_fluent,#outcome)']
 
-	    # initialise irrelevance lists - EDIT to include new objects or zones or cells
+	    	# initialise irrelevance lists
 		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
 		irrelevant_obj_consts = coarse_places.constants + coarse_objects.constants + places.constants + objects.constants
 		for i in range(len(irrelevant_obj_consts)):
@@ -440,7 +484,7 @@ class ControllerToI():
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 
-	    # determine which initial conditions are relevant
+	    	# determine which initial conditions are relevant
 		for condition in initial_state:
 			if not condition in final_state: # conditions that change are relevant
 				rel_initial_conditions.append(condition)
@@ -450,7 +494,7 @@ class ControllerToI():
 				rel_conditions.append(condition)
 
 
-	    # refine initial conditions
+	    	# refine initial conditions
 		for i in range(len(rel_initial_conditions)):
 			if ('loc' in rel_initial_conditions[i]) and ('rob1' in rel_initial_conditions[i]):
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
@@ -464,31 +508,50 @@ class ControllerToI():
 				rel_initial_conditions[i] = 'loc(ref1_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
-				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'): currently_holding = 'ref1_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'): currently_holding = 'ref2_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true'): currently_holding = 'ref3_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref4_index] == 'true'): currently_holding = 'ref4_book1'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'): currently_holding = 'ref1_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'): currently_holding = 'ref2_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true'): currently_holding = 'ref3_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref4_index] == 'true'): currently_holding = 'ref4_book2'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true'): currently_holding = 'ref1_book3'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true'): currently_holding = 'ref2_book3'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true'): currently_holding = 'ref3_book3'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref4_index] == 'true'): currently_holding = 'ref4_book3'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref1_index] == 'true'): currently_holding = 'ref1_book4'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref2_index] == 'true'): currently_holding = 'ref2_book4'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref3_index] == 'true'): currently_holding = 'ref3_book4'
-				elif(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'): currently_holding = 'ref4_book4'
+				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'):
+					currently_holding = 'ref1_book1'
+				if global_variables.complexity_level > 1:
+					if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true'):
+						currently_holding = 'ref2_book1'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true'):
+						currently_holding = 'ref1_book2'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true'):
+						currently_holding = 'ref2_book2'
+				if global_variables.complexity_level > 2:
+					if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true'):
+						currently_holding = 'ref3_book1'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true'):
+						currently_holding = 'ref3_book2'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true'):
+						currently_holding = 'ref1_book3'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true'):
+						currently_holding = 'ref2_book3'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true'):
+						currently_holding = 'ref3_book3'
+				if global_variables.complexity_level > 3:
+					if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref4_index] == 'true'):
+						currently_holding = 'ref4_book1'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook2_Ref4_index] == 'true'):
+						currently_holding = 'ref4_book2'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook3_Ref4_index] == 'true'):
+						currently_holding = 'ref4_book3'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref1_index] == 'true'):
+						currently_holding = 'ref1_book4'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref2_index] == 'true'):
+						currently_holding = 'ref2_book4'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref3_index] == 'true'):
+						currently_holding = 'ref3_book4'
+					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'):
+						currently_holding = 'ref4_book4'
 				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
-	    # determine which final conditions are relevant
+	    	# determine which final conditions are relevant
 		for condition in final_state:
 			if not condition in initial_state:
 				rel_final_conditions.append(condition)
 				rel_conditions.append(condition)
 
-	    # determine which object constants are relevant
+	    	# determine which object constants are relevant
 		for condition in rel_conditions:
 			for index in range(len(condition)):
 				if condition[index] == '(':
@@ -502,7 +565,7 @@ class ControllerToI():
 					irrelevant_obj_consts.remove(const)
 		rel_obj_consts = list(set(rel_obj_consts)) # remove duplicates
 
-	    # add refined components of relevant object constants
+	    	# add refined components of relevant object constants
 		for const in rel_obj_consts:
 			for refinement in refinements:
 				if const == refinement.name:
@@ -513,13 +576,13 @@ class ControllerToI():
 						if refined_const in irrelevant_obj_consts:
 							irrelevant_obj_consts.remove(refined_const)
 
-	    # sort relevant objects into types
+	    	# sort relevant objects into types
 		for sort in sorts:
 			for const in sort.constants:
 				if const in rel_obj_consts:
 					sort.add(const)
 
-	    # determine which sorts should be included in the zoomed description
+	    	# determine which sorts should be included in the zoomed description
 		for sort in sorts:
 			if len(sort.rel_constants) != 0:
 				rel_sorts.append(sort)
@@ -527,13 +590,13 @@ class ControllerToI():
 				if ('#'+sort.name) in irrelevant_sort_names:
 					irrelevant_sort_names.remove('#'+sort.name)
 
-	    # add relevant sorts to sorts of sorts (coarse_things, things, coarse_components and refined_components)
+	    	# add relevant sorts to sorts of sorts (coarse_things, things, coarse_components and refined_components)
 		for sort in rel_sorts:
 			for sort_of_sorts in sorts:
 				if ('#'+sort.name) in sort_of_sorts.constants:
 					sort_of_sorts.add('#'+sort.name)
 
-	    # determine which inertial fluents are relevant
+	    	# determine which inertial fluents are relevant
 		for fluent in inertial_fluents:
 			fluent_relevant = True
 			for index in range(len(fluent)):
@@ -550,7 +613,7 @@ class ControllerToI():
 				if fluent[0:opening_bracket] in irrelevant_fluents:
 					irrelevant_fluents.remove(fluent[0:opening_bracket])
 
-	    # determine which defined fluents are relevant
+	    	# determine which defined fluents are relevant
 		for fluent in defined_fluents:
 			fluent_relevant = True
 			for index in range(len(fluent)):
@@ -567,7 +630,7 @@ class ControllerToI():
 				if fluent[0:opening_bracket] in irrelevant_fluents:
 					irrelevant_fluents.remove(fluent[0:opening_bracket])
 
-	    # determine which actions are relevant
+	    	# determine which actions are relevant
 		for act in actions:
 			action_relevant = True
 			for index in range(len(act)):
@@ -586,7 +649,7 @@ class ControllerToI():
 
 
 
-	    # determine what the goal of the refined ASP should be
+	    	# determine what the goal of the refined ASP should be
 		self.goal = 'goal(I) :- '
 		for condition in rel_final_conditions:
 			if '-' in condition:
@@ -596,7 +659,7 @@ class ControllerToI():
 				self.goal = self.goal + 'holds(' + condition + ',I), '
 		self.goal = self.goal[0:len(self.goal)-2] + '.\n'
 
-	    # make temporary copy of refined ASP file that can be edited
+	    	# make temporary copy of refined ASP file that can be edited
 		original_asp_reader = open(self.preASP_refined_domain_file, 'r')
 		self.zoomed_asp_list = []
 		zoomed_asp_writter = open(self.zoomed_domain_file, 'w')
