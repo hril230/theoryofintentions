@@ -30,7 +30,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	results.write(goal)
 	results.close()
 
-	startTime = datetime.now()
+	#startTime = datetime.now()
 
 	print 'Trials: Initial_conditions_index: ' +str(initial_conditions_index)
 	print 'Trials: World refined initial state: ' + str(initial_state)
@@ -54,8 +54,10 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	#	p1.join()
 	controllerToI.run()
 
-	endTime = datetime.now()
-	timeTaken = endTime - startTime
+	#endTime = datetime.now()
+	#timeTaken = endTime - startTime
+	timeTaken = controllerToI.planning_times[0]
+	for i in range(1,len(controllerToI.planning_times)): timeTaken = timeTaken + controllerToI.planning_times[i]
 	if global_variables.error:
 		sys.exit() # for testing purposes only
 		timeTaken = 'ERROR: the output from the solver exceeds 100000000 characters.'
@@ -64,6 +66,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 		if not (seconds_taken < 1200): timeTaken = 'TIMEOUT: running the controller took longer than 20 minutes'
 
 	results = open('experimental_results.txt', 'a')
+	for line in controllerToI.lines_to_write: results.write(line)
 	results.write('\nTotal time taken with zooming: ')
 	results.write(str(timeTaken))
 	results.close()
@@ -75,7 +78,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 
 def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 
-	startTime = datetime.now()
+	#startTime = datetime.now()
 
 	print 'Trials: Initial_conditions_index: ' +str(initial_conditions_index)
 	print 'Trials: World refined initial state: ' + str(initial_state)
@@ -91,22 +94,26 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	print 'Trials: World coarse initial state: ' + str(initial_conditions)
 	controllerToI = NonZoomingControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
 
-	p2 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
-	p2.start()
-	p2.join(1200)
-	if p2.is_alive():
-		p2.terminate()
-		p2.join()
-	#controllerToI.run()
+	#p2 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
+	#p2.start()
+	#p2.join(1200)
+	#if p2.is_alive():
+	#	p2.terminate()
+	#	p2.join()
+	controllerToI.run()
 
-	endTime = datetime.now()
-	timeTaken = endTime - startTime
+	#endTime = datetime.now()
+	#timeTaken = endTime - startTime
+	timeTaken = controllerToI.planning_times[0]
+	for i in range(1,len(controllerToI.planning_times)): timeTaken = timeTaken + controllerToI.planning_times[i]
+
 	if global_variables.error: timeTaken = 'ERROR: the output from the solver exceeds 100000000 characters.'
 	else:
 		seconds_taken = timeTaken.total_seconds()
 		if not (seconds_taken < 1200): timeTaken = 'TIMEOUT: running the non-zooming controller took longer than 20 minutes'
 
 	results = open('experimental_results.txt', 'a')
+	for line in controllerToI.lines_to_write: results.write(line)
 	results.write('\nTotal time taken without zooming: ')
 	results.write(str(timeTaken))
 	results.close()
@@ -185,5 +192,5 @@ if __name__ == "__main__":
 	global_variables.complexity_level = 1 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 50
+	number_runs = 1
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

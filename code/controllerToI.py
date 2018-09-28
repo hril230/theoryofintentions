@@ -10,6 +10,10 @@ from itertools import groupby
 
 class ControllerToI():
 	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, refined_location, initial_conditions , goal, max_plan_length):
+		self.lines_to_write = []
+		self.planning_times = []
+		self.abstract_planning_time = None
+		self.abstract_action_plan = ''
 
 		self.goal = goal
 		self.sparc_path = sparc_path
@@ -43,11 +47,6 @@ class ControllerToI():
 		self.current_diagnosis = '' #keeping the latest diagnosis
 		self.input_for_planning = [] #holds the input necessary to get the next intended action in the ASP_TOI_Planning
 		self.current_step = 1 # holds the current step of the controllerToI, which is the same as the ASP_TOI_Planning
-
-		self.abstract_action_plan = ''
-
-
-
 
 		self.preparePreASPStringLists()
 		self.setInitialBelief(self.filteredPlainHistory(initial_conditions))
@@ -96,10 +95,10 @@ class ControllerToI():
 				self.number_activities += 1
 				self.number_steps += 1
 			elif(abstract_action[0:5] == 'start'):
-				results = open('experimental_results.txt', 'a')
-				results.write('\nAbstract action plan: ')
-				results.write(self.abstract_action_plan)
-				results.close()
+				self.lines_to_write.append('\nZooming controller abstract action plan: ')
+				self.lines_to_write.append(self.abstract_action_plan)
+				self.lines_to_write.append('\nTime taken to plan abstract action plan: ' + str(self.abstract_planning_time))
+				self.planning_times.append(self.abstract_planning_time)
 			else:
 				print  '\nControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
 				print  'ControllerToI \t\t next abstract action: ' + abstract_action
@@ -123,11 +122,10 @@ class ControllerToI():
 					refined_occurrences.sort(key=self.getStep)
 					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
 					# store refined plan
-					results = open('experimental_results.txt', 'a')
-					results.write('\nAbstract action: ' + str(abstract_action))
-					results.write('\nTime taken to create refined plan: ' + str(timeTaken))
-					results.write('\nRefined plan (computed with zooming): ' + str(refined_occurrences))
-					results.close()
+					self.lines_to_write.append('\nAbstract action: ' + str(abstract_action))
+					self.lines_to_write.append('\nRefined plan (computed with zooming): ' + str(refined_occurrences))
+					self.lines_to_write.append('\nTime taken to create refined plan: ' + str(timeTaken))
+					self.planning_times.append(timeTaken)
 					for i in range(len(refined_occurrences)):
 						refined_occurence = refined_occurrences[i]
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
@@ -245,6 +243,7 @@ class ControllerToI():
 		return Set([self.domain_info.LocationBook1_index, self.domain_info.In_handBook1_index, self.domain_info.LocationBook2_index, self.domain_info.In_handBook2_index, self.domain_info.LocationBook3_index, self.domain_info.In_handBook3_index])
 
 	def runToIPlanning(self,input):
+		startTime = datetime.now() # record the time taken to plan the abstract plan
 		abstract_action = None
 		current_asp_split = self.preASP_ToI_split[:self.index_beginning_history_ToI +1] + input + self.preASP_ToI_split[self.index_beginning_history_ToI +1:]
 		current_asp_split[self.ToI_current_step_index +1] = 'current_step('+str(self.current_step)+').'
@@ -272,6 +271,8 @@ class ControllerToI():
 		print ('\nAbstract action plan:')
 		print (chosenAnswer)
 		if self.abstract_action_plan == '': self.abstract_action_plan = chosenAnswer
+		endTime = datetime.now()
+		if self.abstract_planning_time == None: self.abstract_planning_time = endTime - startTime
 		split_answer = chosenAnswer.strip('}').strip('{').split(', ')
 		self.history_ToI_diagnosis = []
 		self.believes_goal_holds = False
