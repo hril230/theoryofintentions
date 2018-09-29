@@ -92,7 +92,6 @@ holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
 -holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
 %-holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
 coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1), #place(C2).
-lds(in_hand(rob1, OP), I) :- -holds(coarse_in_hand(rob1,O),I), comp(OP,O).
 
 
 
