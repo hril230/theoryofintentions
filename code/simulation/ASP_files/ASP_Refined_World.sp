@@ -11,12 +11,12 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library,kitchen}.
+#coarse_place = {library,kitchen,office1}.
 #robot = {rob1}.
-#coarse_object = {book1}.
-#object = {ref1_book1}.
+#coarse_object = {book1,book2}.
+#object = {ref1_book1,ref2_book1, ref1_book2,ref2_book2}.
 #coarse_thing = #coarse_object + #robot.
-#place = {c1, c2, c3, c4}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9}.
 #thing = #object + #robot.
 
 #step = 0..numSteps.
@@ -88,15 +88,16 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 -holds(coarse_in_hand(R, OP2), I) :- holds(coarse_in_hand(R, OP1), I), OP1!=OP2.
 
+% If a refined part of an object is not in a cell, we know no other other refined part of the object is in that cell
+holds(loc(RB2, C) ,I) :- holds(loc(RB1, C), I), comp(RB1, B), comp(RB2,B).
+
 % Axioms relating coarse-resolution attributes and fine-resolution counterparts
 holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
 holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
 holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
--holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
+-holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
+%-holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
 coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1), #place(C2).
-holds(loc(O1, C), I) :- holds(loc(O2, C), I), comp(O1, O), comp(O2, O). % all refined parts of an object must have the same location.
--holds(in_hand(rob1, OP), I) :- -holds(coarse_in_hand(rob1,O),I), comp(OP,O).
-
 
 
 %% Executability Conditions %%
@@ -194,16 +195,29 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
+next_to(c4, c5).
+next_to(c5, c6).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c8, c9).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
 comp(c1, library).
 comp(c2, library).
-comp(c3, kitchen).
+comp(c3, library).
 comp(c4, kitchen).
+comp(c5, kitchen).
+comp(c6, kitchen).
+comp(c7, office1).
+comp(c8, office1).
+comp(c9, office1).
 
 comp(ref1_book1, book1).
+comp(ref2_book1, book1).
+comp(ref1_book2, book2).
+comp(ref2_book2, book2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -212,10 +226,16 @@ comp(ref1_book1, book1).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(in_hand(rob1,ref1_book1),0).
-holds(loc(rob1,c3),0).
-holds(loc(ref1_book1,c3),0).
-hpd(test(rob1,loc(ref1_book1,c3),true),0).
+holds(loc(ref1_book2,c1),0).
+holds(loc(ref2_book2,c1),0).
+-holds(in_hand(rob1,ref2_book1),0).
+holds(loc(rob1,c7),0).
+-holds(in_hand(rob1,ref1_book1),0).
+-holds(in_hand(rob1,ref1_book2),0).
+-holds(in_hand(rob1,ref2_book2),0).
+holds(loc(ref2_book1,c8),0).
+holds(loc(ref1_book1,c8),0).
+hpd(test(rob1,loc(ref1_book2,c7),true),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
