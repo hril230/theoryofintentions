@@ -83,14 +83,16 @@ holds(loc(OP1, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP2), I), comp(OP
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 -holds(coarse_in_hand(R, OP2), I) :- holds(coarse_in_hand(R, OP1), I), OP1!=OP2.
 
+% If a refined part of an object is not in a cell, we know no other other refined part of the object is in that cell
+holds(loc(RB2, C) ,I) :- holds(loc(RB1, C), I), comp(RB1, B), comp(RB2,B).
+
 % Axioms relating coarse-resolution attributes and fine-resolution counterparts
 holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
 holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
 holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
--holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
+-holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
+%-holds(coarse_in_hand(rob1, O), I) :- -holds(in_hand(rob1, OP), I), comp(OP, O), not holds(coarse_in_hand(rob1, O), I).
 coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1), #place(C2).
--holds(in_hand(rob1, OP), I) :- -holds(coarse_in_hand(rob1,O),I), comp(OP,O).
-
 
 
 %% Executability Conditions %%

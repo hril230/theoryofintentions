@@ -197,7 +197,7 @@ def createConditionsAndRun(trial_number):
 
 if __name__ == "__main__":
 	global_variables.init()
-	global_variables.complexity_level = 1 # TODO change this number to change the complexity level
+	global_variables.complexity_level = 2 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
 	number_runs = 1
