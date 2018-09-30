@@ -1,5 +1,5 @@
 from datetime import datetime
-from sets import Set
+#from sets import Set
 import subprocess
 import re
 import numpy
@@ -7,6 +7,7 @@ import random
 import global_variables
 from itertools import groupby
 import sys
+import time
 
 class NonZoomingControllerToI():
 	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, refined_location, initial_conditions , goal, max_plan_length):
@@ -14,6 +15,7 @@ class NonZoomingControllerToI():
 		self.planning_times = []
 		self.abstract_planning_time = None
 		self.abstract_action_plan = ''
+		self.error = False
 
 		self.goal = goal
 		self.sparc_path = sparc_path
@@ -52,17 +54,16 @@ class NonZoomingControllerToI():
 		self.history_ToI_diagnosis = initial_conditions #holds the history input for ASP_ToI_Diagnosis
 		self.refined_location = refined_location
 
-		print 'Non-zooming ControllerToI \t\t initial coarse belief: '+ str(self.belief)
-		print 'Non-zooming Controller ToI \t\t initial refined location: ' + str(self.refined_location)
+		print ('Non-zooming ControllerToI \t\t initial coarse belief: '+ str(self.belief))
+		print ('Non-zooming Controller ToI \t\t initial refined location: ' + str(self.refined_location))
 
 
 	def run(self):
-		global_variables.error = False
-		self.believes_goal_holds  = False
+		self.believes_goal_holds = False
 		self.history_ToI_diagnosis.append("hpd(select(my_goal), true,0).")
 		self.diagnose()
 		finish = False # flag that breaks the loop that calls the ASP_ToI_Planning when finish == True
-		while(finish == False):
+		while(finish == False and not self.error):
 			abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == 'finish'):
 				#check if the assuption that the goal has been reached is true.
@@ -84,7 +85,7 @@ class NonZoomingControllerToI():
 						abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == None):
 				self.history_ToI_diagnosis.append("Goal is futile")
-				print 'Non-zooming ControllerToI: \t Goal is futile '
+				print ('Non-zooming ControllerToI: \t Goal is futile ')
 				finish = True
 				break
 
@@ -99,26 +100,26 @@ class NonZoomingControllerToI():
 				self.lines_to_write.append('\nTime taken to plan abstract action plan: ' + str(self.abstract_planning_time))
 				self.planning_times.append(self.abstract_planning_time)
 			else:
-				print  'Non-zooming ControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
-				print  'Non-zooming ControllerToI \t\t next abstract action: ' + abstract_action
+				print ('Non-zooming ControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ', '+ str(self.belief))
+				print ('Non-zooming ControllerToI \t\t next abstract action: ' + abstract_action)
 				need_refined_plan = True
 				self.refine(abstract_action, self.belief, self.refined_location)
 				refined_plan_step = 0
-				zoomed_history = Set() #holds all the history of the refined plan created wtih zoomed refined domain in form of 'hpd' and 'obs'
-				refined_observations = Set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
+				zoomed_history = set() #holds all the history of the refined plan created wtih zoomed refined domain in form of 'hpd' and 'obs'
+				refined_observations = set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
 																 #condition for the ASP that infers coarse observations from the refined direct observations
-				while(need_refined_plan):
+				while(need_refined_plan and not self.error):
 					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_occurrences = self.runZoomedDomain()
 					endTime = datetime.now()
 					timeTaken = endTime - startTime
 					need_refined_plan = False
 					if refined_occurrences == ['']:
-						print 'Non-zooming ControllerToI \t\t no refined plan '
+						print ('Non-zooming ControllerToI \t\t no refined plan ')
 						break
 					refined_occurrences.sort(key=self.getStep)
-					print 'Non-zooming ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
+					print ('Non-zooming ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:]))
 					# store refined plan
 					self.lines_to_write.append('\nTime taken to create refined plan: ' + str(timeTaken))
 					self.lines_to_write.append('\nRefined plan (computed without zooming): ' + str(refined_occurrences))
@@ -130,13 +131,13 @@ class NonZoomingControllerToI():
 						if occurrence_step != refined_plan_step: continue
 						print('Non-zooming ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
 						if 'test' in refined_action:
- 							action_test_result, action_observation = self.executer.test(refined_action)
+							action_test_result, action_observation = self.executer.test(refined_action)
 							zoomed_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
 							refined_plan_step += 1
 							print('Non-zooming ControllerToI \t\t test result: ' + str(action_test_result))
 							if(action_test_result==True and 'loc(rob1' in refined_action):
 								self.refined_location = action_observation.split(',')[2][:-1]
-								print 'Non-zooming ControllerToI \t\t refined location: '+self.refined_location
+								print('Non-zooming ControllerToI \t\t refined location: '+self.refined_location)
 
 							refined_observations_step = self.getObservationsRelevantGoal()
 							refined_observations_step.add(action_observation)
@@ -145,7 +146,7 @@ class NonZoomingControllerToI():
 							zoomed_observation_step = self.domain_info.directObservationToRefinedObs(action_observation, refined_plan_step)
 							zoomed_history.add(zoomed_observation_step)
 							if(action_test_result == False):
-								print 'Non-zooming ControllerToI \t\t need another refined plan '
+								print ('Non-zooming ControllerToI \t\t need another refined plan ')
 								need_refined_plan = True
 								self.addObsZoomedDomain(list(zoomed_history),refined_plan_step+6)
 								break
@@ -155,7 +156,6 @@ class NonZoomingControllerToI():
 							self.belief = previous_belief
 							refined_plan_step += 1
 				unlisted_abstract_step_obs = self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step)
-				if global_variables.error: return
 				abstract_step_obs = list(unlisted_abstract_step_obs)
 				print('Non-zooming ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
 				print('Non-zooming ControllerToI \t Abstract obs: ' +': ' + str(abstract_step_obs))
@@ -166,19 +166,29 @@ class NonZoomingControllerToI():
 			self.diagnose()
 		if(self.current_diagnosis != ''): self.history_ToI_diagnosis.append(self.current_diagnosis)
 
+		# write results to file
+		timeTaken = self.planning_times[0]
+		for i in range(1,len(self.planning_times)): timeTaken = timeTaken + self.planning_times[i]
+		if self.error: timeTaken = 'ERROR: too many answer sets to process'
+		results = open('experimental_results.txt', 'a')
+		for line in self.lines_to_write: results.write(line)
+		results.write('\nTotal time taken without zooming: ')
+		results.write(str(timeTaken))
+		results.close()
+
 
 	def getStep(self,occurrence):
 		return int(occurrence[occurrence.rfind(',')+1:-1])
 
 	def prepareRefinedObservations(self,observations,step):
-		if observations == Set(['']) or not observations: return observations
+		if observations == set(['']) or not observations: return observations
 		updated_observations = set()
 		for observation in observations:
 			updated_observations.add(observation[:observation.rfind(',')+1] + str(step) + ').')
 		return updated_observations
 
 	def getObservationsRelevantGoal(self):
-		observations = Set()
+		observations = set()
 		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
 		if global_variables.complexity_level > 1:
@@ -204,9 +214,9 @@ class NonZoomingControllerToI():
 		print('\nNon-zooming ControllerToI: Inferring coarse obs from refined history ')
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_infering_coarse_belief_file +' -A ',shell=True)
 		if not '{' in answer_set:
-			global_variables.error = True
+			self.error = True
 			return
-		observations  = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
+		observations = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
@@ -228,18 +238,18 @@ class NonZoomingControllerToI():
 	###########################################################################################
 	def runZoomedDomain(self):
 		'\nControllerToI: Running zoomed domain to get refined plan '
-		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A ',shell=True)
+		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A',shell=True)
 		if not '{' in answer_set:
-			global_variables.error = True
+			self.error = True
 			return
 		plan = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return plan
 
- 	def filteredPlainHistory(self,this_list):
+	def filteredPlainHistory(self,this_list):
 		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
 
 	def getIndexesRelevantToGoal(self):
-		return Set([self.domain_info.LocationBook1_index, self.domain_info.In_handBook1_index])
+		return set([self.domain_info.LocationBook1_index, self.domain_info.In_handBook1_index])
 
 	def runToIPlanning(self,input):
 		startTime = datetime.now() # record the time taken to plan the abstract plan
@@ -253,7 +263,7 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_ToI_planning_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nNon-zooming ControllerToI: \t\t Finding next intended action'
+		print ('\nNon-zooming ControllerToI: \t\t Finding next intended action')
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
 		while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and self.number_steps < self.current_step + self.max_plan_length+3):
 			current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
@@ -262,10 +272,10 @@ class NonZoomingControllerToI():
 			f1 = open(self.asp_ToI_planning_file, 'w')
 			f1.write(asp)
 			f1.close()
-			print '\nNon-zooming ControllerToI: Increasing variable number_steps and creating a ToI Plan'
+			print ('\nNon-zooming ControllerToI: Increasing variable number_steps and creating a ToI Plan')
 			answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
 			self.number_steps +=1
-	        possibleAnswers = answerSet.rstrip().split('\n\n')
+		possibleAnswers = answerSet.rstrip().split('\n\n')
 		chosenAnswer = possibleAnswers[0]
 		if self.abstract_action_plan == '': self.abstract_action_plan = chosenAnswer
 		endTime = datetime.now()
@@ -276,7 +286,6 @@ class NonZoomingControllerToI():
 		for line in split_answer:
 			if("intended_action" in line):
 				abstract_action = line[16:line.rfind(',')]
-			#elif("number_unobserved" in line): continue
 			elif("selected_goal_holds" in line):
 				self.believes_goal_holds = True
 			else:
@@ -297,7 +306,7 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_ToI_diagnosing_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nNon-zooming ControllerToI: Diagnosing ToI with current obs'
+		print ('\nNon-zooming ControllerToI: Diagnosing ToI with current obs')
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_diagnosing_file +' -A ',shell=True)
 		answers = answerSet.rstrip().split('\n\n')
 		if self.current_diagnosis in answerSet:
@@ -305,7 +314,7 @@ class NonZoomingControllerToI():
 				if(self.current_diagnosis in a): chosenAnswer = a
 		else:
 			chosenAnswer = answers[0]
-	 	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
+		split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
 		for line in split_diagnosis:
 			if("number_unobserved" in line):
 				newLine =line.replace("number_unobserved","explanation")
@@ -331,8 +340,8 @@ class NonZoomingControllerToI():
 		preASP_ToI = reader.read()
 		reader.close()
 		self.preASP_ToI_split = preASP_ToI.split('\n')
-	   	index_goal = self.preASP_ToI_split.index(self.goal_marker)
-		self.preASP_ToI_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ self.goal)
+		index_goal = self.preASP_ToI_split.index(self.goal_marker)
+		self.preASP_ToI_split.insert(index_goal+1, "holds(my_goal,I) :- "+ self.goal)
 		self.index_beginning_history_ToI = self.preASP_ToI_split.index(self.history_marker)
 		self.ToI_current_step_index = self.preASP_ToI_split.index(self.current_step_marker)
 
@@ -358,15 +367,15 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_abstract_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nNon-zooming ControllerToI: Updating belief'
+		print ('\nNon-zooming ControllerToI: Updating belief')
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
 		if not '{' in output:
-			global_variables.error = True
+			self.error = True
 			return
 		output = output.rstrip().strip('{').strip('}')
 		if 'holds' in output:
 			self.belief = self.domain_info.abstractAnswerToCoarseState(output)
-		print 'Non-zooming ControllerToI \t\t updated belief: ' + str(self.belief)
+		print ('Non-zooming ControllerToI \t\t updated belief: ' + str(self.belief))
 
 
 	def setInitialBelief(self,input):
@@ -376,7 +385,7 @@ class NonZoomingControllerToI():
 		f1 = open(self.asp_abstract_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nNon-zooming ControllerToI: Setting initial belief'
+		print ('\nNon-zooming ControllerToI: Setting initial belief')
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
 		output = output.rstrip().strip('{').strip('}')
 		self.belief = self.domain_info.abstractAnswerToCoarseState(output)
@@ -385,8 +394,8 @@ class NonZoomingControllerToI():
 
 	# this function uses the preASP_refined_Domain.txt file and SPARC to get a refined action plan
 	def refine(self,action,belief,refined_location):
-		initial_state = Set()
-		final_state = Set()
+		initial_state = set()
+		final_state = set()
 		coarse_location = belief[self.domain_info.LocationRobot_index]
 		# use action and history to figure out the transition (initial_state, action, final_state)
 		# the location of the robot is relevant for move transitions
@@ -609,7 +618,7 @@ class NonZoomingControllerToI():
 						currently_holding = 'ref3_book4'
 					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'):
 						currently_holding = 'ref4_book4'
-				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
+				if(currently_holding != ''): rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
 		# determine which final conditions are relevant
 		for condition in final_state:

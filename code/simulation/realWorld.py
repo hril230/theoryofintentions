@@ -1,4 +1,4 @@
-from sets import Set
+#from sets import Set
 import subprocess
 import random
 import sys
@@ -72,7 +72,7 @@ class World(object):
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
 		if(answer == '\n'):
-			print '                nothing happned in real world '
+			print ('                nothing happned in real world ')
 			self.history.append(action + "realWorld -  (FAILED) ")
 		else:
 			happened = True
@@ -80,7 +80,7 @@ class World(object):
 			self.history.append(action)
 		direct_observation = self.__getDirectObservation(answer)
 		print (direct_observation)
-	 	return direct_observation
+		return direct_observation
 
 	def __getDirectObservation(self,answer):
 		answer = answer.rstrip().strip('{').strip('}')
@@ -94,9 +94,11 @@ class World(object):
 		f1 = open(asp_Refined_World_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nRealWorld: updating state'
+		print ('\nRealWorld: updating state')
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
-		return answer.rstrip().strip('{').strip('}')
+		answer = answer.decode().strip('{')
+		answer = answer.strip('}')
+		return answer
 
 	def achievedGoal(self): # TODO edit here to change goal
 		#if(self.CoarseState[self.domain_info.LocationBook1_index] != 'kitchen'): return 'false'

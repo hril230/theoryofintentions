@@ -213,9 +213,9 @@ comp(ref1_book1, book1).
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
 holds(in_hand(rob1,ref1_book1),0).
-holds(loc(rob1,c3),0).
-holds(loc(ref1_book1,c3),0).
-hpd(test(rob1,loc(ref1_book1,c3),true),0).
+holds(loc(ref1_book1,c2),0).
+holds(loc(rob1,c2),0).
+hpd(test(rob1,loc(ref1_book1,c2),true),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

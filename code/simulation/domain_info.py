@@ -1,4 +1,4 @@
-from sets import Set
+#from sets import Set
 class DomainInfo():
 
 	def __init__(self,complexity_level):
@@ -166,7 +166,7 @@ class DomainInfo():
 		for holds in answer_split:
 			if not (holds[0] == '-'):
 				fluent = holds[6:holds.rfind(',')]
- 				if(fluent[0:4] == 'loc('):
+				if(fluent[0:4] == 'loc('):
 					fluent = fluent[4:-1]
 					split_fluent = fluent.split(',')
 					if(split_fluent[0] == 'rob1'): new_refined_state[self.LocationRobot_index] = split_fluent[1]
@@ -438,7 +438,7 @@ class DomainInfo():
 		return directObservation
 
 	def getIndexesRelevantToGoal(self,goal):
-		indexes = Set()
+		indexes = set()
 		goal = goal.rstrip()
 		conditions = goal.split(', ')
 		for condition in conditions:
@@ -468,7 +468,7 @@ class DomainInfo():
 		for entry in answer_split:
 			if('observed') in entry:
 				obs_step = entry[entry.rfind(',')+1:entry.rfind(')')]
-				entry =  entry[entry.find('(')+1:entry.rfind(',')]
+				entry = entry[entry.find('(')+1:entry.rfind(',')]
 				fluent = entry[entry.find(',')+1:entry.rfind(',')]
 				value = entry[entry.rfind(',')+1:-1]
 				obs = 'obs('+(',').join([fluent,value,obs_step])+')'

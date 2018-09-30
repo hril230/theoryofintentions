@@ -7,6 +7,7 @@ import random
 import sys
 import global_variables
 from itertools import groupby
+import time
 
 class ControllerToI():
 	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, refined_location, initial_conditions , goal, max_plan_length):
@@ -14,12 +15,13 @@ class ControllerToI():
 		self.planning_times = []
 		self.abstract_planning_time = None
 		self.abstract_action_plan = ''
+		self.error = False
 
 		self.goal = goal
 		self.sparc_path = sparc_path
 		self.executer = executer
 		self.domain_info = domain_info
-                self.refined_state = self.domain_info.refined_state[:]
+		self.refined_state = self.domain_info.refined_state[:]
 		self.max_plan_length = max_plan_length
 
 		## used for creating ASP files
@@ -53,17 +55,16 @@ class ControllerToI():
 		self.history_ToI_diagnosis = initial_conditions #holds the history input for ASP_ToI_Diagnosis
 		self.refined_location = refined_location
 
-		print 'ControllerToI \t\t initial coarse belief: '+ str(self.belief)
-		print 'Controller ToI \t\t initial refined location: ' + str(self.refined_location)
+		print ('ControllerToI \t\t initial coarse belief: ' + str(self.belief))
+		print ('Controller ToI \t\t initial refined location: ' + str(self.refined_location))
 
 
 	def run(self):
-		global_variables.error = False
-		self.believes_goal_holds  = False
+		self.believes_goal_holds = False
 		self.history_ToI_diagnosis.append("hpd(select(my_goal), true,0).")
 		self.diagnose()
 		finish = False # flag that breaks the loop that calls the ASP_ToI_Planning when finish == True
-		while(finish == False):
+		while(finish == False and not self.error):
 			abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == 'finish'):
 				#check if the assuption that the goal has been reached is true.
@@ -85,7 +86,7 @@ class ControllerToI():
 						abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == None):
 				self.history_ToI_diagnosis.append("Goal is futile")
-				print 'ControllerToI: \t Goal is futile '
+				print ('ControllerToI: \t Goal is futile ')
 				finish = True
 				break
 
@@ -100,8 +101,8 @@ class ControllerToI():
 				self.lines_to_write.append('\nTime taken to plan abstract action plan: ' + str(self.abstract_planning_time))
 				self.planning_times.append(self.abstract_planning_time)
 			else:
-				print  '\nControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ',  '+ str(self.belief)
-				print  'ControllerToI \t\t next abstract action: ' + abstract_action
+				print ('\nControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ', '+ str(self.belief))
+				print ('ControllerToI \t\t next abstract action: ' + abstract_action)
 				need_refined_plan = True
 				self.refine(abstract_action, self.refined_location)
 				refined_plan_step = 0
@@ -109,18 +110,18 @@ class ControllerToI():
 				refined_observations = Set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
 																 #condition for the ASP that infers coarse observations from the refined direct observations	
-				while(need_refined_plan):
+				while(need_refined_plan and not self.error):
 					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_occurrences = self.runZoomedDomain()
 					endTime = datetime.now()
 					timeTaken = endTime - startTime
 					need_refined_plan = False
 					if (refined_occurrences == ['']) or (refined_occurrences == None):
-						print 'ControllerToI \t\t no refined plan '
-						global_variables.error = True
-						return
+						print ('ControllerToI \t\t no refined plan ')
+						self.error = True
+						break
 					refined_occurrences.sort(key=self.getStep)
-					print 'ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:])
+					print ('ControllerToI \t\t refined plan: ' + str(refined_occurrences[refined_plan_step:]))
 					# store refined plan
 					self.lines_to_write.append('\nAbstract action: ' + str(abstract_action))
 					self.lines_to_write.append('\nRefined plan (computed with zooming): ' + str(refined_occurrences))
@@ -131,15 +132,15 @@ class ControllerToI():
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
 						if occurrence_step != refined_plan_step: continue
-						print('ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
+						print ('ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
 						if 'test' in refined_action:
- 							action_test_result, action_observation = self.executer.test(refined_action)	
+							action_test_result, action_observation = self.executer.test(refined_action)
 							zoomed_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
 							refined_plan_step += 1
-							print('ControllerToI \t\t test result: ' + str(action_test_result))
+							print ('ControllerToI \t\t test result: ' + str(action_test_result))
 							if(action_test_result==True and 'loc(rob1' in refined_action):
 								self.refined_location = action_observation.split(',')[2][:-1]
-								print 'ControllerToI \t\t refined location: '+self.refined_location
+								print ('ControllerToI \t\t refined location: '+self.refined_location)
 
 							refined_observations_step = self.getObservationsRelevantGoal()
 							refined_observations_step.add(action_observation)
@@ -148,7 +149,7 @@ class ControllerToI():
 							zoomed_observation_step = self.domain_info.directObservationToRefinedObs(action_observation, refined_plan_step)
 							zoomed_history.add(zoomed_observation_step)
 							if(action_test_result == False):
-								print 'ControllerToI \t\t need another refined plan '
+								print ('ControllerToI \t\t need another refined plan ')
 								need_refined_plan = True
 								self.addObsZoomedDomain(list(zoomed_history),refined_plan_step+6)
 								break
@@ -158,9 +159,9 @@ class ControllerToI():
 							self.belief = previous_belief
 							refined_plan_step += 1
 				abstract_step_obs = list(self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step))
-				print('ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
-                		self.refined_state = self.domain_info.refined_state[:]
-				print('ControllerToI \t Abstract obs: ' + ': ' + str(abstract_step_obs))
+				print ('ControllerToI: \t Abstract action ' +abstract_action+' has finished at step ' + str(self.current_step))
+				self.refined_state = self.domain_info.refined_state[:]
+				print ('ControllerToI \t Abstract obs: ' + ': ' + str(abstract_step_obs))
 				self.update_belief(abstract_action, abstract_step_obs)
 				self.history_ToI_diagnosis = self.history_ToI_diagnosis + abstract_step_obs
 			self.history_ToI_diagnosis.append('attempt('+abstract_action+','+str(self.current_step)+').')
@@ -168,13 +169,23 @@ class ControllerToI():
 			self.diagnose()
 		if(self.current_diagnosis != ''): self.history_ToI_diagnosis.append(self.current_diagnosis)
 
+		# write results to file
+		timeTaken = self.planning_times[0]
+		for i in range(1,len(self.planning_times)): timeTaken = timeTaken + self.planning_times[i]
+		if self.error: timeTaken = 'ERROR: too many answer sets to process'
+		results = open('experimental_results.txt', 'a')
+		for line in self.lines_to_write: results.write(line)
+		results.write('\nTotal time taken with zooming: ')
+		results.write(str(timeTaken))
+		results.close()
+
 
 	def getStep(self,occurrence):
 		return int(occurrence[occurrence.rfind(',')+1:-1])
 
 	def prepareRefinedObservations(self,observations,step):
 		if observations == Set(['']) or not observations: return observations
-		updated_observations = set()
+		updated_observations = Set()
 		for observation in observations:
 			updated_observations.add(observation[:observation.rfind(',')+1] + str(step) + ').')
 		return updated_observations
@@ -203,12 +214,12 @@ class ControllerToI():
 		f1 = open(self.asp_infering_coarse_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print('\nControllerToI: Inferring coarse obs from refined history ')
-		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_infering_coarse_belief_file +' -A ',shell=True)
+		print ('\nControllerToI: Inferring coarse obs from refined history ')
+		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_infering_coarse_belief_file +' -A ', shell=True)
 		if not '{' in answer_set:
-			global_variables.error = True
+			self.error = True
 			return
-		observations  = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
+		observations = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
 	def getStep(self, observation):
@@ -229,14 +240,14 @@ class ControllerToI():
 	###########################################################################################
 	def runZoomedDomain(self):
 		'\nControllerToI: Running zoomed domain to get refined plan '
-		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A ',shell=True)
+		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A',shell=True)
 		if not '{' in answer_set:
-			global_variables.error = True
+			self.error = True
 			return
 		plan = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return plan
 
- 	def filteredPlainHistory(self,this_list):
+	def filteredPlainHistory(self,this_list):
 		return [a for a in this_list if 'select' not in a and 'start' not in a and 'stop' not in a]
 
 	def getIndexesRelevantToGoal(self):
@@ -254,19 +265,26 @@ class ControllerToI():
 		f1 = open(self.asp_ToI_planning_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: \t\t Finding next intended action'
+		print ('\nControllerToI: \t\t Finding next intended action')
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
-		while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and self.number_steps < self.current_step + self.max_plan_length+3):
+		max_step = int(self.current_step + self.max_plan_length+3)
+		step_num = int(self.number_steps)
+		if (step_num < max_step): max_reached = True
+		else: max_reached = False
+		while( not ("intended_action" in answerSet) and not ("selected_goal_holds" in answerSet) and max_reached):
 			current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
 			current_asp_split[1] = "#const max_len = "+str(self.number_steps)+". % maximum activity_length of an activity."
 			asp = '\n'.join(current_asp_split)
 			f1 = open(self.asp_ToI_planning_file, 'w')
 			f1.write(asp)
 			f1.close()
-			print '\nControllerToI: Increasing variable number_steps and creating a ToI Plan'
+			print ('\nControllerToI: Increasing variable number_steps and creating a ToI Plan')
 			answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
 			self.number_steps +=1
-	        possibleAnswers = answerSet.rstrip().split('\n\n')
+			step_num = int(self.number_steps)
+			if (step_num < max_step): max_reached = True
+			else: max_reached = False
+		possibleAnswers = answerSet.rstrip().split('\n\n')
 		chosenAnswer = possibleAnswers[0]
 		print ('\nAbstract action plan:')
 		print (chosenAnswer)
@@ -299,7 +317,7 @@ class ControllerToI():
 		f1 = open(self.asp_ToI_diagnosing_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: Diagnosing ToI with current obs'
+		print ('\nControllerToI: Diagnosing ToI with current obs')
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_diagnosing_file +' -A ',shell=True)
 		answers = answerSet.rstrip().split('\n\n')
 		if self.current_diagnosis in answerSet:
@@ -307,7 +325,7 @@ class ControllerToI():
 				if(self.current_diagnosis in a): chosenAnswer = a
 		else:
 			chosenAnswer = answers[0]
-	 	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
+		split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
 		for line in split_diagnosis:
 			if("number_unobserved" in line):
 				newLine =line.replace("number_unobserved","explanation")
@@ -318,7 +336,7 @@ class ControllerToI():
 				if(self.current_diagnosis != line):
 					self.update_belief(line[line.find('(')+1:line.rfind(',')],[])
 					self.current_diagnosis = line
-					print('controllerToI			new diagnosis: ' + self.current_diagnosis)
+					print ('controllerToI			new diagnosis: ' + self.current_diagnosis)
 			elif("selected_goal_holds" in line): pass
 			elif(line == ""): pass
 			else:
@@ -333,8 +351,8 @@ class ControllerToI():
 		preASP_ToI = reader.read()
 		reader.close()
 		self.preASP_ToI_split = preASP_ToI.split('\n')
-	   	index_goal = self.preASP_ToI_split.index(self.goal_marker)
-		self.preASP_ToI_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ self.goal)
+		index_goal = self.preASP_ToI_split.index(self.goal_marker)
+		self.preASP_ToI_split.insert(index_goal+1, "holds(my_goal,I) :- "+ self.goal)
 		self.index_beginning_history_ToI = self.preASP_ToI_split.index(self.history_marker)
 		self.ToI_current_step_index = self.preASP_ToI_split.index(self.current_step_marker)
 
@@ -360,14 +378,14 @@ class ControllerToI():
 		f1 = open(self.asp_abstract_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: Updating belief'
+		print ('\nControllerToI: Updating belief')
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
 		if not '{' in output:
-			global_variables.error = True
+			self.error = True
 			return
 		output = output.rstrip().strip('{').strip('}')
 		if 'holds' in output: self.belief = self.domain_info.abstractAnswerToCoarseState(output)
-		print 'ControllerToI \t\t updated belief: ' + str(self.belief)
+		print ('ControllerToI \t\t updated belief: ' + str(self.belief))
 
 
 	def setInitialBelief(self,input):
@@ -377,7 +395,7 @@ class ControllerToI():
 		f1 = open(self.asp_abstract_belief_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print '\nControllerToI: Setting initial belief'
+		print ('\nControllerToI: Setting initial belief')
 		output = subprocess.check_output('java -jar '+ self.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
 		output = output.rstrip().strip('{').strip('}')
 		self.belief = self.domain_info.abstractAnswerToCoarseState(output)
@@ -389,8 +407,8 @@ class ControllerToI():
 		initial_state = Set()
 		final_state = Set()
 		coarse_location = self.belief[self.domain_info.LocationRobot_index]
-	    # use action and history to figure out the transition (initial_state, action, final_state)
-	    # the location of the robot is relevant for move transitions
+		# use action and history to figure out the transition (initial_state, action, final_state)
+		# the location of the robot is relevant for move transitions
 		action_object = action[action.find(',')+1:-1]
 		if 'move' in action:
 			initial_state.add('coarse_loc(rob1,' + coarse_location + ')')
@@ -478,7 +496,7 @@ class ControllerToI():
 		total_refinements = [library_components, kitchen_components, book1_components, office1_components, book2_components, office2_components, book3_components, storage_cupboard_components, book4_components]
 		refinements = total_refinements[0:global_variables.complexity_level*2+1]
 
-	    	# initialise relevance lists
+		# initialise relevance lists
 		rel_initial_conditions = []
 		rel_final_conditions = []
 		rel_conditions = []
@@ -489,7 +507,7 @@ class ControllerToI():
 		rel_defined_fluents = []
 		rel_actions = ['test(#robot,#physical_inertial_fluent,#outcome)']
 
-	    	# initialise irrelevance lists
+		# initialise irrelevance lists
 		irrelevant_sort_names = ['#coarse_object', '#place', '#object', '#coarse_place']
 		irrelevant_obj_consts = coarse_places.constants + coarse_objects.constants + places.constants + objects.constants
 		for i in range(len(irrelevant_obj_consts)):
@@ -498,7 +516,7 @@ class ControllerToI():
 		irrelevant_fluents = ['coarse_loc', 'coarse_in_hand', 'loc', 'in_hand']
 		irrelevant_actions = ['move', 'pickup', 'put_down']
 
-	    	# determine which initial conditions are relevant
+		# determine which initial conditions are relevant
 		for condition in initial_state:
 			if not condition in final_state: # conditions that change are relevant
 				rel_initial_conditions.append(condition)
@@ -508,7 +526,7 @@ class ControllerToI():
 				rel_conditions.append(condition)
 
 
-	    	# refine initial conditions
+		# refine initial conditions
 		for i in range(len(rel_initial_conditions)):
 			if ('loc' in rel_initial_conditions[i]) and ('rob1' in rel_initial_conditions[i]):
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
@@ -557,15 +575,15 @@ class ControllerToI():
 						currently_holding = 'ref3_book4'
 					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'):
 						currently_holding = 'ref4_book4'
-				if(currently_holding != ''):  rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
+				if(currently_holding != ''): rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
 
-	    	# determine which final conditions are relevant
+		# determine which final conditions are relevant
 		for condition in final_state:
 			if not condition in initial_state:
 				rel_final_conditions.append(condition)
 				rel_conditions.append(condition)
 
-	    	# determine which object constants are relevant
+		# determine which object constants are relevant
 		for condition in rel_conditions:
 			for index in range(len(condition)):
 				if condition[index] == '(':
@@ -579,7 +597,7 @@ class ControllerToI():
 					irrelevant_obj_consts.remove(const)
 		rel_obj_consts = list(set(rel_obj_consts)) # remove duplicates
 
-	    	# add refined components of relevant object constants
+		# add refined components of relevant object constants
 		for const in rel_obj_consts:
 			for refinement in refinements:
 				if const == refinement.name:
@@ -590,13 +608,13 @@ class ControllerToI():
 						if refined_const in irrelevant_obj_consts:
 							irrelevant_obj_consts.remove(refined_const)
 
-	    	# sort relevant objects into types
+		# sort relevant objects into types
 		for sort in sorts:
 			for const in sort.constants:
 				if const in rel_obj_consts:
 					sort.add(const)
 
-	    	# determine which sorts should be included in the zoomed description
+		# determine which sorts should be included in the zoomed description
 		for sort in sorts:
 			if len(sort.rel_constants) != 0:
 				rel_sorts.append(sort)
@@ -604,13 +622,13 @@ class ControllerToI():
 				if ('#'+sort.name) in irrelevant_sort_names:
 					irrelevant_sort_names.remove('#'+sort.name)
 
-	    	# add relevant sorts to sorts of sorts (coarse_things, things, coarse_components and refined_components)
+		# add relevant sorts to sorts of sorts (coarse_things, things, coarse_components and refined_components)
 		for sort in rel_sorts:
 			for sort_of_sorts in sorts:
 				if ('#'+sort.name) in sort_of_sorts.constants:
 					sort_of_sorts.add('#'+sort.name)
 
-	    	# determine which inertial fluents are relevant
+		# determine which inertial fluents are relevant
 		for fluent in inertial_fluents:
 			fluent_relevant = True
 			for index in range(len(fluent)):
@@ -627,7 +645,7 @@ class ControllerToI():
 				if fluent[0:opening_bracket] in irrelevant_fluents:
 					irrelevant_fluents.remove(fluent[0:opening_bracket])
 
-	    	# determine which defined fluents are relevant
+		# determine which defined fluents are relevant
 		for fluent in defined_fluents:
 			fluent_relevant = True
 			for index in range(len(fluent)):
@@ -644,7 +662,7 @@ class ControllerToI():
 				if fluent[0:opening_bracket] in irrelevant_fluents:
 					irrelevant_fluents.remove(fluent[0:opening_bracket])
 
-	    	# determine which actions are relevant
+		# determine which actions are relevant
 		for act in actions:
 			action_relevant = True
 			for index in range(len(act)):
@@ -663,7 +681,7 @@ class ControllerToI():
 
 
 
-	    	# determine what the goal of the refined ASP should be
+		# determine what the goal of the refined ASP should be
 		self.goal = 'goal(I) :- '
 		for condition in rel_final_conditions:
 			if '-' in condition:
@@ -673,7 +691,7 @@ class ControllerToI():
 				self.goal = self.goal + 'holds(' + condition + ',I), '
 		self.goal = self.goal[0:len(self.goal)-2] + '.\n'
 
-	    	# make temporary copy of refined ASP file that can be edited
+		# make temporary copy of refined ASP file that can be edited
 		original_asp_reader = open(self.preASP_refined_domain_file, 'r')
 		self.zoomed_asp_list = []
 		zoomed_asp_writter = open(self.zoomed_domain_file, 'w')
