@@ -16,8 +16,8 @@ ASP_subfolder_path = 'simulation/'
 results_file_name = "simulation/results/"
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
 max_plan_length = 17
-
-
+maxTimeZooming = 300
+maxTimeNoZooming = 3 * maxTimeZooming
 
 def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	if book_goal_loc == 'library':
@@ -62,18 +62,19 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	results.close()
 
 	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
-
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
 	p1.start()
-	p1.join(1200)
+	start = time.time()
+	p1.join(maxTimeZooming)
 	if p1.is_alive():
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTIMEOUT: running the zooming controller took longer than 20 minutes')
+		results.write('\nTIMEOUT: running the zooming controller took longer than 5 minutes')
 		results.close()
 		p1.terminate()
 		p1.join()
-
-	#controllerToI.run()
+	timeTaken = time.time() - start
+	global maxTimeNoZooming
+	maxTimeNoZooming = 3 * timeTaken
 
 
 
@@ -92,14 +93,16 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
 	p1.start()
-	p1.join(1200)
+	start = time.time()
+	p1.join(maxTimeNoZooming)
 	if p1.is_alive():
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTIMEOUT: running the non-zooming controller took longer than 20 minutes')
+		results.write('\nTIMEOUT: running the non-zooming controller took longer than '+str(maxTimeNoZooming)+' minutes')
 		results.close()
 		p1.terminate()
 		p1.join()
-
+	print '*************************************** max time no zooming: ' + str(maxTimeNoZooming)
+	print ' ************************************* time taken no zooming: ' + str(time.time()-start)
 	#controllerToI.run()
 
 
@@ -189,7 +192,7 @@ def createConditionsAndRun(trial_number):
 	print ('Initial_state:')
 	print (initial_state)
 
-	# run experiment
+
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
 	runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
 
@@ -200,5 +203,5 @@ if __name__ == "__main__":
 	global_variables.complexity_level = 2 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 1
+	number_runs = 200
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

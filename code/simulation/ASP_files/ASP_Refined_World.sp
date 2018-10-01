@@ -1,9 +1,10 @@
-#const numSteps = 2.
+#const numSteps = 1. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% This ASP is used for inferring indirect observations from the direct observations set
-%% collected during the execution of a refined plan. This ASP does not contain planning
-%% or diagnosis. It does not have understanding of exogeneous actions.
+%% This ASP is used to represent the real world domain at fine resolution.
+%% It does not have planning module. It gets initial state and the occurrence of
+%% and action in the form of a 'hpd' statement at step 0, and returns the value of the physical
+%% fluents at step 1 as output.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,8 +30,9 @@ sorts
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
-
+#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
 
 #refined_component = #place + #object.
 #coarse_component = #coarse_place + #coarse_object.
@@ -48,7 +50,6 @@ success().
 goal(#step).
 something_happened(#step).
 comp(#refined_component, #coarse_component).
-indirect_observation_at_step(#physical_defined_fluent,#outcome,#step).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  rules
@@ -59,6 +60,8 @@ indirect_observation_at_step(#physical_defined_fluent,#outcome,#step).
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
+%% Exogenous moving an object causes the object to be in a different location.
+holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 % Grasping an object causes object to be in hand.
 holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
@@ -97,7 +100,6 @@ holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
 coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1), #place(C2).
 
 
-
 %% Executability Conditions %%
 
 % Cannot move to a location if you are already there.
@@ -119,9 +121,15 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1
 %-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
 %-occurs(pickup(rob1, OP), I) :- I = 0.
 
+%% An exogenous move of an object cannot be done to the same location.
+-occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
+
+%% An exogenous move of an object cannot happen if it is being in hand
+-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 holds(can_be_tested(rob1, loc(T, C), V), I) :- holds(loc(rob1, C), I).
 holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
@@ -145,9 +153,6 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, false), I).
 -holds(directly_observed(R,loc(O,C1),true),I) :- holds(directly_observed(R,loc(O,C2),true),I), C1!=C2.
 
-
-%%% predicate used for output proposes
-indirect_observation_at_step(F,O,I) :- holds(indirectly_observed(R,F,O),I), not holds(indirectly_observed(R,F,O),I-1).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inertial axiom + CWA
@@ -181,7 +186,7 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 
 
 %% Cannot execute two actions at the same time.
-:- occurs(A1,I), occurs(A2,I), A1 != A2, #action(A1), #action(A2).
+:- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
 
 
@@ -224,16 +229,13 @@ comp(ref2_book2, book2).
 holds(loc(ref1_book2,c2),0).
 holds(loc(ref2_book2,c2),0).
 holds(loc(ref1_book1,c9),0).
-holds(loc(rob1,c7),0).
 -holds(in_hand(rob1,ref1_book1),0).
 -holds(in_hand(rob1,ref1_book2),0).
 holds(loc(ref2_book1,c9),0).
--holds(in_hand(rob1,ref2_book1),0).
 -holds(in_hand(rob1,ref2_book2),0).
-holds(loc(rob1,c7),0).
-holds(directly_observed(rob1,loc(ref1_book1,c6),false),2).
-holds(directly_observed(rob1,loc(rob1,c6),true),2).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),2).
+-holds(in_hand(rob1,ref2_book1),0).
+holds(loc(rob1,c5),0).
+hpd(test(rob1,loc(rob1,c5),true),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
@@ -244,4 +246,11 @@ holds(directly_observed(rob1,loc(ref1_book2,c6),false),2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(indirectly_observed(rob1,F,O),numSteps).
+holds(loc(A,B),numSteps).
+holds(in_hand(A,B),numSteps).
+-holds(in_hand(rob1,B),numSteps).
+holds(coarse_loc(A,B),numSteps).
+holds(coarse_in_hand(A,B),numSteps).
+-holds(coarse_in_hand(A,B),numSteps).
+holds(directly_observed(rob1,F,true),1).
+holds(directly_observed(rob1,F,false),1).

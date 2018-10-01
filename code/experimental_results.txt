@@ -1,0 +1,5 @@
+
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand, refined_object_parts_in_hand] = ['c7', 'c9', 'c2', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,kitchen),I).
