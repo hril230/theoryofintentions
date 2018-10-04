@@ -530,14 +530,6 @@ class ControllerToI():
 		for i in range(len(rel_initial_conditions)):
 			if ('loc' in rel_initial_conditions[i]) and ('rob1' in rel_initial_conditions[i]):
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
-			if ('loc' in rel_initial_conditions[i]) and ('book1' in rel_initial_conditions[i]):
-				rel_initial_conditions[i] = 'loc(ref1_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')'
-			if ('loc' in rel_initial_conditions[i]) and ('book2' in rel_initial_conditions[i]):
-				rel_initial_conditions[i] = 'loc(ref1_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')'
-			if ('loc' in rel_initial_conditions[i]) and ('book3' in rel_initial_conditions[i]):
-				rel_initial_conditions[i] = 'loc(ref1_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')'
-			if ('loc' in rel_initial_conditions[i]) and ('book4' in rel_initial_conditions[i]):
-				rel_initial_conditions[i] = 'loc(ref1_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')'
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
 				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'):

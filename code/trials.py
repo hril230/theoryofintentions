@@ -16,7 +16,7 @@ ASP_subfolder_path = 'simulation/'
 results_file_name = "simulation/results/"
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
 max_plan_length = 17
-maxTimeZooming = 300
+maxTimeZooming = 1200
 maxTimeNoZooming = 3 * maxTimeZooming
 
 def refine_goal_location(book_goal_loc, refined_location_possibilities):
@@ -68,7 +68,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	p1.join(maxTimeZooming)
 	if p1.is_alive():
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTIMEOUT: running the zooming controller took longer than 5 minutes')
+		results.write('\nTIMEOUT: running the zooming controller took longer than 20 minutes')
 		results.close()
 		p1.terminate()
 		p1.join()
@@ -203,5 +203,5 @@ if __name__ == "__main__":
 	global_variables.complexity_level = 2 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 200
+	number_runs = 1
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

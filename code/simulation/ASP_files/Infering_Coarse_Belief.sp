@@ -1,4 +1,4 @@
-#const numSteps = 2.
+#const numSteps = 6.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This ASP is used for inferring indirect observations from the direct observations set
@@ -221,19 +221,25 @@ comp(ref2_book2, book2).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref1_book2,c2),0).
-holds(loc(ref2_book2,c2),0).
-holds(loc(ref1_book1,c9),0).
-holds(loc(rob1,c7),0).
+holds(in_hand(rob1,ref2_book2),0).
 -holds(in_hand(rob1,ref1_book1),0).
+holds(loc(ref2_book2,c6),0).
+holds(loc(ref2_book1,c4),0).
 -holds(in_hand(rob1,ref1_book2),0).
-holds(loc(ref2_book1,c9),0).
+holds(loc(ref1_book1,c4),0).
+holds(loc(ref1_book2,c6),0).
+holds(loc(rob1,c6),0).
 -holds(in_hand(rob1,ref2_book1),0).
--holds(in_hand(rob1,ref2_book2),0).
-holds(loc(rob1,c7),0).
-holds(directly_observed(rob1,loc(ref1_book1,c6),false),2).
-holds(directly_observed(rob1,loc(rob1,c6),true),2).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),2).
+holds(loc(rob1,c6),0).
+holds(directly_observed(rob1,loc(rob1,c4),true),4).
+holds(directly_observed(rob1,loc(rob1,c5),true),2).
+holds(directly_observed(rob1,loc(rob1,c3),true),6).
+holds(directly_observed(rob1,loc(ref1_book1,c4),true),4).
+holds(directly_observed(rob1,loc(ref1_book1,c5),false),2).
+holds(directly_observed(rob1,loc(ref1_book1,c3),false),6).
+holds(directly_observed(rob1,loc(ref1_book2,c3),true),6).
+holds(directly_observed(rob1,loc(ref1_book2,c4),true),4).
+holds(directly_observed(rob1,loc(ref1_book2,c5),true),2).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

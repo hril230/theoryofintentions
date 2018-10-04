@@ -155,13 +155,11 @@ next_to(kitchen, office1).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
+holds(loc(book1,kitchen),0).
 -holds(in_hand(rob1,book1),0).
-holds(loc(book1,office1),0).
-holds(loc(book2,library),0).
-holds(loc(rob1,office1),0).
+holds(loc(rob1,kitchen),0).
+holds(loc(book2,office1),0).
 -holds(in_hand(rob1,book2),0).
-hpd(move(rob1,kitchen), 0).
-obs(loc(rob1,kitchen),true,1).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
