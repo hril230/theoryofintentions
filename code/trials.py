@@ -12,6 +12,7 @@ import time
 import global_variables
 from simulation.domain_info import DomainInfo
 import sys
+import csv
 ASP_subfolder_path = 'simulation/'
 results_file_name = "simulation/results/"
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
@@ -192,6 +193,10 @@ def createConditionsAndRun(trial_number):
 	print ('Initial_state:')
 	print (initial_state)
 
+	with open('experimental_results.csv', 'a') as writeFile:
+		writer = csv.writer(writeFile)
+		writer.writerow(['complexity level', 'zooming', 'planning time', '# abstract plans', '# refined plans', '# abstract actions', '# refined actions'])
+	writeFile.close()
 
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
 	runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
@@ -200,8 +205,8 @@ def createConditionsAndRun(trial_number):
 
 if __name__ == "__main__":
 	global_variables.init()
-	global_variables.complexity_level = 2 # TODO change this number to change the complexity level
+	global_variables.complexity_level = 4 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 1
+	number_runs = 200
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

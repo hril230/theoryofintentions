@@ -8,6 +8,7 @@ import global_variables
 from itertools import groupby
 import sys
 import time
+import csv
 
 class NonZoomingControllerToI():
 	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, refined_location, initial_conditions , goal, max_plan_length):
@@ -16,6 +17,10 @@ class NonZoomingControllerToI():
 		self.abstract_planning_time = None
 		self.abstract_action_plan = ''
 		self.error = False
+		self.abstract_plan_count = 0
+		self.refined_plan_count = 0
+		self.abstract_action_count = 0
+		self.refined_action_count = 0
 
 		self.goal = goal
 		self.sparc_path = sparc_path
@@ -32,7 +37,7 @@ class NonZoomingControllerToI():
 		## used for paths and names of the ASP files created
 		self.asp_ToI_planning_file = ASP_subfolder+'ASP_files/ASP_ToI_Planning.sp'
 		self.asp_ToI_diagnosing_file = ASP_subfolder + 'ASP_files/ASP_ToI_Diagnosis.sp'
-		self.zoomed_domain_file = ASP_subfolder + 'ASP_files/Zoomed_Domain.sp'
+		self.zoomed_domain_file = ASP_subfolder + 'ASP_files/Non_Zoomed_Domain.sp'
 		self.asp_abstract_belief_file = ASP_subfolder + 'ASP_files/ToI_Abstract_Belief.sp'
 		self.asp_infering_coarse_belief_file = ASP_subfolder + 'ASP_files/Infering_Coarse_Belief.sp'
 
@@ -95,6 +100,7 @@ class NonZoomingControllerToI():
 				self.number_activities += 1
 				self.number_steps += 1
 			elif(abstract_action[0:5] == 'start'):
+				self.abstract_plan_count = self.abstract_plan_count + 1
 				self.lines_to_write.append('\nNon-zooming controller abstract action plan: ')
 				self.lines_to_write.append(self.abstract_action_plan)
 				self.lines_to_write.append('\nTime taken to plan abstract action plan: ' + str(self.abstract_planning_time))
@@ -102,6 +108,7 @@ class NonZoomingControllerToI():
 			else:
 				print ('Non-zooming ControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ', '+ str(self.belief))
 				print ('Non-zooming ControllerToI \t\t next abstract action: ' + abstract_action)
+				self.abstract_action_count = self.abstract_action_count + 1
 				need_refined_plan = True
 				self.refine(abstract_action, self.belief, self.refined_location)
 				refined_plan_step = 0
@@ -126,6 +133,7 @@ class NonZoomingControllerToI():
 					self.lines_to_write.append('\nTime taken to create refined plan: ' + str(timeTaken))
 					self.planning_times.append(timeTaken)	
 					for refined_occurence in refined_occurrences:
+						self.refined_action_count = self.refined_action_count + 1
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
 						if occurrence_step != refined_plan_step: continue
@@ -166,7 +174,7 @@ class NonZoomingControllerToI():
 			self.diagnose()
 		if(self.current_diagnosis != ''): self.history_ToI_diagnosis.append(self.current_diagnosis)
 
-		# write results to file
+		# write results to text file
 		timeTaken = self.planning_times[0]
 		for i in range(1,len(self.planning_times)): timeTaken = timeTaken + self.planning_times[i]
 		if self.error: timeTaken = 'ERROR: too many answer sets to process'
@@ -175,6 +183,12 @@ class NonZoomingControllerToI():
 		results.write('\nTotal time taken without zooming: ')
 		results.write(str(timeTaken))
 		results.close()
+
+		# write results to csv file
+		with open('experimental_results.csv', 'a') as writeFile:
+			writer = csv.writer(writeFile)
+			writer.writerow([global_variables.complexity_level, 'without zooming', timeTaken, self.abstract_plan_count, self.refined_plan_count, self.abstract_action_count, self.refined_action_count])
+		writeFile.close()
 
 
 	def getStep(self,occurrence):
@@ -237,6 +251,7 @@ class NonZoomingControllerToI():
 	### This file is updated with the refined history through the function addObsZoomedDomain
 	###########################################################################################
 	def runZoomedDomain(self):
+		self.refined_plan_count = self.refined_plan_count + 1
 		'\nControllerToI: Running zoomed domain to get refined plan '
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A',shell=True)
 		if not '{' in answer_set:
@@ -407,85 +422,73 @@ class NonZoomingControllerToI():
 		if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true':
 			initial_state.add('in_hand(rob1,ref1_book1)')
 		else: initial_state.add('-in_hand(rob1,ref1_book1)')
-		initial_state.add('loc(ref1_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
+		initial_state.add('coarse_loc(book1,' + self.domain_info.coarse_state[self.domain_info.LocationBook1_index] + ')')
 		if global_variables.complexity_level > 1:
 			# ground fluents for ref2_book1
 			if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref2_index] == 'true':
 				initial_state.add('in_hand(rob1,ref2_book1)')
 			else: initial_state.add('-in_hand(rob1,ref2_book1)')
-			initial_state.add('loc(ref2_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
 			# ground fluents for ref1_book2
 			if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref1_index] == 'true':
 				initial_state.add('in_hand(rob1,ref1_book2)')
 			else: initial_state.add('-in_hand(rob1,ref1_book2)')
-			initial_state.add('loc(ref1_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
+			initial_state.add('coarse_loc(book2,' + self.domain_info.coarse_state[self.domain_info.LocationBook2_index] + ')')
 			# ground fluents for ref2_book2
 			if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref2_index] == 'true':
 				initial_state.add('in_hand(rob1,ref2_book2)')
 			else: initial_state.add('-in_hand(rob1,ref2_book2)')
-			initial_state.add('loc(ref2_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
 		if global_variables.complexity_level > 2:
 			# ground fluents for ref3_book1
 			if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref3_index] == 'true':
 				initial_state.add('in_hand(rob1,ref3_book1)')
 			else: initial_state.add('-in_hand(rob1,ref3_book1)')
-			initial_state.add('loc(ref3_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
 			# ground fluents for ref3_book2
 			if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref3_index] == 'true':
 				initial_state.add('in_hand(rob1,ref3_book2)')
 			else: initial_state.add('-in_hand(rob1,ref3_book2)')
-			initial_state.add('loc(ref3_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
 			# ground fluents for ref1_book3
 			if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref1_index] == 'true':
 				initial_state.add('in_hand(rob1,ref1_book3)')
 			else: initial_state.add('-in_hand(rob1,ref1_book3)')
-			initial_state.add('loc(ref1_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
+			initial_state.add('coarse_loc(book3,' + self.domain_info.coarse_state[self.domain_info.LocationBook3_index] + ')')
 			# ground fluents for ref2_book3
 			if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref2_index] == 'true':
 				initial_state.add('in_hand(rob1,ref2_book3)')
 			else: initial_state.add('-in_hand(rob1,ref2_book3)')
-			initial_state.add('loc(ref2_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
 			# ground fluents for ref3_book3
 			if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref3_index] == 'true':
 				initial_state.add('in_hand(rob1,ref3_book3)')
 			else: initial_state.add('-in_hand(rob1,ref3_book3)')
-			initial_state.add('loc(ref3_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
 		if global_variables.complexity_level > 3:
 			# ground fluents for ref4_book1
 			if self.domain_info.refined_state[self.domain_info.In_handBook1_Ref4_index] == 'true':
 				initial_state.add('in_hand(rob1,ref4_book1)')
 			else: initial_state.add('-in_hand(rob1,ref4_book1)')
-			initial_state.add('loc(ref4_book1,' + self.domain_info.refined_state[self.domain_info.LocationBook1_index] + ')')
 			# ground fluents for ref4_book2
 			if self.domain_info.refined_state[self.domain_info.In_handBook2_Ref4_index] == 'true':
 				initial_state.add('in_hand(rob1,ref4_book2)')
 			else: initial_state.add('-in_hand(rob1,ref4_book2)')
-			initial_state.add('loc(ref4_book2,' + self.domain_info.refined_state[self.domain_info.LocationBook2_index] + ')')
 			# ground fluents for ref4_book3
 			if self.domain_info.refined_state[self.domain_info.In_handBook3_Ref4_index] == 'true':
 				initial_state.add('in_hand(rob1,ref4_book3)')
 			else: initial_state.add('-in_hand(rob1,ref4_book3)')
-			initial_state.add('loc(ref4_book3,' + self.domain_info.refined_state[self.domain_info.LocationBook3_index] + ')')
 			# ground fluents for ref1_book4
 			if self.domain_info.refined_state[self.domain_info.In_handBook4_Ref1_index] == 'true':
 				initial_state.add('in_hand(rob1,ref1_book4)')
 			else: initial_state.add('-in_hand(rob1,ref1_book4)')
-			initial_state.add('loc(ref1_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')')
+			initial_state.add('coarse_loc(book4,' + self.domain_info.coarse_state[self.domain_info.LocationBook4_index] + ')')
 			# ground fluents for ref2_book4
 			if self.domain_info.refined_state[self.domain_info.In_handBook4_Ref2_index] == 'true':
 				initial_state.add('in_hand(rob1,ref2_book4)')
 			else: initial_state.add('-in_hand(rob1,ref2_book4)')
-			initial_state.add('loc(ref2_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')')
 			# ground fluents for ref3_book4
 			if self.domain_info.refined_state[self.domain_info.In_handBook4_Ref3_index] == 'true':
 				initial_state.add('in_hand(rob1,ref3_book4)')
 			else: initial_state.add('-in_hand(rob1,ref3_book4)')
-			initial_state.add('loc(ref3_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')')
 			# ground fluents for ref4_book4
 			if self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true':
 				initial_state.add('in_hand(rob1,ref4_book4)')
 			else: initial_state.add('-in_hand(rob1,ref4_book4)')
-			initial_state.add('loc(ref4_book4,' + self.domain_info.refined_state[self.domain_info.LocationBook4_index] + ')')
 
 		# ground final state
 		if 'move' in action:

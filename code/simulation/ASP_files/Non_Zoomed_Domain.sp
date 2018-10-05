@@ -1,17 +1,16 @@
-#const numSteps = 1. % maximum number of steps.
+#const numSteps = 10. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% This ASP is used to represent the real world domain at fine resolution.
-%% It does not have planning module. It gets initial state and the occurrence of
-%% and action in the form of a 'hpd' statement at step 0, and returns the value of the physical
-%% fluents at step 1 as output.
+%% This ASP is used for zooming. This ASP contains planning.
+%% It does not have understanding of exogeneous actions, and it
+%% does not contain diagnosis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library,kitchen}.
+#coarse_place = {library, kitchen}.
 #robot = {rob1}.
 #coarse_object = {book1}.
 #object = {ref1_book1}.
@@ -22,17 +21,15 @@ sorts
 #step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
-#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
-#physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
+#physical_inertial_fluent = loc(#thing,#place) + in_hand(#robot,#object).
+#physical_defined_fluent = coarse_loc(#coarse_thing,#coarse_place) + coarse_in_hand(#robot,#coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 #knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
 #knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
-#exo_action = exo_move(#object,#place).
-#action = #rob_action + #exo_action.
+#action = test(#robot,#physical_inertial_fluent,#outcome) + move(#robot,#place) + pickup(#robot,#object) + put_down(#robot,#object).
 
 #refined_component = #place + #object.
 #coarse_component = #coarse_place + #coarse_object.
@@ -60,9 +57,6 @@ comp(#refined_component, #coarse_component).
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
-%% Exogenous moving an object causes the object to be in a different location.
-holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
-
 % Grasping an object causes object to be in hand.
 holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 
@@ -81,6 +75,7 @@ next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 
 % If a robot is holding an object, they have the same location.
 holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
+holds(loc(OP1, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP2), I), comp(OP1, O), comp(OP2, O).
 
 % Only one object can be held at any time.
 -holds(in_hand(R, OP2), I) :- holds(in_hand(R, OP1), I), OP1!=OP2.
@@ -119,15 +114,12 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1
 % Cannot pick up an object if you are not in the same room.
 -occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
 
-%% The next two executability conditions make sure that the robot has tested the objects location before trying to pick it up
-%-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
-%-occurs(pickup(rob1, OP), I) :- I = 0.
 
-%% An exogenous move of an object cannot be done to the same location.
--occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
+% The next two executability conditions make sure that the robot has tested the objects location before trying to pick it up
+-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
+-occurs(pickup(rob1, OP), I) :- I = 0.
 
-%% An exogenous move of an object cannot happen if it is being in hand
--occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
@@ -138,6 +130,7 @@ holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
 holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
 holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O).
 holds(indirectly_observed(rob1, coarse_loc(T, R), false), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), -holds(may_discover(rob1, coarse_loc(T, R), true), I).
 holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), false), I) :- -holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I), -holds(may_discover(R, coarse_in_hand(rob1, O), true), I).
@@ -146,14 +139,28 @@ holds(may_discover(rob1, coarse_in_hand(rob1, O), true), I) :- -holds(indirectly
 holds(directly_observed(rob1, F, undet), I) :- not holds(directly_observed(rob1, F, true), I), not holds(directly_observed(rob1, F, false), I).
 holds(observed(rob1, F, O), I) :- holds(directly_observed(rob1, F, O), I).
 holds(observed(rob1, F, O), I) :- holds(indirectly_observed(rob1, F, O), I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
 holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), comp(Z, T), holds(directly_observed(rob1, loc(Z, C), undet), I).
+
+
 
 -holds(indirectly_observed(R,F,O),I) :- not holds(indirectly_observed(R,F,O),I).
 -holds(may_discover(R,F,B),I) :- not holds(may_discover(R,F,B),I).
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, true), I).
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, false), I).
 -holds(directly_observed(R,loc(O,C1),true),I) :- holds(directly_observed(R,loc(O,C2),true),I), C1!=C2.
+
+
+
+
+
+% Make sure the outcome of any concrete action is tested
+occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).
+occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
+occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
+%occurs(test(rob1, F, true), I) :- -holds(F, I-1), holds(F, I), #physical_inertial_fluent(F).
+%occurs(test(rob1, F, false), I) :- holds(F, I-1), -holds(F, I), #physical_inertial_fluent(F), not -occurs(test(rob1, F, false), I).
+%-occurs(test(R, F, O), 0). % cannot test in the first step
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -186,10 +193,23 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Planning Module
 
+%% Failure is not an option.
+success :- goal(I).
+:- not success.
+
+%% Plan Actions All
+%occurs(A, I)| -occurs(A,I).
+%:- occurs(A, I), goal(I).
+
+%% Plan Actions minimally
+occurs(A,I):+ not goal(I).
 
 %% Cannot execute two actions at the same time.
-:- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
+:- occurs(A1,I), occurs(A2,I), A1 != A2.
 
+something_happened(I) :- occurs(A, I).
+:- not goal(I), not something_happened(I).
+:- not something_happened(0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -211,29 +231,26 @@ comp(ref1_book1, book1).
 
 
 
+
+%%%%%%%%%
+%% Goal:
+%%%%%%%%%
+goal(I) :- holds(coarse_loc(rob1,kitchen),I).
+
+
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-%% HISTORY GOES HERE
-holds(in_hand(rob1,ref1_book1),0).
-holds(loc(rob1,c3),0).
-holds(loc(ref1_book1,c3),0).
-hpd(test(rob1,loc(ref1_book1,c3),true),0).
+holds(in_hand(rob1,ref1_book1), 0).
+holds(loc(rob1,c1), 0).
+holds(coarse_loc(book1,library), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
 %%%%%%%%%%%%%%%%%
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(loc(A,B),numSteps).
-holds(in_hand(A,B),numSteps).
--holds(in_hand(rob1,B),numSteps).
-holds(coarse_loc(A,B),numSteps).
-holds(coarse_in_hand(A,B),numSteps).
--holds(coarse_in_hand(A,B),numSteps).
-holds(directly_observed(rob1,F,true),1).
-holds(directly_observed(rob1,F,false),1).
+occurs.

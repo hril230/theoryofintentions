@@ -8,6 +8,7 @@ import sys
 import global_variables
 from itertools import groupby
 import time
+import csv
 
 class ControllerToI():
 	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, refined_location, initial_conditions , goal, max_plan_length):
@@ -16,6 +17,10 @@ class ControllerToI():
 		self.abstract_planning_time = None
 		self.abstract_action_plan = ''
 		self.error = False
+		self.abstract_plan_count = 0
+		self.refined_plan_count = 0
+		self.abstract_action_count = 0
+		self.refined_action_count = 0
 
 		self.goal = goal
 		self.sparc_path = sparc_path
@@ -96,6 +101,7 @@ class ControllerToI():
 				self.number_activities += 1
 				self.number_steps += 1
 			elif(abstract_action[0:5] == 'start'):
+				self.abstract_plan_count = self.abstract_plan_count + 1
 				self.lines_to_write.append('\nZooming controller abstract action plan: ')
 				self.lines_to_write.append(self.abstract_action_plan)
 				self.lines_to_write.append('\nTime taken to plan abstract action plan: ' + str(self.abstract_planning_time))
@@ -103,6 +109,7 @@ class ControllerToI():
 			else:
 				print ('\nControllerToI \t\t ref location and coarse belief: ' +self.refined_location + ', '+ str(self.belief))
 				print ('ControllerToI \t\t next abstract action: ' + abstract_action)
+				self.abstract_action_count = self.abstract_action_count + 1
 				need_refined_plan = True
 				self.refine(abstract_action, self.refined_location)
 				refined_plan_step = 0
@@ -128,6 +135,7 @@ class ControllerToI():
 					self.lines_to_write.append('\nTime taken to create refined plan: ' + str(timeTaken))
 					self.planning_times.append(timeTaken)
 					for i in range(len(refined_occurrences)):
+						self.refined_action_count = self.refined_action_count + 1
 						refined_occurence = refined_occurrences[i]
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
@@ -169,7 +177,7 @@ class ControllerToI():
 			self.diagnose()
 		if(self.current_diagnosis != ''): self.history_ToI_diagnosis.append(self.current_diagnosis)
 
-		# write results to file
+		# write results to text file
 		timeTaken = self.planning_times[0]
 		for i in range(1,len(self.planning_times)): timeTaken = timeTaken + self.planning_times[i]
 		if self.error: timeTaken = 'ERROR: too many answer sets to process'
@@ -178,6 +186,12 @@ class ControllerToI():
 		results.write('\nTotal time taken with zooming: ')
 		results.write(str(timeTaken))
 		results.close()
+
+		# write results to csv file
+		with open('experimental_results.csv', 'a') as writeFile:
+			writer = csv.writer(writeFile)
+			writer.writerow([global_variables.complexity_level, 'with zooming', timeTaken, self.abstract_plan_count, self.refined_plan_count, self.abstract_action_count, self.refined_action_count])
+		writeFile.close()
 
 
 	def getStep(self,occurrence):
@@ -239,6 +253,7 @@ class ControllerToI():
 	### This file is updated with the refined history through the function addObsZoomedDomain
 	###########################################################################################
 	def runZoomedDomain(self):
+		self.refined_plan_count = self.refined_plan_count + 1
 		'\nControllerToI: Running zoomed domain to get refined plan '
 		answer_set = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.zoomed_domain_file +' -A',shell=True)
 		if not '{' in answer_set:
