@@ -12,7 +12,6 @@ import time
 import global_variables
 from simulation.domain_info import DomainInfo
 import sys
-import csv
 ASP_subfolder_path = 'simulation/'
 results_file_name = "simulation/results/"
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
@@ -40,8 +39,8 @@ def refine_goal_location(book_goal_loc, refined_location_possibilities):
 
 
 
-
 def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
+	global maxTimeNoZooming
 
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
 	my_world = World(sparc_path,initial_state,domain_info)
@@ -83,6 +82,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 
 
 
+
 def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
@@ -113,9 +113,6 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 
 
 
-
-
-
 def createConditionsAndRun(trial_number):
 
 	# set the domain to match the complexity number
@@ -130,7 +127,9 @@ def createConditionsAndRun(trial_number):
 	initial_conditions_index = 0
 	controlled_run = False
 
+
 	# set initial conditions
+	'''
 	repeat = True # repeat until initial conditions and a goal have been chosen that means planning has to be done to achieve the goal
 	while (repeat):
 		in_hand_possibilities = ['false', 'true']
@@ -192,19 +191,16 @@ def createConditionsAndRun(trial_number):
 			goal = 'holds(loc('+book_choice+','+book_goal_loc+'),I).'
 		# check that the goal choosing loop completed before it ran out of attempts - it not, need to choose new initial conditions
 		if count < 10: repeat = False
+		'''
 
+	goal = 'holds(loc(book1,library),I).'
+	initial_state = ['c14', 'c8', 'c14', 'c16', 'false', 'true', 'false', 'false', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false']
 	print ('\nComplexity level:')
 	print (global_variables.complexity_level)
 	print ('Goal:')
 	print (goal)
 	print ('Initial_state:')
 	print (initial_state)
-
-	with open('experimental_results.csv', 'a') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerow(['complexity level', 'zooming', 'planning time', '# abstract plans', '# refined plans', '# abstract actions', '# refined actions'])
-	writeFile.close()
-
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
 	runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
 
@@ -215,5 +211,5 @@ if __name__ == "__main__":
 	global_variables.complexity_level = 3 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 200
+	number_runs = 1
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

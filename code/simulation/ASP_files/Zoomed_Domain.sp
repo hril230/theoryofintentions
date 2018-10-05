@@ -10,10 +10,10 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#coarse_place = {library, kitchen}.
+#coarse_place = {kitchen, office1}.
 #robot = {rob1}.
 #coarse_thing = #robot.
-#place = {c1, c2, c3, c4}.
+#place = {c5, c6, c7, c8, c9, c10, c11, c12}.
 #thing = #robot.
 
 #step = 0..numSteps.
@@ -81,8 +81,7 @@ holds(loc(RB2, C) ,I) :- holds(loc(RB1, C), I), comp(RB1, B), comp(RB2,B).
 % Axioms relating coarse-resolution attributes and fine-resolution counterparts
 holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
 holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
-coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), #place(C1), #place(C2).
-
+coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #place(C1), #place(C2).
 
 
 
@@ -191,17 +190,25 @@ something_happened(I) :- occurs(A, I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Attributes.
-next_to(c1, c2).
-next_to(c2, c3).
-next_to(c3, c4).
+next_to(c5, c6).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c8, c9).
+next_to(c9, c10).
+next_to(c10, c11).
+next_to(c11, c12).
 
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
--next_to(L1,L2) :- not next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
+-coarse_next_to(L1,L2) :- not coarse_next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
-comp(c1, library).
-comp(c2, library).
-comp(c3, kitchen).
-comp(c4, kitchen).
+comp(c5, kitchen).
+comp(c6, kitchen).
+comp(c7, kitchen).
+comp(c8, kitchen).
+comp(c9, office1).
+comp(c10, office1).
+comp(c11, office1).
+comp(c12, office1).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -211,13 +218,13 @@ comp(c4, kitchen).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,kitchen),I).
+goal(I) :- holds(coarse_loc(rob1,office1),I).
 
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c1), 0).
+holds(loc(rob1,c8), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

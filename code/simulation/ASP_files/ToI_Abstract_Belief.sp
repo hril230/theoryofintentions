@@ -8,9 +8,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {library, kitchen}.
+#room = {library, kitchen, office1, office2}.
 #robot = {rob1}.
-#book = {book1}.
+#book = {book1, book2, book3}.
 #object = #book.
 #thing = #object + #robot.
 
@@ -146,6 +146,8 @@ diag(A,I) :- occurs(A,I),
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Attributes.
 next_to(library, kitchen).
+next_to(kitchen, office1).
+next_to(office1, office2).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -154,12 +156,13 @@ next_to(library, kitchen).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
+holds(loc(book1,kitchen),0).
+-holds(in_hand(rob1,book1),0).
+holds(loc(book2,office2),0).
+holds(loc(book3,kitchen),0).
+-holds(in_hand(rob1,book3),0).
 holds(loc(rob1,library),0).
-holds(loc(book1,library),0).
-holds(in_hand(rob1,book1),0).
-hpd(move(rob1,kitchen), 0).
-obs(loc(rob1,kitchen),true,1).
-obs(loc(book1,kitchen),true,1).
+-holds(in_hand(rob1,book2),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
