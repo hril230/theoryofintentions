@@ -13,18 +13,16 @@ class Executer(object):
 	# and a holds statement about the tested fluent.
 	# False, 'holds(directly_observed(rob1,loc(ref_book1,c11),false),1)'
 	######################################################
-	def test(self,test):
-		fluent_test = test[test.find(',')+1:test.rfind(',')]
-		value_test = test[test.rfind(',')+1:-1]
-		test_result = True
-		direct_observation = self.world.executeAction(test)
-		if 'holds' not in direct_observation:
-			if value_test == 'false': real_value = 'true'
-			elif value_test == 'true': real_value = 'false'
-			test_result = False
-			direct_observation = 'holds(directly_observed(rob1,'+fluent_test+','+real_value+'),1)'
-		else: real_value = value_test
-		if 'loc(rob1' in test and test_result == False: raw_input('robot location test result is false ')
+	def test(self,test_action):
+		tested_fluent = test_action[test_action.find(',')+1:test_action.rfind(',')]
+		tested_value = test_action[test_action.rfind(',')+1:-1]
+		test_result = None
+		direct_observation = self.world.executeAction(test_action)
+		short_observation = direct_observation[:direct_observation.rfind(',')]
+		real_value = short_observation[short_observation.rfind(',')+1:-1]
+		if tested_value != real_value: test_result = False
+		else: test_result = True
+		if 'loc(rob1' in test_action and test_result == False: raw_input('robot location test result is false ')
 		return test_result,  direct_observation
 
 

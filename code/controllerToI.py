@@ -14,6 +14,9 @@ class ControllerToI():
 	def __init__(self, sparc_path, ASP_subfolder, domain_info, executer, refined_location, initial_conditions , goal, max_plan_length):
 		self.lines_to_write = []
 		self.planning_times = []
+		self.acting_times = []
+		self.testing_times = []
+		self.diagnosing_times = []
 		self.abstract_planning_time = None
 		self.abstract_action_plan = ''
 		self.error = False
@@ -116,7 +119,7 @@ class ControllerToI():
 				zoomed_history = Set() #holds all the history of the refined plan created wtih zoomed refined domain in form of 'hpd' and 'obs'
 				refined_observations = Set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
-																 #condition for the ASP that infers coarse observations from the refined direct observations	
+																 #condition for the ASP that infers coarse observations from the refined direct observations
 				while(need_refined_plan and not self.error):
 					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_occurrences = self.runZoomedDomain()
@@ -142,15 +145,20 @@ class ControllerToI():
 						if occurrence_step != refined_plan_step: continue
 						print ('ControllerToI \t\t Refined action: ' + str(refined_action) + ' at refined step: ' + str(occurrence_step))
 						if 'test' in refined_action:
+							startTime = datetime.now()
 							action_test_result, action_observation = self.executer.test(refined_action)
+							print(' line 151 controller Toi, action test result and action observations are: ' + str(action_test_result) + ' ' + str(action_observation))
+							endTime = datetime.now()
+							totalTime = endTime - startTime
+							self.testing_times.append(totalTime)
 							zoomed_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
 							refined_plan_step += 1
-							print ('ControllerToI \t\t test result: ' + str(action_test_result))
+							print ('ControllerToI \t\t test result and observation: ' + str(action_test_result) +' '+ str(action_observation))
 							if(action_test_result==True and 'loc(rob1' in refined_action):
 								self.refined_location = action_observation.split(',')[2][:-1]
 								print ('ControllerToI \t\t refined location: '+self.refined_location)
-
-							refined_observations_step = self.getObservationsRelevantGoal()
+							#refined_observations_step = self.getObservationsRelevantGoal()
+							refined_observations_step = Set()
 							refined_observations_step.add(action_observation)
 							refined_observations_step = self.prepareRefinedObservations(refined_observations_step,refined_plan_step)
 							refined_observations = refined_observations.union(refined_observations_step)
@@ -163,7 +171,10 @@ class ControllerToI():
 								break
 						else:
 							previous_belief = self.belief[:]
+							startTime = datetime.now()
 							self.executer.executeAction(refined_action)
+							endTime = datetime.now()
+							self.acting_times.append(endTime-startTime)
 							self.belief = previous_belief
 							refined_plan_step += 1
 				abstract_step_obs = list(self.infer_abstract_obs_from_refined_observations(initial_refined_location,list(refined_observations), refined_plan_step))
@@ -178,14 +189,39 @@ class ControllerToI():
 		if(self.current_diagnosis != ''): self.history_ToI_diagnosis.append(self.current_diagnosis)
 
 		# write results to text file
-		timeTaken = self.planning_times[0]
-		for i in range(1,len(self.planning_times)): timeTaken = timeTaken + self.planning_times[i]
-		if self.error: timeTaken = 'ERROR: too many answer sets to process'
+		timeTakenPlanning = self.planning_times[0]
+		for i in range(1,len(self.planning_times)): timeTakenPlanning = timeTakenPlanning + self.planning_times[i]
+		if self.error: timeTakenPlanning = 'ERROR: too many answer sets to process'
 		results = open('experimental_results.txt', 'a')
 		for line in self.lines_to_write: results.write(line)
-		results.write('\nTotal time taken with zooming: ')
-		results.write(str(timeTaken))
+		results.write('\nTotal time taken planning with zooming: ')
+		results.write(str(timeTakenPlanning))
 		results.close()
+
+		# write results to text file
+		timeTakenDiagnosing = self.diagnosing_times[0]
+		for i in range(1,len(self.diagnosing_times)): timeTakenDiagnosing = timeTakenDiagnosing + self.diagnosing_times[i]
+		results = open('experimental_results.txt', 'a')
+		results.write('\nTotal time taken diagnosing: ')
+		results.write(str(timeTakenDiagnosing))
+		results.close()
+
+		# write results to text file
+		timeTakenActing = self.acting_times[0]
+		for i in range(1,len(self.acting_times)): timeTakenActing = timeTakenActing + self.acting_times[i]
+		results = open('experimental_results.txt', 'a')
+		results.write('\nTotal time taken acting: ')
+		results.write(str(timeTakenActing))
+		results.close()
+
+		# write results to text file
+		timeTakenTesting = self.testing_times[0]
+		for i in range(1,len(self.testing_times)): timeTakenTesting = timeTakenTesting + self.testing_times[i]
+		results = open('experimental_results.txt', 'a')
+		results.write('\nTotal time taken testing: ')
+		results.write(str(timeTakenTesting))
+		results.close()
+
 
 		# write results to csv file
 		with open('experimental_results.csv', 'a') as writeFile:
@@ -205,6 +241,7 @@ class ControllerToI():
 		return updated_observations
 
 	def getObservationsRelevantGoal(self):
+		startTime = datetime.now()
 		observations = Set()
 		result,observation1 = self.executer.test('test(rob1,loc(ref1_book1,' + self.refined_location+ '),true)')
 		if 'holds' in observation1: observations.add(observation1)
@@ -217,6 +254,10 @@ class ControllerToI():
 		if global_variables.complexity_level > 3:
 			result,observation4 = self.executer.test('test(rob1,loc(ref1_book4,' + self.refined_location+ '),true)')
 			if 'holds' in observation4: observations.add(observation4)
+		endTime = datetime.now()
+		totalTime = endTime - startTime
+		self.testing_times.append(totalTime)
+		print(' observations relevant to goal are:' + str(observations))
 		return observations
 
 	def infer_abstract_obs_from_refined_observations(self,initial_refined_location,refined_observations_list, step):
@@ -319,6 +360,7 @@ class ControllerToI():
 		return abstract_action
 
 	def diagnose(self):
+		startTime = datetime.now()
 		self.input_for_planning = []
 		possibleDiagnosis = []
 		input = list(self.history_ToI_diagnosis)
@@ -335,6 +377,9 @@ class ControllerToI():
 		print ('\nControllerToI: Diagnosing ToI with current obs')
 		answerSet = subprocess.check_output('java -jar '+self.sparc_path + ' ' + self.asp_ToI_diagnosing_file +' -A ',shell=True)
 		answers = answerSet.rstrip().split('\n\n')
+		endTime = datetime.now()
+		timeTaken = endTime -  startTime
+
 		if self.current_diagnosis in answerSet:
 			for a in answers:
 				if(self.current_diagnosis in a): chosenAnswer = a
@@ -357,6 +402,9 @@ class ControllerToI():
 			else:
 				self.input_for_planning.append(line + '.')
 
+		self.lines_to_write.append('\nDiagnosis with Zooming' + str(self.current_diagnosis))
+		self.lines_to_write.append('\nTime taken to diagnose with Zooming: ' + str(timeTaken))
+		self.diagnosing_times.append(timeTaken)
 		return
 
 

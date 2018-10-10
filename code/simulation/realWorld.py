@@ -10,7 +10,7 @@ asp_Refined_World_file = 'simulation/ASP_files/ASP_Refined_World.sp'
 
 class World(object):
 	def __init__(self,thisPath,world_initial_state, new_domain_info):
-		self.domain_info = new_domain_info	
+		self.domain_info = new_domain_info
 		preASP_refined_world_file = 'simulation/pre_ASP_files/complexity_level_' + str(self.domain_info.complexity_level) + '/preASP_refined_world.txt'
 		reader = open(preASP_refined_world_file, 'r')
 		pre_asp = reader.read()
@@ -66,8 +66,10 @@ class World(object):
 		print('realWorld - deleting world  #############################################################################################################\n\n\n\n ')
 
 	def executeAction(self,action):
+		if 'test' in action: return self.testFluent(action)
 		happened = False
 		input = list(self.domain_info.refinedStateToRefinedHoldsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
+		print('refined action happening: ' + action)
 		answer = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
@@ -79,14 +81,64 @@ class World(object):
 			self.__updateStateFromAnswer(answer)
 			self.history.append(action)
 		direct_observation = self.__getDirectObservation(answer)
-		print (direct_observation)
+		print ('ASP direct observation: ' + direct_observation)
 		return direct_observation
 
 	def __getDirectObservation(self,answer):
 		answer = answer.rstrip().strip('{').strip('}')
 		for entry in answer.split(', '):
-			if 'directly_observed' in entry: return entry
+			if 'directly_observed' in entry:
+				return entry
 		return ''
+
+	def testFluent(self,testedFluent):
+		observed = ''
+		if('in_hand' in testedFluent):
+			observed = 'holds('+(testedFluent[:testedFluent.rfind(',')+1]).replace('test','directly_observed')
+			if('book1' in testedFluent):
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref1_index] +'),1)'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref2_index] +'),1)'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref3_index] +'),1)'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref4_index] +'),1)'
+			elif('book2' in testedFluent):
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref1_index] +'),1)'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref2_index] +'),1)'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref3_index] +'),1)'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref4_index] +'),1)'
+			elif('book3' in testedFluent):
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref1_index] +'),1)'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref2_index] +'),1)'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref3_index] +'),1)'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref4_index] +'),1)'
+			elif('book4' in testedFluent):
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref1_index] +'),1)'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref2_index] +'),1)'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref3_index] +'),1)'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref4_index] +'),1)'
+		if('loc' in testedFluent):
+			observed = 'holds(' + (testedFluent[:testedFluent.rfind(',')+1]).replace('test', 'directly_observed')
+			if('book1' in testedFluent):
+			 	if self.RefinedState[self.domain_info.LocationBook1_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
+					 observed = observed + 'true),1)'
+				else: observed = observed + 'false),1)'
+			elif('book2' in testedFluent):
+			 	if self.RefinedState[self.domain_info.LocationBook2_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
+				 	observed = observed + 'true),1)'
+				else: observed = observed + 'false),1)'
+			elif('book3' in testedFluent):
+			 	if self.RefinedState[self.domain_info.LocationBook3_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
+					 observed = observed + 'true),1)'
+				else: observed = observed + 'false),1)'
+			elif('book4' in testedFluent):
+			 	if self.RefinedState[self.domain_info.LocationBook4_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
+					 observed = observed + 'true),1)'
+				else: observed = observed + 'false),1)'
+			else:
+				observed = observed[:observed.rfind('rob1,')] + 'rob1,' + self.RefinedState[self.domain_info.LocationRobot_index] +'),true),1)'
+		return observed
+
+
+
 
 	def __runASPDomain(self,input):
 		asp_split = self.pre_asp_split[:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
@@ -94,7 +146,7 @@ class World(object):
 		f1 = open(asp_Refined_World_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print ('\nRealWorld: updating state')
+		print ('asp_Refined_World_file.sp')
 		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
 		answer = answer.decode().strip('{')
 		answer = answer.strip('}')

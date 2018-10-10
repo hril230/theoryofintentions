@@ -1,9 +1,23 @@
 complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
-3,with zooming,0:00:06.620463,1,4,4,11
+4,with zooming,0:00:00.397895,1,5,5,29
 complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
-3,with zooming,0:00:03.875838,1,5,3,24
+4,with zooming,0:00:00.432516,1,7,4,48
 complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
-3,with zooming,0:00:06.221838,1,7,4,40
+4,with zooming,0:00:00.670668,1,5,3,22
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+4,with zooming,0:00:01.055918,1,6,3,42
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+4,with zooming,0:00:05.267530,1,4,3,19
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+4,with zooming,0:00:01.245302,1,4,4,23
 complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
 complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
-3,with zooming,0:00:16.090910,1,6,3,32
+4,with zooming,0:00:02.047650,1,5,3,26
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+4,with zooming,0:00:13.462918,1,6,2,47
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+4,with zooming,0:00:19.393592,1,11,7,95
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions
+4,with zooming,0:00:04.860045,1,4,3,19
+complexity level,zooming,planning time,# abstract plans,# refined plans,# abstract actions,# refined actions

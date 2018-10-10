@@ -1,5 +1,6 @@
 
 from datetime import datetime
+
 from simulation.realWorld import World
 #from controllerTraditionalPlanning import ControllerTraditionalPlanning
 from controllerToI import ControllerToI
@@ -18,8 +19,7 @@ results_file_name = "simulation/results/"
 sparc_path = "$HOME/work/solverfiles/sparc.jar"
 max_plan_length = 17
 maxTimeZooming = 300
-maxTimeNoZooming = 3 * maxTimeZooming
-
+timeTakenZooming = 0
 def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	if book_goal_loc == 'library':
 		book_loc_start_index = 0
@@ -42,7 +42,7 @@ def refine_goal_location(book_goal_loc, refined_location_possibilities):
 
 
 def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
-
+	global timeTakenZooming
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
 	my_world = World(sparc_path,initial_state,domain_info)
 	executer = Executer(my_world)
@@ -65,25 +65,33 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
 	p1.start()
-	start = time.time()
+	start = datetime.now()
 	p1.join(maxTimeZooming)
 	if p1.is_alive():
 		results = open('experimental_results.txt', 'a')
 		results.write('\nTIMEOUT: running the zooming controller took longer than 5 minutes')
 		results.close()
+		timeTakenZooming = 0
 		p1.terminate()
 		p1.join()
-		maxTimeNoZoooming = 3 * maxTimeZooming
+
 	else:
-		timeTaken = time.time() - start
+		endTime = datetime.now()
+		timeTakenZooming = (endTime - start).seconds
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTotal trial time with zooming: ' + str(timeTaken))
+		results.write('\nTotal trial time with zooming: ' + str(timeTakenZooming) + ' seconds.')
 		results.close()
-		maxTimeNoZooming = 3 * timeTaken
+
+	print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
 
 
 
 def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
+	maxTimeNoZooming = 2*(timeTakenZooming)
+	results = open('experimental_results.txt', 'a')
+	results.write('\nTime limit for non-zooming: ' + str(maxTimeNoZooming) + ' seconds.')
+	results.close()
 
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
 	my_world = World(sparc_path,initial_state,domain_info)
@@ -97,18 +105,19 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
 	p1.start()
-	start = time.time()
+	start = datetime.now()
 	p1.join(maxTimeNoZooming)
 	if p1.is_alive():
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTIMEOUT: running the non-zooming controller took longer than '+str(int(maxTimeNoZooming/60))+' minutes')
+		results.write('\nTIMEOUT: running the non-zooming controller took longer than '+str(maxTimeNoZooming) + ' seconds.')
 		results.close()
 		p1.terminate()
 		p1.join()
 	else:
-		timeTaken = time.time() - start
+		endTime = datetime.now()
+		timeTaken = (endTime - start).seconds
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTotal trial time with no zooming: ' + str(timeTaken))
+		results.write('\nTotal trial time with no zooming: ' + str(timeTaken) + ' seconds.')
 		results.close()
 
 
@@ -193,18 +202,19 @@ def createConditionsAndRun(trial_number):
 		# check that the goal choosing loop completed before it ran out of attempts - it not, need to choose new initial conditions
 		if count < 10: repeat = False
 
+
+
+	with open('experimental_results.csv', 'a') as writeFile:
+		writer = csv.writer(writeFile)
+		writer.writerow(['complexity level', 'zooming', 'planning time', '# abstract plans', '# refined plans', '# abstract actions', '# refined actions'])
+	writeFile.close()
+	
 	print ('\nComplexity level:')
 	print (global_variables.complexity_level)
 	print ('Goal:')
 	print (goal)
 	print ('Initial_state:')
 	print (initial_state)
-
-	with open('experimental_results.csv', 'a') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerow(['complexity level', 'zooming', 'planning time', '# abstract plans', '# refined plans', '# abstract actions', '# refined actions'])
-	writeFile.close()
-
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
 	runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
 
@@ -212,7 +222,7 @@ def createConditionsAndRun(trial_number):
 
 if __name__ == "__main__":
 	global_variables.init()
-	global_variables.complexity_level = 3 # TODO change this number to change the complexity level
+	global_variables.complexity_level = 4 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
 	number_runs = 200
