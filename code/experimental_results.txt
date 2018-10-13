@@ -432,3 +432,175 @@ TIMEOUT: running the non-zooming controller took longer than 132 seconds.
 Trial number: 1
 Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book4_loc, book1_in_hand, book2_in_hand, book3_in_hand, book4_in_hand, refined_object_parts_in_hand] = ['c20', 'c25', 'c17', 'c16', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
 Goal: holds(loc(book3,kitchen),I).
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.401366
+Zooming controller abstract action plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken to plan abstract action plan: 0:00:00.418106
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.424059
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c1),true),0)', 'occurs(pickup(rob1,ref1_book1),1)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),2)']
+Time taken to create refined plan: 0:00:00.663060
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c1),true),0)', 'occurs(move(rob1,c2),1)', 'occurs(test(rob1,loc(rob1,c2),true),2)', 'occurs(test(rob1,loc(ref1_book1,c2),true),3)', 'occurs(pickup(rob1,ref1_book1),4)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),5)']
+Time taken to create refined plan: 0:00:00.565257
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.447888
+Abstract action: move(rob1,kitchen)
+Refined plan (computed with zooming): ['occurs(move(rob1,c3),0)', 'occurs(test(rob1,loc(rob1,c3),true),1)']
+Time taken to create refined plan: 0:00:00.449186
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.438253
+Total time taken planning with zooming: 0:00:02.095609
+Total time taken diagnosing: 0:00:01.711566
+Total time taken acting: 0:00:01.258776
+Total time taken testing: 0:00:00.000196
+Total trial time with zooming: 7 seconds.
+Time limit for non-zooming: 14 seconds.
+Total trial time with no zooming: 3 seconds.
+
+Trial number: 2
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.446855
+Zooming controller abstract action plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken to plan abstract action plan: 0:00:00.453724
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.458271
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c1),true),0)', 'occurs(pickup(rob1,ref1_book1),1)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),2)']
+Time taken to create refined plan: 0:00:00.670048
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c1),true),0)', 'occurs(move(rob1,c2),1)', 'occurs(test(rob1,loc(rob1,c2),true),2)', 'occurs(test(rob1,loc(ref1_book1,c2),true),3)', 'occurs(pickup(rob1,ref1_book1),4)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),5)']
+Time taken to create refined plan: 0:00:00.573760
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.430012
+Abstract action: move(rob1,kitchen)
+Refined plan (computed with zooming): ['occurs(move(rob1,c3),0)', 'occurs(test(rob1,loc(rob1,c3),true),1)']
+Time taken to create refined plan: 0:00:00.451996
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.430105
+Total time taken planning with zooming: 0:00:02.149528
+Total time taken diagnosing: 0:00:01.765243
+Total time taken acting: 0:00:01.226043
+Total time taken testing: 0:00:00.000201
+Total trial time with zooming: 8 seconds.
+
+Trial number: 2
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.418687
+Zooming controller abstract action plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,kitchen)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,library)), activity_length(1,3), intended_action(start(1),1)}
+Time taken to plan abstract action plan: 0:00:00.471867
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.429035
+Abstract action: move(rob1,kitchen)
+Refined plan (computed with zooming): ['occurs(move(rob1,c2),0)', 'occurs(test(rob1,loc(rob1,c2),true),1)', 'occurs(move(rob1,c3),2)', 'occurs(test(rob1,loc(rob1,c3),true),3)']
+Time taken to create refined plan: 0:00:00.457716
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.453923
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c3),true),0)', 'occurs(pickup(rob1,ref1_book1),1)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),2)']
+Time taken to create refined plan: 0:00:00.684300
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.439288
+Abstract action: move(rob1,library)
+Refined plan (computed with zooming): ['occurs(move(rob1,c2),0)', 'occurs(test(rob1,loc(rob1,c2),true),1)']
+Time taken to create refined plan: 0:00:00.442132
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.435580
+Total time taken planning with zooming: 0:00:02.056015
+Total time taken diagnosing: 0:00:02.176513
+Total time taken acting: 0:00:01.645958
+Total time taken testing: 0:00:00.000221
+Total trial time with zooming: 9 seconds.
+
+Trial number: 3
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c1', 'c1', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.419652
+Zooming controller abstract action plan: {hpd(select(my_goal),true,0), holds(loc(rob1,library),0), holds(loc(book1,library),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,kitchen)), activity_length(1,2), intended_action(start(1),1)}
+Time taken to plan abstract action plan: 0:00:00.460172
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.426769
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c1),true),0)', 'occurs(pickup(rob1,ref1_book1),1)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),2)']
+Time taken to create refined plan: 0:00:00.641472
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.438257
+Abstract action: move(rob1,kitchen)
+Refined plan (computed with zooming): ['occurs(move(rob1,c2),0)', 'occurs(test(rob1,loc(rob1,c2),true),1)', 'occurs(move(rob1,c3),2)', 'occurs(test(rob1,loc(rob1,c3),true),3)']
+Time taken to create refined plan: 0:00:00.445679
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.459305
+Total time taken planning with zooming: 0:00:01.547323
+Total time taken diagnosing: 0:00:01.743983
+Total time taken acting: 0:00:01.233947
+Total time taken testing: 0:00:00.000182
+Total trial time with zooming: 7 seconds.
+
+Trial number: 4
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c4', 'c2', 'false', 'false']
+Goal: holds(loc(book1,kitchen),I).
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.444005
+Zooming controller abstract action plan: {hpd(select(my_goal),true,0), holds(loc(book1,library),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,move(rob1,library)), activity_component(1,2,pickup(rob1,book1)), activity_component(1,3,move(rob1,kitchen)), activity_length(1,3), intended_action(start(1),1)}
+Time taken to plan abstract action plan: 0:00:00.426731
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.436903
+Abstract action: move(rob1,library)
+Refined plan (computed with zooming): ['occurs(move(rob1,c3),0)', 'occurs(test(rob1,loc(rob1,c3),true),1)', 'occurs(move(rob1,c2),2)', 'occurs(test(rob1,loc(rob1,c2),true),3)']
+Time taken to create refined plan: 0:00:00.453398
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.452602
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c2),true),0)', 'occurs(pickup(rob1,ref1_book1),1)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),2)']
+Time taken to create refined plan: 0:00:00.660345
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.447962
+Abstract action: move(rob1,kitchen)
+Refined plan (computed with zooming): ['occurs(move(rob1,c3),0)', 'occurs(test(rob1,loc(rob1,c3),true),1)']
+Time taken to create refined plan: 0:00:00.452075
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.441153
+Total time taken planning with zooming: 0:00:01.992549
+Total time taken diagnosing: 0:00:02.222625
+Total time taken acting: 0:00:01.661613
+Total time taken testing: 0:00:00.000221
+Total trial time with zooming: 9 seconds.
+
+Trial number: 5
+Initial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ['c3', 'c3', 'false', 'false']
+Goal: holds(loc(book1,library),I).
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.446315
+Zooming controller abstract action plan: {hpd(select(my_goal),true,0), holds(loc(book1,kitchen),0), holds(loc(rob1,kitchen),0), -holds(in_hand(rob1,book1),0), activity_goal(1,my_goal), activity_component(1,1,pickup(rob1,book1)), activity_component(1,2,move(rob1,library)), activity_length(1,2), intended_action(start(1),1)}
+Time taken to plan abstract action plan: 0:00:00.459111
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.430002
+Abstract action: pickup(rob1,book1)
+Refined plan (computed with zooming): ['occurs(test(rob1,loc(ref1_book1,c3),true),0)', 'occurs(pickup(rob1,ref1_book1),1)', 'occurs(test(rob1,in_hand(rob1,ref1_book1),true),2)']
+Time taken to create refined plan: 0:00:00.658474
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.456289
+Abstract action: move(rob1,library)
+Refined plan (computed with zooming): ['occurs(move(rob1,c2),0)', 'occurs(test(rob1,loc(rob1,c2),true),1)']
+Time taken to create refined plan: 0:00:00.448296
+Diagnosis with Zooming
+Time taken to diagnose with Zooming: 0:00:00.441994
+Total time taken planning with zooming: 0:00:01.565881
+Total time taken diagnosing: 0:00:01.774600
+Total time taken acting: 0:00:00.826337
+Total time taken testing: 0:00:00.000205
+Total trial time with zooming: 7 seconds.

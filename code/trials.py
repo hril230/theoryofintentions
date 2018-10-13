@@ -216,7 +216,7 @@ def createConditionsAndRun(trial_number):
 	print ('Initial_state:')
 	print (initial_state)
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
-	runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
+	#runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
 
 
 
@@ -225,5 +225,5 @@ if __name__ == "__main__":
 	global_variables.complexity_level = 4 # TODO change this number to change the complexity level
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 200
+	number_runs = 5
 	for x in range (0,number_runs): createConditionsAndRun(x+1)

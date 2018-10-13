@@ -10,29 +10,29 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ZOOM THIS SORT: #coarse_place = {library,kitchen,office1,office2}.
+#coarse_place = {library,kitchen,office1,office2}.
 #robot = {rob1}.
-ZOOM THIS SORT: #coarse_object = {book1,book2,book3}.
-ZOOM THIS SORT: #object = {ref1_book1,ref2_book1,ref3_book1, ref1_book2,ref2_book2,ref3_book2, ref1_book3,ref2_book3,ref3_book3}.
-ZOOM THIS SORT OF SORTS: #coarse_thing = #coarse_object + #robot.
-ZOOM THIS SORT: #place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
-ZOOM THIS SORT OF SORTS: #thing = #object + #robot.
+#coarse_object = {book1,book2,book3}.
+#object = {ref1_book1,ref2_book1,ref3_book1, ref1_book2,ref2_book2,ref3_book2, ref1_book3,ref2_book3,ref3_book3}.
+#coarse_thing = #coarse_object + #robot.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
+#thing = #object + #robot.
 
 #step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
-ZOOM INERTIAL FLUENTS: #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
-ZOOM DEFINED FLUENTS: #physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
+#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 #knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
 #knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-ZOOM ACTIONS: #action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
 
-ZOOM THIS SORT OF SORTS: #refined_component = #place + #object.
-ZOOM THIS SORT OF SORTS: #coarse_component = #coarse_place + #coarse_object.
+#refined_component = #place + #object.
+#coarse_component = #coarse_place + #coarse_object.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates

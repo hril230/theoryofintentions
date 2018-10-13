@@ -12,9 +12,9 @@ sorts
 #step = 0..numSteps.
 #integer = 0..numSteps.
 
-#room = {library, kitchen, office1, office2, storage_cupboard}.
+#room = {library, kitchen}.
 #robot = {rob1}.
-#book = {book1, book2, book3, book4}.
+#book = {book1}.
 #object = #book.
 #thing = #object + #robot.
 #positive_index = 1..max_len.
@@ -558,9 +558,6 @@ has_intention(I) :- intended_action(A,I).
 %%Attributes:
 %%%%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
-next_to(kitchen, office1).
-next_to(office1, office2).
-next_to(office2, storage_cupboard).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 
@@ -570,7 +567,7 @@ next_to(office2, storage_cupboard).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book3,kitchen),I).
+holds(my_goal,I) :- holds(loc(book1,library),I).
 
 
 
@@ -578,30 +575,28 @@ holds(my_goal,I) :- holds(loc(book3,kitchen),I).
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(2).
+current_step(4).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
+obs(loc(book1,kitchen),true,3).
+obs(in_hand(rob1,book1),true,3).
 hpd(select(my_goal),true,0).
-activity_goal(1,my_goal).
-activity_component(1,1,pickup(rob1,book3)).
-activity_component(1,2,move(rob1,office1)).
-activity_component(1,3,move(rob1,kitchen)).
-activity_length(1,3).
-holds(loc(book1,storage_cupboard),0).
-holds(loc(book2,office2),0).
-holds(loc(rob1,office2),0).
-holds(loc(book3,office2),0).
-holds(loc(book4,library),0).
--holds(in_hand(rob1,book3),0).
--holds(in_hand(rob1,book1),0).
--holds(in_hand(rob1,book4),0).
--holds(in_hand(rob1,book2),0).
 attempt(start(1),1).
-explaining(2).
+attempt(pickup(rob1,book1),2).
+activity_goal(1,my_goal).
+activity_component(1,1,pickup(rob1,book1)).
+activity_component(1,2,move(rob1,library)).
+activity_length(1,2).
+holds(loc(book1,kitchen),0).
+holds(loc(rob1,kitchen),0).
+-holds(in_hand(rob1,book1),0).
+obs(loc(rob1,library),true,4).
+attempt(move(rob1,library),3).
+explaining(4).
 
 
 

@@ -763,7 +763,8 @@ class ControllerToI():
 						self.zoomed_asp_list.append('holds(' + condition + ', 0).\n')
 			elif ('cannot test in the first step' in line) and ('pickup' in action): # remove this axiom for pickup actions, as the object's location needs to be tested at step zero
 				pass
-			elif 'ZOOM THIS SORT:' in line: # add relevant constants to sort
+			elif ('#coarse_place =' in line) or ('#coarse_object =' in line) or ('#object =' in line) or ('#place =' in line):
+				# add relevant constants to sort
 				zoomed_sort = ''
 				for sort in sorts:
 					if (('#'+sort.name+' = ') in line) and (len(sort.rel_constants) != 0):
@@ -772,7 +773,8 @@ class ControllerToI():
 							zoomed_sort = zoomed_sort + const + ', '
 						zoomed_sort = zoomed_sort[0:len(zoomed_sort)-2] + '}.\n'
 						self.zoomed_asp_list.append(zoomed_sort)
-			elif 'ZOOM THIS SORT OF SORTS' in line: # add relevant sorts
+			elif ('#coarse_thing =' in line) or ('#thing =' in line) or ('#refined_component =' in line) or ('#coarse_component =' in line):
+				# add relevant sorts
 				zoomed_sort = ''
 				for sort in sorts:
 					if (('#'+sort.name+' = ') in line) and (len(sort.rel_constants) != 0):
@@ -781,19 +783,19 @@ class ControllerToI():
 							zoomed_sort = zoomed_sort + const + ' + '
 						zoomed_sort = zoomed_sort[0:len(zoomed_sort)-3] + '.\n'
 						self.zoomed_asp_list.append(zoomed_sort)
-			elif 'ZOOM INERTIAL FLUENTS' in line: # add relevant inertial fluents
+			elif '#physical_inertial_fluent =' in line: # add relevant inertial fluents
 				inertial_fluent_sort = '#physical_inertial_fluent = '
 				for fluent in rel_inertial_fluents:
 					inertial_fluent_sort = inertial_fluent_sort + fluent + ' + '
 				inertial_fluent_sort = inertial_fluent_sort[0:len(inertial_fluent_sort)-3] + '.\n'
 				self.zoomed_asp_list.append(inertial_fluent_sort)
-			elif 'ZOOM DEFINED FLUENTS' in line: # add relevant defined fluents
+			elif '#physical_defined_fluent =' in line: # add relevant defined fluents
 				defined_fluent_sort = '#physical_defined_fluent = '
 				for fluent in rel_defined_fluents:
 					defined_fluent_sort = defined_fluent_sort + fluent + ' + '
 				defined_fluent_sort = defined_fluent_sort[0:len(defined_fluent_sort)-3] + '.\n'
 				self.zoomed_asp_list.append(defined_fluent_sort)
-			elif 'ZOOM ACTIONS' in line: # add relevant actions
+			elif '#action =' in line: # add relevant actions
 				action_sort = '#action = '
 				for act in rel_actions:
 					action_sort = action_sort + act + ' + '
