@@ -604,3 +604,11 @@ Total time taken diagnosing: 0:00:01.774600
 Total time taken acting: 0:00:00.826337
 Total time taken testing: 0:00:00.000205
 Total trial time with zooming: 7 seconds.
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c15', 'c10', 'c1', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book3,office2),I).
+
+Trial number: 1
+Initial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ['c10', 'c7', 'c5', 'c7', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+Goal: holds(loc(book2,office2),I).

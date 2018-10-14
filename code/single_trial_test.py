@@ -139,9 +139,8 @@ def createConditionsAndRun(trial_number):
 	controlled_run = False
 
 
-	goal = 'holds(loc(book3,kitchen),I).'
-	initial_state = ['c20', 'c25', 'c17', 'c16', 'c1', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
-	print ('\nComplexity level:')
+	goal = 'holds(loc(book1,office1),I).'
+	initial_state = ['c5', 'c14', 'c3', 'c5', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'true', 'false', 'false']
 	print (global_variables.complexity_level)
 	print ('Goal:')
 	print (goal)
@@ -150,11 +149,140 @@ def createConditionsAndRun(trial_number):
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
 	#runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
 
+def createPreASP_AbstractBeliefFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_abstract, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.abstract_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
+	writer = open(global_variables.file_name_preASP_abstract_belief, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_ToIFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_ToI_domain, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	my_text_split[0] = '#const numSteps = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1])
+	my_text_split[1] = '#const max_len = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1]+1)
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.abstract_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
+	writer = open(global_variables.file_name_preASP_ToI, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_RefinedWorldFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_refined, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
+	my_text_split.append(global_variables.refined_world_display_string)
+	my_text = '\n'.join(my_text_split)
+
+	#removing zooming guidance headings
+	my_text_split = my_text.split('\n')
+	for i, line in enumerate(my_text_split):
+		if('ZOOM' in line): my_text_split[i] = line[line.find('#'):]
+
+
+	writer = open(global_variables.file_name_preASP_refined_world, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_InferringObservations():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_refined, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
+	my_text_split.append(global_variables.inferring_observations_display_string)
+	my_text = '\n'.join(my_text_split)
+
+	#removing zooming guidance headings
+	my_text_split = my_text.split('\n')
+	for i, line in enumerate(my_text_split):
+		if('ZOOM' in line): my_text_split[i] = line[line.find('#'):]
+
+	#removing exo actions
+	for i, line in enumerate(my_text_split):
+		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
+		if('exo' in line): my_text_split[i] = '\n'
+
+
+
+	writer = open(global_variables.file_name_preASP_inferring_observations, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_RefinedPlanning():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	planning_marker = '%% PLANNING RULES GO HERE'
+	testing_marker = '%% TESTING RULES GO HERE'
+	reader = open(global_variables.file_name_preASP_refined, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	my_text_split[0] = '#const numSteps = 10. % maximum number of steps.'
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
+	planning_index = my_text_split.index(planning_marker)
+	my_text_split[planning_index] = global_variables.planning_rules_string
+	testing_index = my_text_split.index(testing_marker)
+	my_text_split[testing_index] = global_variables.testing_rules_string
+	my_text_split.append('occurs.')
+	my_text = '\n'.join(my_text_split)
+
+	#removing exo actions
+	for i, line in enumerate(my_text_split):
+		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
+		if('exo' in line): my_text_split[i] = '\n'
+
+	writer = open(global_variables.file_name_preASP_refined_planning, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
 
 
 if __name__ == "__main__":
 	global_variables.init()
-	global_variables.complexity_level = 4 # TODO change this number to change the complexity level
+	global_variables.complexity_level = 3 # TODO change this number to change the complexity level
+	global_variables.file_name_preASP_ToI = ASP_subfolder_path +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI.txt' # Used for astract planning and diagnosis with ToI
+	global_variables.file_name_preASP_abstract_belief = ASP_subfolder_path + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_domain.txt' # used for updating controller abstract belief
+	global_variables.file_name_preASP_refined_planning = ASP_subfolder_path + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_domain.txt' # used for zoomed refined planning
+	global_variables.file_name_preASP_inferring_observations = ASP_subfolder_path+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_domain_no_planning.txt' # used for infering coarse observations
+	global_variables.file_name_preASP_refined_world = ASP_subfolder_path + 'pre_ASP_files/complexity_level_'+str(global_variables.complexity_level) + '/preASP_refined_world.txt' # used for creating simulated world
+
+	global_variables.file_name_preASP_abstract = ASP_subfolder_path +'pre_ASP_files/preASP_abstract.txt'
+	#global_variables.file_name_preASP_ToI_domain = ASP_subfolder_path +'pre_ASP_files/preASP_ToI_domain.txt'
+	global_variables.file_name_preASP_refined = ASP_subfolder_path +'pre_ASP_files/preASP_refined.txt'
+	createPreASP_AbstractBeliefFile()
+ 	createPreASP_RefinedWorldFile()
+	createPreASP_InferringObservations()
+	createPreASP_RefinedPlanning()
+	createPreASP_ToIFile()
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
 	number_runs = 1

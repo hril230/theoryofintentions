@@ -6,11 +6,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  sorts
+sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {library, kitchen}.
+#room = {library, kitchen, office1, office2}.
+#book = {book1, book2, book3}.
 #robot = {rob1}.
-#book = {book1}.
 #object = #book.
 #thing = #object + #robot.
 
@@ -19,30 +19,30 @@
 
 #inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
 #fluent = #inertial_fluent.
-
 #rob_action = move(#robot, #room) + pickup(#robot, #object)
 	+ put_down(#robot, #object).
 #exo_action = exo_move(#object,#room).
 #action = #rob_action + #exo_action.
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 next_to(#room,#room).
-
 holds(#fluent,#step).
 occurs(#action,#step).
-
 obs(#fluent, #boolean, #step).
-hpd(#action, #step).
 
+hpd(#action, #step).
 diag(#exo_action, #step).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%
 %% Causal Laws %%
+%%%%%%%%%%%%%%%%%
 %% Moving changes location to target room (if the door is not locked).
 holds(loc(R, L), I+1) :- occurs(move(R, L), I).
 
@@ -56,8 +56,9 @@ holds(in_hand(R, O), I+1) :- occurs(pickup(R, O), I).
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
+%%%%%%%%%%%%%%%%%%%%%%%
 %% Reflexive property of next_to relation.
 next_to(L1,L2) :- next_to(L2,L1).
 
@@ -70,9 +71,12 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% Only one object can be held at any time.
 -holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1 != O2.
 
+%% a room is not next to another unless specified.
+-next_to(L1,L2) :- not next_to(L1,L2).
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Executability Conditions %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Cannot move to a location if you are already there.
 -occurs(move(R, L), I) :- holds(loc(R, L), I).
 
@@ -94,6 +98,7 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% An exogenous move of an object cannot happen if it is being in hand
 -occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
+
 %%%%%%%%%%%%%%
 %% Defaults %%
 %%%%%%%%%%%%%%
@@ -101,10 +106,9 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Inertial axiom + CWA
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Inertial axiom + CWA %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% General inertia axioms.
 holds(F,I+1) :- #inertial_fluent(F),
                 holds(F,I),
@@ -117,10 +121,9 @@ holds(F,I+1) :- #inertial_fluent(F),
 %% CWA for Actions.
 -occurs(A,I) :- not occurs(A,I).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% History and initial state rules
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% History and initial state rules %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Take what actually happened into account.
 occurs(A,I) :- hpd(A,I).
 
@@ -133,37 +136,40 @@ occurs(A,I) :- hpd(A,I).
 holds(F, 0) | -holds(F, 0) :- #inertial_fluent(F).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%
 %% Diagnosis
-
+%%%%%%%%%%%%%%
 occurs(A,I) :+ #exo_action(A), I<numSteps.
 diag(A,I) :- occurs(A,I),
 		not hpd(A,I),
 		#exo_action(A).
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%
 %% Attributes.
+%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
--next_to(L1,L2) :- not next_to(L1,L2).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+next_to(kitchen, office1).
+next_to(office1, office2).
 
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
 holds(loc(book1,kitchen),0).
+-holds(in_hand(rob1,book1),0).
+holds(loc(book2,kitchen),0).
+holds(loc(book3,kitchen),0).
+-holds(in_hand(rob1,book3),0).
 holds(loc(rob1,kitchen),0).
-holds(in_hand(rob1,book1),0).
-hpd(move(rob1,library), 0).
-obs(loc(rob1,library),true,1).
+-holds(in_hand(rob1,book2),0).
+hpd(pickup(rob1,book2), 0).
+obs(in_hand(rob1,book2),true,1).
+obs(loc(book2,kitchen),true,1).
+obs(loc(rob1,kitchen),true,1).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%
 display
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%
 diag(A,I).
 holds(F,numSteps).
 -holds(in_hand(rob1,B), numSteps).

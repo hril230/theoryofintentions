@@ -1,5 +1,5 @@
-#const numSteps = 5. % maximum number of steps.
-#const max_len = 4. % maximum activity_length of an activity.
+#const numSteps = 7. % maximum number of steps.
+#const max_len = 6. % maximum activity_length of an activity.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,19 +9,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#step = 0..numSteps.
-#integer = 0..numSteps.
-
-#room = {library, kitchen}.
+#room = {library, kitchen, office1, office2}.
+#book = {book1, book2, book3}.
 #robot = {rob1}.
-#book = {book1}.
 #object = #book.
 #thing = #object + #robot.
+
+#boolean = {true, false}.
+#step = 0..numSteps.
+
+#integer = 0..numSteps.
 #positive_index = 1..max_len.
 #index = #positive_index + {neg1, 0}.
 #activity_name = 1..max_name.
-#boolean = {true, false}.
-
 
 #physical_inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
 #possible_goal = {my_goal}.
@@ -48,20 +48,17 @@ sorts
 
 #fluent = #inertial_fluent + #defined_fluent.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%
 predicates
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% static relation
+%%%%%%%%%%%%%
+%% static relations
 next_to(#room,#room).
-activity_goal(#activity_name,#possible_goal).
-activity_component(#activity_name,#index,#physical_agent_action).
-activity_length(#activity_name,#index).
-
-
 holds(#fluent,#step).
 occurs(#action,#step).
 
+activity_goal(#activity_name,#possible_goal).
+activity_component(#activity_name,#index,#physical_agent_action).
+activity_length(#activity_name,#index).
 
 %% used in history
 obs(#fluent, #boolean, #step).
@@ -87,66 +84,44 @@ some_action_occurred(#step).
 intended_action(#agent_action, #step).
 projected_success(#activity_name,#step).
 has_intention(#step).
-
 candidate(#activity_name,#step).
 has_component(#activity_name,#index).
 equal_activities(#activity_name,#activity_name).
 equal_components(#activity_name,#activity_name).
 different_component(#activity_name,#activity_name).
-
 futile_activity(#activity_name,#step).
-
 selected_goal_holds(#possible_goal,#step).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Inertial axiom + CWA %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% CWA for Defined Fluents (Thesis: 2.12)
--holds(F,I) :- #defined_fluent(F),
-               not holds(F,I).
-
-%%  General inertia axioms... (Thesis: 2.15)
-holds(F,I+1) :- #inertial_fluent(F),
-                holds(F,I),
-                not -holds(F,I+1).
--holds(F,I+1) :- #inertial_fluent(F),
-                 -holds(F,I),
-                 not holds(F,I+1).
-
-%%  CWA for Actions... (Thesis: 2.16)
--occurs(A,I) :- not occurs(A,I).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Causal Laws %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 holds(loc(R, L), I+1) :- occurs(move(R, L), I).
 holds(in_hand(R,O),I+1) :- occurs(pickup(R,O), I).
 -holds(in_hand(R,O),I+1) :- occurs(put_down(R,O), I).
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical State Constraints %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 next_to(L1,L2) :- next_to(L2,L1).
 -holds(loc(T, L2), I) :- holds(loc(T, L1), I), L1!=L2.
 holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
 -holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1!=O2.
-
+-next_to(L1,L2) :- not next_to(L1,L2).
+-holds(in_hand(R,O),0) :- not holds(in_hand(R,O),0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Executability Condition %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -occurs(A,I) :- impossible(A,I).
-
 %% (Desc: 10 - 14)
 impossible(move(R,L),I) :- holds(loc(R,L),I).
 impossible(move(R,L2),I) :- holds(loc(R,L1),I), -next_to(L1,L2).
-
-
 impossible(put_down(R,O), I) :- -holds(in_hand(R,O), I).
 impossible(pickup(R,O1), I) :- holds(in_hand(R,O2), I).
 impossible(pickup(R,O), I) :- holds(loc(R,L), I), not holds(loc(O,L), I).
@@ -160,15 +135,24 @@ impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
 %holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Inertial axiom + CWA %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CWA for Defined Fluents (Thesis: 2.12)
+-holds(F,I) :- #defined_fluent(F), not holds(F,I).
+%%  General inertia axioms... (Thesis: 2.15)
+holds(F,I+1) :- #inertial_fluent(F),  holds(F,I), not -holds(F,I+1).
+-holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
+
+%%  CWA for Actions... (Thesis: 2.16)
+-occurs(A,I) :- not occurs(A,I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Theory of Intention %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %% (1)
 holds(current_action_index(AN,0), I+1) :- occurs(start(AN),I).
 holds(current_action_index(AN,neg1), I+1) :- occurs(stop(AN),I).
-
 
 %% (2)
 holds(active_goal(G),I+1) :- occurs(select(G),I), not holds(G,I).
@@ -211,11 +195,6 @@ holds(next_action(AN,PAA),I) :- holds(current_action_index(AN,K),I),
 %% (10)
 -holds(next_available_name(AN),I) :- holds(next_available_name(AN1), I), AN != AN1.
 
-
-
-
-
-
 %% (11) definition of my_goal: Included a the end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -234,7 +213,6 @@ impossible(MAA1,I) :- occurs(MAA2,I), #mental_agent_action(MAA1), #mental_agent_
 %impossible(PAA,I) :- occurs(finish,I),  #physical_agent_action(PAA).
 %impossible(MAA,I) :- occurs(finish,I),  #mental_agent_action(MAA).
 
-
 %% (15)
 impossible(select(G), I) :- holds(active_goal(G), I).
 impossible(abandon(G), I) :- -holds(active_goal(G), I).
@@ -242,21 +220,18 @@ impossible(abandon(G), I) :- -holds(active_goal(G), I).
 %% (16)
 impossible(PAA,I) :- occurs(MEA,I), #mental_exogenous_action(MEA), #physical_agent_action(PAA).
 impossible(MEA,I) :- occurs(PAA,I), #mental_exogenous_action(MEA), #physical_agent_action(PAA).
-
 impossible(PEA,I) :- occurs(MEA,I), #mental_exogenous_action(MEA), #physical_exogenous_action(PEA).
 impossible(MEA,I) :- occurs(PEA,I), #mental_exogenous_action(MEA), #physical_exogenous_action(PEA).
-
 impossible(MAA,I) :- occurs(MEA,I), #mental_exogenous_action(MEA), #mental_agent_action(MAA).
 impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent_action(MAA).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%% Automatic Behaviour %%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Automatic Behaviour %%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History records and initial state rules %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
 -holds(F, 0) :- obs(F, false, 0).
@@ -349,9 +324,6 @@ equal_activities(AN,AN1) :- activity_goal(AN,G),
 
 :- equal_activities(AN,AN1), AN != AN1.
 
-
-
-
 %  (30)
 no_activity_for_goal(G,I) :- current_step(I),
 			explanation(N, I),
@@ -376,8 +348,9 @@ intended_action(finish,I) :- current_step(I),
 			explanation(N, I),
 			no_goal_for_activity(AN,I).
 
-
-%%%%%% Finding intended action for active_goal_activity
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Finding intended action for active_goal_activity
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% (34)
 occurs(AA,I1) :- current_step(I),
 		explanation(N, I),
@@ -428,15 +401,14 @@ intended_action(stop(AN),I) :- current_step(I),
 	active_goal_activity(AN,I),
 	futile_activity(AN,I).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Creating a new activity by specifying its goal, activity_components and activity_length.%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% (41)
 candidate(AN,I) :-  current_step(I),
 		explanation(N, I),
 		no_activity_for_goal(G,I),
 		holds(next_available_name(AN),I).
-
 
 %% (42)
 activity_goal(AN,G) :-  current_step(I),
@@ -460,13 +432,11 @@ occurs(start(AN),I) :- current_step(I),
          	     	activity_goal(AN,G),
 			not impossible(start(AN),I).
 
-
 %% (48)
 some_action_occurred(I1) :-  current_step(I),
 			explanation(N, I),
 			I <= I1,
 			occurs(A,I1).
-
 
 %% (49) original
 occurs(PAA,I1) :+ current_step(I),
@@ -477,8 +447,6 @@ occurs(PAA,I1) :+ current_step(I),
 		I < I1,
 		some_action_occurred(I1-1),
 		#physical_agent_action(PAA).
-
-
 
 % (50)
 activity_component(AN,I1-I,PAA) :- current_step(I),
@@ -526,25 +494,19 @@ intended_action(start(AN),I) :- current_step(I),
 		occurs(start(AN),I),
 		projected_success(AN,I).
 
-
-
 %% latest addition
 selected_goal_holds(G,I) :- current_step(I),
 		holds(G,I),
 		occurs(select(G),I1),
 		I1 <= I.
 
-
-
 intended_action(finish,I) :- current_step(I),
 			explanation(N,I),
 			selected_goal_holds(G,I).
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%% Engine %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%
+%% Engine %%
+%%%%%%%%%%%%
 % (55)
 has_intention(I) :- intended_action(A,I).
 :- current_step(I),
@@ -553,22 +515,19 @@ has_intention(I) :- intended_action(A,I).
 	not has_intention(I).
 
 
-
-%%%%%%%%%%%%%%%%%
-%%Attributes:
-%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%
+%% Attributes.
+%%%%%%%%%%%%%%%%
 next_to(library, kitchen).
--next_to(L1,L2) :- not next_to(L1,L2).
+next_to(kitchen, office1).
+next_to(office1, office2).
 
-
--holds(in_hand(R,O),0) :- not holds(in_hand(R,O),0).
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book1,library),I).
-
+holds(my_goal,I) :- holds(loc(book2,office2),I).
 
 
 %%%%%%%%%%%%%%%%%
@@ -577,29 +536,32 @@ holds(my_goal,I) :- holds(loc(book1,library),I).
 %% CURRENT STEP GOES HERE
 current_step(4).
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-obs(loc(book1,kitchen),true,3).
-obs(in_hand(rob1,book1),true,3).
+obs(loc(rob1,kitchen),true,3).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
-attempt(pickup(rob1,book1),2).
+attempt(move(rob1,kitchen),2).
 activity_goal(1,my_goal).
-activity_component(1,1,pickup(rob1,book1)).
-activity_component(1,2,move(rob1,library)).
-activity_length(1,2).
+activity_component(1,1,move(rob1,kitchen)).
+activity_component(1,2,pickup(rob1,book2)).
+activity_component(1,3,move(rob1,office1)).
+activity_component(1,4,move(rob1,office2)).
+activity_length(1,4).
 holds(loc(book1,kitchen),0).
-holds(loc(rob1,kitchen),0).
+holds(loc(book2,kitchen),0).
+holds(loc(book3,kitchen),0).
+holds(loc(rob1,office1),0).
 -holds(in_hand(rob1,book1),0).
-obs(loc(rob1,library),true,4).
-attempt(move(rob1,library),3).
+-holds(in_hand(rob1,book3),0).
+-holds(in_hand(rob1,book2),0).
+obs(in_hand(rob1,book2),true,4).
+obs(loc(book2,kitchen),true,4).
+obs(loc(rob1,kitchen),true,4).
+attempt(pickup(rob1,book2),3).
 explaining(4).
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
