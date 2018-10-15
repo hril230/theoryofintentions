@@ -70,6 +70,7 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
+%% STATE CONSTRAINTS GO HERE
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 
@@ -247,42 +248,42 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref1_book2,c11),0).
--holds(in_hand(rob1,ref1_book3),0).
-holds(loc(rob1,c8),0).
-holds(loc(ref1_book3,c8),0).
-holds(in_hand(rob1,ref1_book1),0).
--holds(in_hand(rob1,ref3_book2),0).
-holds(loc(ref3_book1,c8),0).
--holds(in_hand(rob1,ref1_book2),0).
-holds(loc(ref3_book2,c11),0).
-holds(loc(ref2_book2,c11),0).
-holds(loc(ref3_book3,c8),0).
--holds(in_hand(rob1,ref3_book1),0).
--holds(in_hand(rob1,ref2_book1),0).
--holds(in_hand(rob1,ref2_book2),0).
-holds(loc(ref2_book1,c8),0).
+holds(loc(ref2_book1,c13),0).
+holds(loc(ref1_book3,c5),0).
 -holds(in_hand(rob1,ref3_book3),0).
+holds(loc(ref3_book3,c5),0).
+-holds(in_hand(rob1,ref3_book2),0).
+-holds(in_hand(rob1,ref1_book1),0).
+-holds(in_hand(rob1,ref1_book2),0).
+-holds(in_hand(rob1,ref3_book1),0).
+holds(loc(ref2_book3,c5),0).
+-holds(in_hand(rob1,ref2_book2),0).
+holds(loc(ref2_book2,c8),0).
+holds(loc(ref1_book2,c8),0).
+holds(loc(ref1_book1,c13),0).
+holds(loc(rob1,c5),0).
 -holds(in_hand(rob1,ref2_book3),0).
-holds(loc(ref1_book1,c8),0).
-holds(loc(ref2_book3,c8),0).
-holds(loc(rob1,c8),0).
-holds(directly_observed(rob1,loc(ref1_book2,c4),false),8).
-holds(directly_observed(rob1,loc(rob1,c5),true),6).
-holds(directly_observed(rob1,loc(ref1_book3,c4),false),8).
-holds(directly_observed(rob1,loc(rob1,c6),true),4).
-holds(directly_observed(rob1,loc(rob1,c7),true),2).
-holds(directly_observed(rob1,loc(ref1_book2,c5),false),6).
-holds(directly_observed(rob1,loc(ref1_book1,c5),true),6).
-holds(directly_observed(rob1,loc(ref1_book1,c4),true),8).
-holds(directly_observed(rob1,loc(ref1_book1,c7),true),2).
-holds(directly_observed(rob1,loc(rob1,c4),true),8).
-holds(directly_observed(rob1,loc(ref1_book2,c7),false),2).
-holds(directly_observed(rob1,loc(ref1_book2,c6),false),4).
-holds(directly_observed(rob1,loc(ref1_book3,c7),false),2).
-holds(directly_observed(rob1,loc(ref1_book1,c6),true),4).
-holds(directly_observed(rob1,loc(ref1_book3,c5),false),6).
-holds(directly_observed(rob1,loc(ref1_book3,c6),false),4).
+-holds(in_hand(rob1,ref2_book1),0).
+holds(loc(ref3_book1,c13),0).
+holds(in_hand(rob1,ref1_book3),0).
+holds(loc(ref3_book2,c8),0).
+holds(loc(rob1,c5),0).
+holds(directly_observed(rob1,loc(ref1_book2,c8),true),6).
+holds(directly_observed(rob1,loc(ref1_book3,c9),true),8).
+holds(directly_observed(rob1,loc(rob1,c9),true),8).
+holds(directly_observed(rob1,loc(ref1_book2,c6),false),2).
+holds(directly_observed(rob1,loc(ref1_book2,c9),false),8).
+holds(directly_observed(rob1,loc(ref1_book3,c6),true),2).
+holds(directly_observed(rob1,loc(rob1,c7),true),4).
+holds(directly_observed(rob1,loc(ref1_book1,c7),false),4).
+holds(directly_observed(rob1,loc(ref1_book1,c9),false),8).
+holds(directly_observed(rob1,loc(ref1_book1,c6),false),2).
+holds(directly_observed(rob1,loc(rob1,c8),true),6).
+holds(directly_observed(rob1,loc(ref1_book2,c7),false),4).
+holds(directly_observed(rob1,loc(rob1,c6),true),2).
+holds(directly_observed(rob1,loc(ref1_book3,c8),true),6).
+holds(directly_observed(rob1,loc(ref1_book3,c7),true),4).
+holds(directly_observed(rob1,loc(ref1_book1,c8),false),6).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

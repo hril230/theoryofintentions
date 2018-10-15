@@ -68,7 +68,7 @@ class World(object):
 		if 'test' in action: return self.testFluent(action)
 		happened = False
 		input = list(self.domain_info.refinedStateToRefinedHoldsSet(self.RefinedState,0)) + ['hpd('+ action +',0).']
-		print('refined action happening: ' + action)
+		#print('refined action happening: ' + action)
 		answer = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1

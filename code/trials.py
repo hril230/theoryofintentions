@@ -13,11 +13,12 @@ import global_variables
 from simulation.domain_info import DomainInfo
 import sys
 import csv
+import psutil
 
 
 
 max_plan_length = 17
-maxTimeZooming = 30
+maxTimeZooming = 3000
 timeTakenZooming = 0
 def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	if book_goal_loc == 'library':
@@ -46,6 +47,9 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	executer = Executer(my_world)
 
 	known_world = my_world.getCoarseState()
+	print('my_world.getCoarseState() ')
+	print(known_world)
+
 	initial_conditions = list(domain_info.coarseStateToAstractHoldsSet(known_world,0))
 	robot_refined_location = my_world.getRobotRefinedLocation()
 
@@ -70,11 +74,9 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
   	while True:
 		if error.is_set():
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			print error.is_set()
 			p1.terminate()
 			p1.join()
-			raw_input()
-			sys.exit()
+
 		if (datetime.now()-startTime).seconds > maxTimeZooming and p1.is_alive():
 			timeout = True
 			p1.terminate()
@@ -119,8 +121,6 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 		  	print error.is_set()
 		  	p1.terminate()
 		  	p1.join()
-		  	raw_input()
-		  	sys.exit()
 		if (datetime.now()-startTime).seconds > maxTimeNonZooming and p1.is_alive():
 			timeout = True
 			p1.terminate()
@@ -218,6 +218,7 @@ def createPreASP_RefinedPlanningFile():
 	attributes_marker = '%% ATTRIBUTES GO HERE'
 	planning_marker = '%% PLANNING RULES GO HERE'
 	testing_marker = '%% TESTING RULES GO HERE'
+	state_constraints_marker = '%% STATE CONSTRAINTS GO HERE'
 	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
 	my_text = reader.read()
 	reader.close()
@@ -231,6 +232,8 @@ def createPreASP_RefinedPlanningFile():
 	my_text_split[planning_index] = global_variables.planning_rules_string
 	testing_index = my_text_split.index(testing_marker)
 	my_text_split[testing_index] = global_variables.testing_rules_string
+	state_constraints_index =  my_text_split.index(state_constraints_marker)
+	my_text_split[state_constraints_index] = global_variables.in_hand_state_constraints[global_variables.complexity_level-1]
 	my_text_split.append('occurs.')
 	my_text = '\n'.join(my_text_split)
 	#removing exo actions
@@ -333,15 +336,14 @@ def createConditionsAndRun(trial_number):
 
 
 def runGivenInitialState():
-	goal = 'holds(loc(book2,kitchen),I).'
-	initial_state = ['c3', 'c3', 'c3', 'c8', 'true', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
-	print (global_variables.complexity_level)
+	goal = 'holds(loc(book1,kitchen),I).'
+	initial_state = ['c1', 'c4', 'c1', 'c11', 'false', 'true', 'false', 'false', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false']
 	print ('Goal:')
 	print (goal)
 	print ('Initial_state:')
 	print (initial_state)
 	runAndWrite(1, 1, goal, initial_state)
-	runAndWriteWithoutZooming(1, goal, initial_state)
+	#runAndWriteWithoutZooming(1, goal, initial_state)
 
 if __name__ == "__main__":
 	singleRunTest = False

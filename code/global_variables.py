@@ -25,6 +25,7 @@ def init():
     global refined_world_causal_law
     global new_refined_world_executability_condition
     global old_refined_world_executability_condition
+    global in_hand_state_constraints
     global sparc_path
     global results_file_name
 
@@ -91,6 +92,17 @@ def init():
                             ':- not goal(I), not something_happened(I).\n'
                             ':- not something_happened(0).')
 
+
+    in_hand_state_constraints = [('holds(in_hand(rob1,ref1_book1),I):- holds(coarse_in_hand(rob1,book1),I).\n'),
+                            ('holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I):- holds(coarse_in_hand(rob1,book1),I).\n'
+                            'holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I):- holds(coarse_in_hand(rob1,book2),I).'),
+                            ('holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I) | holds(in_hand(rob1,ref3_book1),I) :- holds(coarse_in_hand(rob1,book1),I).\n'
+                            'holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I) | holds(in_hand(rob1,ref3_book2),I) :- holds(coarse_in_hand(rob1,book2),I).\n'
+                            'holds(in_hand(rob1,ref1_book3),I) | holds(in_hand(rob1,ref2_book3),I) | holds(in_hand(rob1,ref3_book3),I) :- holds(coarse_in_hand(rob1,book3),I).'),
+                            ('holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I) | holds(in_hand(rob1,ref3_book1),I) | holds(in_hand(rob1,ref4_book1),I):- holds(coarse_in_hand(rob1,book1),I).\n'
+                            'holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I) | holds(in_hand(rob1,ref3_book2),I) | holds(in_hand(rob1,ref4_book2),I):- holds(coarse_in_hand(rob1,book2),I).\n'
+                            'holds(in_hand(rob1,ref1_book3),I) | holds(in_hand(rob1,ref2_book3),I) | holds(in_hand(rob1,ref3_book3),I) | holds(in_hand(rob1,ref4_book3),I):- holds(coarse_in_hand(rob1,book3),I).\n'
+                            'holds(in_hand(rob1,ref1_book4),I) | holds(in_hand(rob1,ref2_book4),I) | holds(in_hand(rob1,ref3_book4),I) | holds(in_hand(rob1,ref4_book4),I):- holds(coarse_in_hand(rob1,book4),I).')]
     inferring_indirect_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
 
     refined_world_display_string = 'holds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'

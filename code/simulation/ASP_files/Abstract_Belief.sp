@@ -154,13 +154,13 @@ next_to(office1, office2).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
--holds(in_hand(rob1,book1),0).
-holds(loc(rob1,office1),0).
+holds(loc(book1,kitchen),0).
 -holds(in_hand(rob1,book3),0).
-holds(loc(book3,library),0).
-holds(loc(book1,library),0).
+-holds(in_hand(rob1,book1),0).
+holds(loc(book3,office2),0).
+holds(loc(rob1,kitchen),0).
 holds(loc(book2,office1),0).
--holds(in_hand(rob1,book2),0).
+holds(in_hand(rob1,book2),0).
 
 
 %%%%%%%%%%

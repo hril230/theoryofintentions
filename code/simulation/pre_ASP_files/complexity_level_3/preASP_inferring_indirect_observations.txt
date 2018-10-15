@@ -70,6 +70,7 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
+%% STATE CONSTRAINTS GO HERE
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 

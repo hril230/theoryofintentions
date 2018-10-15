@@ -66,6 +66,7 @@ holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
+%% STATE CONSTRAINTS GO HERE
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 

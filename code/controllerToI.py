@@ -57,9 +57,6 @@ class ControllerToI():
 		self.current_step = 1 # holds the current step of the controllerToI, which is the same as the ASP_TOI_Planning
 
 		self.preparePreASPStringLists()
-		print ' this is for debugging only: controller toi line 60'
-		print initial_conditions
-		print self.filteredPlainHistory(initial_conditions)
 		self.setInitialBelief(self.filteredPlainHistory(initial_conditions))
 		self.history_ToI_diagnosis = initial_conditions #holds the history input for ASP_ToI_Diagnosis
 		self.refined_location = refined_location
@@ -155,7 +152,7 @@ class ControllerToI():
 							self.testing_times.append(totalTime)
 							refined_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
 							refined_plan_step += 1
-							print ('ControllerToI: \t\t Test result and observation: ' + str(action_test_result) +' '+ str(action_observation))
+							print ('\t\t\t Test result and observations: ' + str(action_test_result) +' '+ str(action_observation))
 							if(action_test_result==True and 'loc(rob1' in refined_action):
 								self.refined_location = action_observation.split(',')[2][:-1]
 								print ('ControllerToI: \t\t Refined location: '+self.refined_location)
@@ -349,7 +346,7 @@ class ControllerToI():
 		possibleAnswers = answerSet.rstrip().split('\n\n')
 		chosenAnswer = possibleAnswers[0]
 		print ('\nAbstract action plan:')
-		print (chosenAnswer)
+		#print (chosenAnswer)
 		if self.abstract_action_plan == '': self.abstract_action_plan = chosenAnswer
 		endTime = datetime.now()
 		if self.abstract_planning_time == None: self.abstract_planning_time = endTime - startTime
@@ -599,11 +596,11 @@ class ControllerToI():
 				rel_initial_conditions.append(condition)
 				rel_conditions.append(condition)
 
-
 		# refine initial conditions
 		for i in range(len(rel_initial_conditions)):
 			if ('loc' in rel_initial_conditions[i]) and ('rob1' in rel_initial_conditions[i]):
 				rel_initial_conditions[i] = 'loc(rob1,' + self.refined_location + ')'
+		'''
 			if ('in_hand' in rel_initial_conditions[i]) and (not '-' in rel_initial_conditions[i]):
 				currently_holding = ''
 				if(self.domain_info.refined_state[self.domain_info.In_handBook1_Ref1_index] == 'true'):
@@ -642,7 +639,7 @@ class ControllerToI():
 					if(self.domain_info.refined_state[self.domain_info.In_handBook4_Ref4_index] == 'true'):
 						currently_holding = 'ref4_book4'
 				if(currently_holding != ''): rel_initial_conditions[i] = 'in_hand(rob1,' + currently_holding + ')'
-
+		'''
 		# determine which final conditions are relevant
 		for condition in final_state:
 			if not condition in initial_state:

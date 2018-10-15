@@ -66,6 +66,7 @@ holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
+%% STATE CONSTRAINTS GO HERE
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 
@@ -239,26 +240,25 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref3_book1,c4),0).
+holds(loc(ref2_book1,c5),0).
 -holds(in_hand(rob1,ref1_book3),0).
--holds(in_hand(rob1,ref2_book2),0).
 holds(loc(ref1_book2,c12),0).
-holds(loc(ref3_book3,c2),0).
+holds(loc(ref1_book3,c15),0).
+-holds(in_hand(rob1,ref3_book3),0).
 -holds(in_hand(rob1,ref1_book1),0).
 -holds(in_hand(rob1,ref3_book2),0).
 holds(loc(ref2_book2,c12),0).
-holds(loc(ref2_book1,c4),0).
--holds(in_hand(rob1,ref3_book1),0).
-holds(loc(ref1_book3,c2),0).
-holds(loc(ref2_book3,c2),0).
-holds(loc(ref1_book1,c4),0).
--holds(in_hand(rob1,ref3_book3),0).
--holds(in_hand(rob1,ref2_book1),0).
 -holds(in_hand(rob1,ref1_book2),0).
-holds(loc(rob1,c10),0).
+-holds(in_hand(rob1,ref3_book1),0).
+-holds(in_hand(rob1,ref2_book2),0).
+holds(loc(ref3_book1,c5),0).
+holds(loc(ref3_book3,c15),0).
+-holds(in_hand(rob1,ref2_book1),0).
+holds(loc(rob1,c5),0).
+holds(loc(ref2_book3,c15),0).
 -holds(in_hand(rob1,ref2_book3),0).
+holds(loc(ref1_book1,c5),0).
 holds(loc(ref3_book2,c12),0).
-hpd(move(rob1,c9),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

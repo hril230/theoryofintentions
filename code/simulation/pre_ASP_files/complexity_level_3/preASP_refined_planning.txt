@@ -70,6 +70,9 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
+holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I) | holds(in_hand(rob1,ref3_book1),I) :- holds(coarse_in_hand(rob1,book1),I).
+holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I) | holds(in_hand(rob1,ref3_book2),I) :- holds(coarse_in_hand(rob1,book2),I).
+holds(in_hand(rob1,ref1_book3),I) | holds(in_hand(rob1,ref2_book3),I) | holds(in_hand(rob1,ref3_book3),I) :- holds(coarse_in_hand(rob1,book3),I).
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 
