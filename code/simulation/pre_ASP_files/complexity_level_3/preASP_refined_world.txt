@@ -50,6 +50,7 @@ comp(#refined_component, #coarse_component).
 %%%%%%%%%%%%%%%%%
 %% Causal Laws %%
 %%%%%%%%%%%%%%%%%
+-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
@@ -105,7 +106,7 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 -occurs(move(R, C2), I) :- holds(loc(R, C1), I), -next_to(C1,C2).
 
 % Cannot put down an object unless it is in hand.
--occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).
+-occurs(put_down(R,OP),I) :- comp(OP,B), -holds(coarse_in_hand(rob1,B),I).
 
 % Cannot pick up an object if it has something in hand.
 -occurs(pickup(R, OP1), I) :- holds(in_hand(R, OP2), I).

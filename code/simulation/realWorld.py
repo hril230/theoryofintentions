@@ -4,12 +4,12 @@ import random
 import sys
 history_marker = '%% HISTORY GOES HERE'
 display_marker = 'display'
-asp_World_file = 'simulation/ASP_files/ASP_World.sp'
 asp_Refined_World_file = 'simulation/ASP_files/ASP_Refined_World.sp'
+import global_variables
 
 
 class World(object):
-	def __init__(self,thisPath,world_initial_state, new_domain_info):
+	def __init__(self,world_initial_state, new_domain_info):
 		self.domain_info = new_domain_info
 		preASP_refined_world_file = 'simulation/pre_ASP_files/complexity_level_' + str(self.domain_info.complexity_level) + '/preASP_refined_world.txt'
 		reader = open(preASP_refined_world_file, 'r')
@@ -22,7 +22,6 @@ class World(object):
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
-		self.sparcPath = thisPath
 		obs_list = list(self.domain_info.refinedStateToRefinedHoldsSet(world_initial_state,0))
 		output = self.__runASPDomain(obs_list)
 		self.__updateStateFromAnswer(output)
@@ -146,8 +145,8 @@ class World(object):
 		f1 = open(asp_Refined_World_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print ('asp_Refined_World_file.sp')
-		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_Refined_World_file+' -A',shell=True)
+		print (asp_Refined_World_file)
+		answer = subprocess.check_output('java -jar '+ global_variables.sparc_path + ' ' +asp_Refined_World_file+' -A',shell=True)
 		answer = answer.decode().strip('{')
 		answer = answer.strip('}')
 		return answer

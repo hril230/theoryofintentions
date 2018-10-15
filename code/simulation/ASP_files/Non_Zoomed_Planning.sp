@@ -1,4 +1,4 @@
-#const numSteps = 1. % maximum number of steps.
+#const numSteps = 10. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -52,6 +52,7 @@ comp(#refined_component, #coarse_component).
 %%%%%%%%%%%%%%%%%
 %% Causal Laws %%
 %%%%%%%%%%%%%%%%%
+%% CAUSAL LAWS GO HERE
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
@@ -159,7 +160,12 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %%%%%%%%%%%%%%%%%%%
 %% Testing Actions
 %%%%%%%%%%%%%%%%%%%
-%% TESTING RULES GO HERE
+% Make sure the outcome of any concrete action is tested
+occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).
+occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
+occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
+-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
+-occurs(pickup(rob1, OP), I) :- I = 0.
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -188,7 +194,15 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
 %%%%%%%%%%%%%%%%%%%%
-%% PLANNING RULES GO HERE
+%% Failure is not an option.
+success :- goal(I).
+:- not success.
+%% Plan Actions minimally
+occurs(A,I):+ not goal(I).
+%% Preventing preASP_refined_domain_no_planning
+something_happened(I) :- occurs(A, I).
+:- not goal(I), not something_happened(I).
+:- not something_happened(0).
 
 
 %%%%%%%%%%%%%%%
@@ -240,12 +254,12 @@ comp(ref3_book3, book3).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-%% GOAL GOES HERE
+goal(I) :- -coarse_in_hand(rob1,book1).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-%% HISTORY GOES HERE
+coarse_in_hand(rob1,book1)
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
@@ -255,4 +269,4 @@ comp(ref3_book3, book3).
 display
 %%%%%%%%%
 
-holds(indirectly_observed(rob1,B,C),numSteps).
+occurs.

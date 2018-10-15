@@ -1,4 +1,4 @@
-#const numSteps = 10. % maximum number of steps.
+#const numSteps = 8.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -52,6 +52,7 @@ comp(#refined_component, #coarse_component).
 %%%%%%%%%%%%%%%%%
 %% Causal Laws %%
 %%%%%%%%%%%%%%%%%
+%% CAUSAL LAWS GO HERE
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
@@ -159,12 +160,7 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %%%%%%%%%%%%%%%%%%%
 %% Testing Actions
 %%%%%%%%%%%%%%%%%%%
-% Make sure the outcome of any concrete action is tested
-occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).
-occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
-occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
--occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
--occurs(pickup(rob1, OP), I) :- I = 0.
+%% TESTING RULES GO HERE
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -193,15 +189,7 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
 %%%%%%%%%%%%%%%%%%%%
-%% Failure is not an option.
-success :- goal(I).
-:- not success.
-%% Plan Actions minimally
-occurs(A,I):+ not goal(I).
-%% Preventing preASP_refined_domain_no_planning
-something_happened(I) :- occurs(A, I).
-:- not goal(I), not something_happened(I).
-:- not something_happened(0).
+%% PLANNING RULES GO HERE
 
 
 %%%%%%%%%%%%%%%
@@ -259,6 +247,42 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
+holds(loc(ref1_book2,c11),0).
+-holds(in_hand(rob1,ref1_book3),0).
+holds(loc(rob1,c8),0).
+holds(loc(ref1_book3,c8),0).
+holds(in_hand(rob1,ref1_book1),0).
+-holds(in_hand(rob1,ref3_book2),0).
+holds(loc(ref3_book1,c8),0).
+-holds(in_hand(rob1,ref1_book2),0).
+holds(loc(ref3_book2,c11),0).
+holds(loc(ref2_book2,c11),0).
+holds(loc(ref3_book3,c8),0).
+-holds(in_hand(rob1,ref3_book1),0).
+-holds(in_hand(rob1,ref2_book1),0).
+-holds(in_hand(rob1,ref2_book2),0).
+holds(loc(ref2_book1,c8),0).
+-holds(in_hand(rob1,ref3_book3),0).
+-holds(in_hand(rob1,ref2_book3),0).
+holds(loc(ref1_book1,c8),0).
+holds(loc(ref2_book3,c8),0).
+holds(loc(rob1,c8),0).
+holds(directly_observed(rob1,loc(ref1_book2,c4),false),8).
+holds(directly_observed(rob1,loc(rob1,c5),true),6).
+holds(directly_observed(rob1,loc(ref1_book3,c4),false),8).
+holds(directly_observed(rob1,loc(rob1,c6),true),4).
+holds(directly_observed(rob1,loc(rob1,c7),true),2).
+holds(directly_observed(rob1,loc(ref1_book2,c5),false),6).
+holds(directly_observed(rob1,loc(ref1_book1,c5),true),6).
+holds(directly_observed(rob1,loc(ref1_book1,c4),true),8).
+holds(directly_observed(rob1,loc(ref1_book1,c7),true),2).
+holds(directly_observed(rob1,loc(rob1,c4),true),8).
+holds(directly_observed(rob1,loc(ref1_book2,c7),false),2).
+holds(directly_observed(rob1,loc(ref1_book2,c6),false),4).
+holds(directly_observed(rob1,loc(ref1_book3,c7),false),2).
+holds(directly_observed(rob1,loc(ref1_book1,c6),true),4).
+holds(directly_observed(rob1,loc(ref1_book3,c5),false),6).
+holds(directly_observed(rob1,loc(ref1_book3,c6),false),4).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
@@ -268,4 +292,4 @@ comp(ref3_book3, book3).
 display
 %%%%%%%%%
 
-occurs.
+holds(indirectly_observed(rob1,B,C),numSteps).

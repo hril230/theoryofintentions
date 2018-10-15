@@ -4,7 +4,6 @@ from datetime import datetime
 from simulation.realWorld import World
 #from controllerTraditionalPlanning import ControllerTraditionalPlanning
 from controllerToI import ControllerToI
-from nonZoomingControllerToI import NonZoomingControllerToI
 from simulation.executer import Executer
 import  csv
 import random
@@ -14,14 +13,11 @@ import global_variables
 from simulation.domain_info import DomainInfo
 import sys
 import csv
-ASP_subfolder_path = 'simulation/'
-results_file_name = "simulation/results/"
-sparc_path = "$HOME/work/solverfiles/sparc.jar"
 
 
 
 max_plan_length = 17
-maxTimeZooming = 300
+maxTimeZooming = 30
 timeTakenZooming = 0
 def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	if book_goal_loc == 'library':
@@ -42,12 +38,11 @@ def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	return (refined_location_possibilities[book_loc_start_index:book_loc_end_index])
 
 
-
-
 def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
+	global_variables.controller_type = 'zooming'
 	global timeTakenZooming
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
-	my_world = World(sparc_path,initial_state,domain_info)
+	my_world = World(initial_state,domain_info)
 	executer = Executer(my_world)
 
 	known_world = my_world.getCoarseState()
@@ -65,66 +60,188 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	results.write(goal)
 	results.close()
 
-	controllerToI = ControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
+	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
+	error = multiprocessing.Event()
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,))
+	timeTakenZooming = 0
+	timeout = False
 	p1.start()
-	start = datetime.now()
-	p1.join(maxTimeZooming)
-	if p1.is_alive():
-		results = open('experimental_results.txt', 'a')
-		results.write('\nTIMEOUT: running the zooming controller took longer than 5 minutes')
-		results.close()
-		timeTakenZooming = 0
-		p1.terminate()
-		p1.join()
+	startTime = datetime.now()
+  	while True:
+		if error.is_set():
+			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+			print error.is_set()
+			p1.terminate()
+			p1.join()
+			raw_input()
+			sys.exit()
+		if (datetime.now()-startTime).seconds > maxTimeZooming and p1.is_alive():
+			timeout = True
+			p1.terminate()
+			p1.join()
+			results = open('experimental_results.txt', 'a')
+			results.write('\nTIMEOUT: running the zooming controller took ' + str(maxTimeZooming) + ' seconds.')
+			results.close()
+			timeTakenZooming = 0
+		if not p1.is_alive(): break
 
-	else:
-		endTime = datetime.now()
-		timeTakenZooming = (endTime - start).seconds
+	if not error.is_set() and not timeout:
+		timeTakenZooming = (datetime.now()-startTime).seconds
 		results = open('experimental_results.txt', 'a')
 		results.write('\nTotal trial time with zooming: ' + str(timeTakenZooming) + ' seconds.')
 		results.close()
-
-	print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+	print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
 	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
 
 
 
 def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
-	maxTimeNoZooming = 2*(timeTakenZooming)
+	global_variables.controller_type = 'non_zooming'
+	maxTimeNonZooming = 2*(timeTakenZooming)
 	results = open('experimental_results.txt', 'a')
-	results.write('\nTime limit for non-zooming: ' + str(maxTimeNoZooming) + ' seconds.')
+	results.write('\nTime limit for non-zooming: ' + str(maxTimeNonZooming) + ' seconds.')
 	results.close()
-
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
-	my_world = World(sparc_path,initial_state,domain_info)
+	my_world = World(initial_state,domain_info)
 	executer = Executer(my_world)
-
 	known_world = my_world.getCoarseState()
 	initial_conditions = list(domain_info.coarseStateToAstractHoldsSet(known_world,0))
 	robot_refined_location = my_world.getRobotRefinedLocation()
-
-	controllerToI = NonZoomingControllerToI(sparc_path, ASP_subfolder_path, domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
-
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=())
+	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
+	error = multiprocessing.Event()
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,))
+	timeTakenNonZooming = 0
 	p1.start()
-	start = datetime.now()
-	p1.join(maxTimeNoZooming)
-	if p1.is_alive():
+	startTime = datetime.now()
+	while True:
+		if error.is_set():
+			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+		  	print error.is_set()
+		  	p1.terminate()
+		  	p1.join()
+		  	raw_input()
+		  	sys.exit()
+		if (datetime.now()-startTime).seconds > maxTimeNonZooming and p1.is_alive():
+			timeout = True
+			p1.terminate()
+			p1.join()
+			results = open('experimental_results.txt', 'a')
+			results.write('\nTIMEOUT: running the non zooming controller took ' + str(maxTimeNonZooming) + ' seconds.')
+			results.close()
+			timeTakenNonZooming = 0
+		if not p1.is_alive(): break
+
+	if not error.is_set() and not timeout:
+		timeTakenNonZooming = (datetime.now()-startTime).seconds
 		results = open('experimental_results.txt', 'a')
-		results.write('\nTIMEOUT: running the non-zooming controller took longer than '+str(maxTimeNoZooming) + ' seconds.')
+		results.write('\nTotal trial time with non zooming: ' + str(timeTakenNonZooming) + ' seconds.')
 		results.close()
-		p1.terminate()
-		p1.join()
-	else:
-		endTime = datetime.now()
-		timeTaken = (endTime - start).seconds
-		results = open('experimental_results.txt', 'a')
-		results.write('\nTotal trial time with no zooming: ' + str(timeTaken) + ' seconds.')
-		results.close()
+	print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken not zooming: ' + str(timeTakenNonZooming) + ' seconds.'
+
+
+def createPreASP_AbstractBeliefFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_abstract_domain, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.abstract_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
+	writer = open(global_variables.file_name_preASP_abstract_belief, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_ToIPlanningFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_ToI_domain, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	my_text_split[0] = '#const numSteps = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1])
+	my_text_split[1] = '#const max_len = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1]+1)
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.abstract_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
+	writer = open(global_variables.file_name_preASP_ToI_planning, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_RefinedWorldFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	causal_law_marker = '%% CAUSAL LAWS GO HERE'
+	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
+	causal_law_index = my_text_split.index(causal_law_marker)
+	my_text_split[causal_law_index] = global_variables.refined_world_causal_law
+	exec_condition_index = my_text_split.index(global_variables.old_refined_world_executability_condition)
+	my_text_split[exec_condition_index] = global_variables.new_refined_world_executability_condition
+	my_text_split.append(global_variables.refined_world_display_string)
+	writer = open(global_variables.file_name_preASP_refined_world, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_InferringIndirectObservationsFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
+	my_text_split.append(global_variables.inferring_indirect_observations_display_string)
+	#removing exo actions
+	for i, line in enumerate(my_text_split):
+		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
+		if('exo' in line): my_text_split[i] = '\n'
+	writer = open(global_variables.file_name_preASP_inferring_indirect_observations, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
+
+def createPreASP_RefinedPlanningFile():
+	sorts_marker = '%% SORTS GO HERE'
+	attributes_marker = '%% ATTRIBUTES GO HERE'
+	planning_marker = '%% PLANNING RULES GO HERE'
+	testing_marker = '%% TESTING RULES GO HERE'
+	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
+	my_text = reader.read()
+	reader.close()
+	my_text_split = my_text.split('\n')
+	my_text_split[0] = '#const numSteps = 10. % maximum number of steps.'
+	sorts_index = my_text_split.index(sorts_marker)
+	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
+	attributes_index = my_text_split.index(attributes_marker)
+	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
+	planning_index = my_text_split.index(planning_marker)
+	my_text_split[planning_index] = global_variables.planning_rules_string
+	testing_index = my_text_split.index(testing_marker)
+	my_text_split[testing_index] = global_variables.testing_rules_string
+	my_text_split.append('occurs.')
+	my_text = '\n'.join(my_text_split)
+	#removing exo actions
+	for i, line in enumerate(my_text_split):
+		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
+		if('exo' in line): my_text_split[i] = '\n'
+	writer = open(global_variables.file_name_preASP_refined_planning, 'w')
+	writer.write('\n'.join(my_text_split))
+	writer.close()
 
 def createConditionsAndRun(trial_number):
-
 	# set the domain to match the complexity number
 	total_refined_location_possibilities = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25']
 	location_possibilities_index = (global_variables.complexity_level+1)**2
@@ -214,124 +331,42 @@ def createConditionsAndRun(trial_number):
 	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
 	#runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
 
-def createPreASP_AbstractBeliefFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_abstract, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.abstract_sorts_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
-	writer = open(global_variables.file_name_preASP_abstract_belief, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
 
-def createPreASP_ToIFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_ToI_domain, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	my_text_split[0] = '#const numSteps = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1])
-	my_text_split[1] = '#const max_len = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1]+1)
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.abstract_sorts_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
-	writer = open(global_variables.file_name_preASP_ToI, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-def createPreASP_RefinedWorldFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_refined, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
-	my_text_split.append(global_variables.refined_world_display_string)
-	writer = open(global_variables.file_name_preASP_refined_world, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-def createPreASP_InferringObservationsFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_refined, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
-	my_text_split.append(global_variables.inferring_observations_display_string)
-	#removing exo actions
-	for i, line in enumerate(my_text_split):
-		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
-		if('exo' in line): my_text_split[i] = '\n'
-	writer = open(global_variables.file_name_preASP_inferring_observations, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-def createPreASP_RefinedPlanningFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	planning_marker = '%% PLANNING RULES GO HERE'
-	testing_marker = '%% TESTING RULES GO HERE'
-	reader = open(global_variables.file_name_preASP_refined, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	my_text_split[0] = '#const numSteps = 10. % maximum number of steps.'
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
-	planning_index = my_text_split.index(planning_marker)
-	my_text_split[planning_index] = global_variables.planning_rules_string
-	testing_index = my_text_split.index(testing_marker)
-	my_text_split[testing_index] = global_variables.testing_rules_string
-	my_text_split.append('occurs.')
-	my_text = '\n'.join(my_text_split)
-	#removing exo actions
-	for i, line in enumerate(my_text_split):
-		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
-		if('exo' in line): my_text_split[i] = '\n'
-	writer = open(global_variables.file_name_preASP_refined_planning, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-
+def runGivenInitialState():
+	goal = 'holds(loc(book2,kitchen),I).'
+	initial_state = ['c3', 'c3', 'c3', 'c8', 'true', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+	print (global_variables.complexity_level)
+	print ('Goal:')
+	print (goal)
+	print ('Initial_state:')
+	print (initial_state)
+	runAndWrite(1, 1, goal, initial_state)
+	runAndWriteWithoutZooming(1, goal, initial_state)
 
 if __name__ == "__main__":
+	singleRunTest = False
 	global_variables.init()
 	global_variables.complexity_level = 3 # TODO change this number to change the complexity level
-	global_variables.file_name_preASP_ToI = ASP_subfolder_path +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI.txt' # Used for astract planning and diagnosis with ToI
-	global_variables.file_name_preASP_abstract_belief = ASP_subfolder_path + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_domain.txt' # used for updating controller abstract belief
-	global_variables.file_name_preASP_refined_planning = ASP_subfolder_path + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_domain.txt' # used for zoomed refined planning
-	global_variables.file_name_preASP_inferring_observations = ASP_subfolder_path+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_domain_no_planning.txt' # used for infering coarse observations
-	global_variables.file_name_preASP_refined_world = ASP_subfolder_path + 'pre_ASP_files/complexity_level_'+str(global_variables.complexity_level) + '/preASP_refined_world.txt' # used for creating simulated world
+	global_variables.file_name_preASP_ToI_planning = global_variables.ASP_subfolder +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI_planning.txt' # Used for astract planning and diagnosis with ToI
+	global_variables.file_name_preASP_abstract_belief = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_belief.txt' # used for updating controller abstract belief
+	global_variables.file_name_preASP_refined_planning = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_planning.txt' # used for zoomed refined planning
+	global_variables.file_name_preASP_inferring_indirect_observations = global_variables.ASP_subfolder+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_inferring_indirect_observations.txt' # used for inferring coarse observations
+	global_variables.file_name_preASP_refined_world = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_'+str(global_variables.complexity_level) + '/preASP_refined_world.txt' # used for creating simulated world
 
-	global_variables.file_name_preASP_abstract = ASP_subfolder_path +'pre_ASP_files/preASP_abstract.txt'
-	global_variables.file_name_preASP_ToI_domain = ASP_subfolder_path +'pre_ASP_files/preASP_ToI_domain.txt'
-	global_variables.file_name_preASP_refined = ASP_subfolder_path +'pre_ASP_files/preASP_refined.txt'
+	global_variables.file_name_preASP_abstract_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_abstract_domain.txt'
+	global_variables.file_name_preASP_ToI_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_ToI_domain.txt'
+	global_variables.file_name_preASP_refined_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_refined_domain.txt'
 	createPreASP_AbstractBeliefFile()
  	createPreASP_RefinedWorldFile()
-	createPreASP_InferringObservationsFile()
+	createPreASP_InferringIndirectObservationsFile()
 	createPreASP_RefinedPlanningFile()
-	createPreASP_ToIFile()
+	createPreASP_ToIPlanningFile()
 
 
 	sys_random = random.SystemRandom()
 	domain_info = DomainInfo(global_variables.complexity_level)
 	number_runs = 200
-	for x in range (0,number_runs): createConditionsAndRun(x+1)
+	if(singleRunTest): number_runs = 1
+	for x in range (0,number_runs):
+		if(singleRunTest): runGivenInitialState()
+		else: createConditionsAndRun(x+1)

@@ -47,6 +47,7 @@ comp(#refined_component, #coarse_component).
 %%%%%%%%%%%%%%%%%
 %% Causal Laws %%
 %%%%%%%%%%%%%%%%%
+%% CAUSAL LAWS GO HERE
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 

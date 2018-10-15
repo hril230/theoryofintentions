@@ -1,16 +1,16 @@
 def init():
     global complexity_level
     global controller_type
-
-    global file_name_preASP_refined
+    global error
+    global file_name_preASP_refined_domain
     global file_name_preASP_ToI_domain
     global file_name_preASP_abstract_domain
-
+    global ASP_subfolder
 
     global file_name_preASP_ToI_planning
     global file_name_preASP_abstract_belief
     global file_name_preASP_refined_planning
-    global file_name_preASP_inferring_observations
+    global file_name_preASP_inferring_indirect_observations
     global file_name_preASP_refined_world
 
     global abstract_sorts_string
@@ -18,10 +18,20 @@ def init():
     global refined_sorts_string
     global refined_attributes_string
     global refined_world_display_string
-    global inferring_observations_display_string
+    global inferring_indirect_observations_display_string
     global testing_rules_string
     global planning_rules_string
     global max_number_steps_ToI_planning
+    global refined_world_causal_law
+    global new_refined_world_executability_condition
+    global old_refined_world_executability_condition
+    global sparc_path
+    global results_file_name
+
+    results_file_name = "simulation/results/"
+    sparc_path = "$HOME/work/solverfiles/sparc.jar"
+
+    ASP_subfolder = 'simulation/'
 
     abstract_sorts_string = ['#room = {library, kitchen}.\n#book = {book1}.',
                             '#room = {library, kitchen, office1}.\n#book = {book1, book2}.',
@@ -81,9 +91,12 @@ def init():
                             ':- not goal(I), not something_happened(I).\n'
                             ':- not something_happened(0).')
 
-    refined_world_display_string = 'holds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'
-    inferring_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
+    inferring_indirect_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
 
+    refined_world_display_string = 'holds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'
+    refined_world_causal_law = '-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).'
+    new_refined_world_executability_condition = '-occurs(put_down(R,OP),I) :- comp(OP,B), -holds(coarse_in_hand(rob1,B),I).'
+    old_refined_world_executability_condition = '-occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).'
 
 '''    testing_rules_string = ('% Make sure the outcome of any concrete action is tested\n'
                         'occurs(test(rob1, F, true), I) :- -holds(F, I-1), holds(F, I), #physical_inertial_fluent(F).\n'
