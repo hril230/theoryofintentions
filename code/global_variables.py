@@ -93,17 +93,8 @@ def init():
                             ':- not something_happened(0).')
 
 
-    in_hand_state_constraints = [('holds(in_hand(rob1,ref1_book1),I):- holds(coarse_in_hand(rob1,book1),I).\n'),
-                            ('holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I):- holds(coarse_in_hand(rob1,book1),I).\n'
-                            'holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I):- holds(coarse_in_hand(rob1,book2),I).'),
-                            ('holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I) | holds(in_hand(rob1,ref3_book1),I) :- holds(coarse_in_hand(rob1,book1),I).\n'
-                            'holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I) | holds(in_hand(rob1,ref3_book2),I) :- holds(coarse_in_hand(rob1,book2),I).\n'
-                            'holds(in_hand(rob1,ref1_book3),I) | holds(in_hand(rob1,ref2_book3),I) | holds(in_hand(rob1,ref3_book3),I) :- holds(coarse_in_hand(rob1,book3),I).'),
-                            ('holds(in_hand(rob1,ref1_book1),I) | holds(in_hand(rob1,ref2_book1),I) | holds(in_hand(rob1,ref3_book1),I) | holds(in_hand(rob1,ref4_book1),I):- holds(coarse_in_hand(rob1,book1),I).\n'
-                            'holds(in_hand(rob1,ref1_book2),I) | holds(in_hand(rob1,ref2_book2),I) | holds(in_hand(rob1,ref3_book2),I) | holds(in_hand(rob1,ref4_book2),I):- holds(coarse_in_hand(rob1,book2),I).\n'
-                            'holds(in_hand(rob1,ref1_book3),I) | holds(in_hand(rob1,ref2_book3),I) | holds(in_hand(rob1,ref3_book3),I) | holds(in_hand(rob1,ref4_book3),I):- holds(coarse_in_hand(rob1,book3),I).\n'
-                            'holds(in_hand(rob1,ref1_book4),I) | holds(in_hand(rob1,ref2_book4),I) | holds(in_hand(rob1,ref3_book4),I) | holds(in_hand(rob1,ref4_book4),I):- holds(coarse_in_hand(rob1,book4),I).')]
     inferring_indirect_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
+    #inferring_indirect_observations_extra_rule: 'obs(F,B,I) :- holds(directly_observed(rob1,F,B),I).'
 
     refined_world_display_string = 'holds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'
     refined_world_causal_law = '-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).'

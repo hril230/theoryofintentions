@@ -16,9 +16,10 @@ import csv
 import psutil
 
 
+global trialCount
 
 max_plan_length = 17
-maxTimeZooming = 3000
+maxTimeZooming = 300
 timeTakenZooming = 0
 def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	if book_goal_loc == 'library':
@@ -39,22 +40,21 @@ def refine_goal_location(book_goal_loc, refined_location_possibilities):
 	return (refined_location_possibilities[book_loc_start_index:book_loc_end_index])
 
 
-def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
+def runAndWrite(initial_conditions_index, goal, initial_state):
 	global_variables.controller_type = 'zooming'
 	global timeTakenZooming
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
 	my_world = World(initial_state,domain_info)
 	executer = Executer(my_world)
-
 	known_world = my_world.getCoarseState()
 	print('my_world.getCoarseState() ')
 	print(known_world)
 
-	initial_conditions = list(domain_info.coarseStateToAstractHoldsSet(known_world,0))
+	initial_conditions = list(domain_info.coarseStateToAbstractHoldsSet(known_world,0))
 	robot_refined_location = my_world.getRobotRefinedLocation()
 
 	results = open('experimental_results.txt', 'a')
-	results.write('\n\nTrial number: ' + str(trial_number))
+	results.write('\n\nTrial Number: ' + str(trialCount))
 	if global_variables.complexity_level == 1: results.write('\nInitial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = ')
 	elif global_variables.complexity_level == 2: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand, refined_object_parts_in_hand] = ')
 	elif global_variables.complexity_level == 3: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = ')
@@ -63,10 +63,14 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 	results.write('\nGoal: ')
 	results.write(goal)
 	results.close()
-
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
 	error = multiprocessing.Event()
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,))
+	planningTime = multiprocessing.Value('i', 0)
+	numAbsPlans = multiprocessing.Value('i', 0)
+	numRefPlans = multiprocessing.Value('i', 0)
+	numAbsAct = multiprocessing.Value('i', 0)
+	numRefAct = multiprocessing.Value('i', 0)
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct))
 	timeTakenZooming = 0
 	timeout = False
 	p1.start()
@@ -76,6 +80,7 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			p1.terminate()
 			p1.join()
+			return['ERROR','ERROR','ERROR','ERROR','ERROR']
 
 		if (datetime.now()-startTime).seconds > maxTimeZooming and p1.is_alive():
 			timeout = True
@@ -84,16 +89,21 @@ def runAndWrite(initial_conditions_index, trial_number, goal, initial_state):
 			results = open('experimental_results.txt', 'a')
 			results.write('\nTIMEOUT: running the zooming controller took ' + str(maxTimeZooming) + ' seconds.')
 			results.close()
+			print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+			print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ TIMEOUT: running the zooming controller took ' + str(maxTimeZooming) + ' seconds.'
 			timeTakenZooming = 0
+			return[str(maxTimeZooming),'TIMEOUT','','','','']
 		if not p1.is_alive(): break
 
-	if not error.is_set() and not timeout:
+	if not error.is_set() and timeout == False :
 		timeTakenZooming = (datetime.now()-startTime).seconds
 		results = open('experimental_results.txt', 'a')
 		results.write('\nTotal trial time with zooming: ' + str(timeTakenZooming) + ' seconds.')
 		results.close()
-	print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
-	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
+		print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+		print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
+
+ 	return [str(timeTakenZooming),str(planningTime.value),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value)]
 
 
 
@@ -107,20 +117,27 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	my_world = World(initial_state,domain_info)
 	executer = Executer(my_world)
 	known_world = my_world.getCoarseState()
-	initial_conditions = list(domain_info.coarseStateToAstractHoldsSet(known_world,0))
+	initial_conditions = list(domain_info.coarseStateToAbstractHoldsSet(known_world,0))
 	robot_refined_location = my_world.getRobotRefinedLocation()
+
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
 	error = multiprocessing.Event()
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,))
+	planningTime = multiprocessing.Value('i', 0)
+	numAbsPlans = multiprocessing.Value('i', 0)
+	numRefPlans = multiprocessing.Value('i', 0)
+	numAbsAct = multiprocessing.Value('i', 0)
+	numRefAct = multiprocessing.Value('i', 0)
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct))
 	timeTakenNonZooming = 0
 	p1.start()
 	startTime = datetime.now()
-	while True:
+	timeout = False
+  	while True:
 		if error.is_set():
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-		  	print error.is_set()
-		  	p1.terminate()
-		  	p1.join()
+			p1.terminate()
+			p1.join()
+			return['ERROR','ERROR','ERROR','ERROR','ERROR']
 		if (datetime.now()-startTime).seconds > maxTimeNonZooming and p1.is_alive():
 			timeout = True
 			p1.terminate()
@@ -128,16 +145,21 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 			results = open('experimental_results.txt', 'a')
 			results.write('\nTIMEOUT: running the non zooming controller took ' + str(maxTimeNonZooming) + ' seconds.')
 			results.close()
-			timeTakenNonZooming = 0
+			print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+			print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  TIMEOUT: running the non zooming controller took ' + str(maxTimeNonZooming) + ' seconds.'
+			return[str(maxTimeNonZooming),'TIMEOUT','','','','']
+
 		if not p1.is_alive(): break
 
-	if not error.is_set() and not timeout:
+	if not error.is_set() and timeout == False :
 		timeTakenNonZooming = (datetime.now()-startTime).seconds
 		results = open('experimental_results.txt', 'a')
 		results.write('\nTotal trial time with non zooming: ' + str(timeTakenNonZooming) + ' seconds.')
 		results.close()
-	print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
-	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken not zooming: ' + str(timeTakenNonZooming) + ' seconds.'
+		print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
+		print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken non zooming: ' + str(timeTakenNonZooming) + ' seconds.'
+
+	return [str(timeTakenNonZooming),str(planningTime.value),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value)]
 
 
 def createPreASP_AbstractBeliefFile():
@@ -218,7 +240,6 @@ def createPreASP_RefinedPlanningFile():
 	attributes_marker = '%% ATTRIBUTES GO HERE'
 	planning_marker = '%% PLANNING RULES GO HERE'
 	testing_marker = '%% TESTING RULES GO HERE'
-	state_constraints_marker = '%% STATE CONSTRAINTS GO HERE'
 	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
 	my_text = reader.read()
 	reader.close()
@@ -232,8 +253,6 @@ def createPreASP_RefinedPlanningFile():
 	my_text_split[planning_index] = global_variables.planning_rules_string
 	testing_index = my_text_split.index(testing_marker)
 	my_text_split[testing_index] = global_variables.testing_rules_string
-	state_constraints_index =  my_text_split.index(state_constraints_marker)
-	my_text_split[state_constraints_index] = global_variables.in_hand_state_constraints[global_variables.complexity_level-1]
 	my_text_split.append('occurs.')
 	my_text = '\n'.join(my_text_split)
 	#removing exo actions
@@ -244,7 +263,7 @@ def createPreASP_RefinedPlanningFile():
 	writer.write('\n'.join(my_text_split))
 	writer.close()
 
-def createConditionsAndRun(trial_number):
+def createConditionsAndRun():
 	# set the domain to match the complexity number
 	total_refined_location_possibilities = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25']
 	location_possibilities_index = (global_variables.complexity_level+1)**2
@@ -320,10 +339,7 @@ def createConditionsAndRun(trial_number):
 		# check that the goal choosing loop completed before it ran out of attempts - it not, need to choose new initial conditions
 		if count < 10: repeat = False
 
-	with open('experimental_results.csv', 'a') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerow(['complexity level', 'zooming', 'planning time', '# abstract plans', '# refined plans', '# abstract actions', '# refined actions'])
-	writeFile.close()
+
 
 	print ('\nComplexity level:')
 	print (global_variables.complexity_level)
@@ -331,44 +347,60 @@ def createConditionsAndRun(trial_number):
 	print (goal)
 	print ('Initial_state:')
 	print (initial_state)
-	runAndWrite(initial_conditions_index, trial_number, goal, initial_state)
-	#runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
+	resultsListZooming = runAndWrite(initial_conditions_index, goal, initial_state)
+	resultsListNonZooming = runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
+	resultsList = [trialCount, str(global_variables.complexity_level)] + resultsListZooming + resultsListNonZooming
+	with open('experimental_results_new.csv', 'a') as writeFile:
+		writer = csv.writer(writeFile)
+		writer.writerow(resultsList)
+	writeFile.close()
 
 
 def runGivenInitialState():
-	goal = 'holds(loc(book1,kitchen),I).'
-	initial_state = ['c1', 'c4', 'c1', 'c11', 'false', 'true', 'false', 'false', 'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false']
-	print ('Goal:')
+	goal = 'holds(loc(book2,library),I).'
+	initial_state = ['c10', 'c13', 'c8', 'c12', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
+
+
 	print (goal)
 	print ('Initial_state:')
 	print (initial_state)
 	runAndWrite(1, 1, goal, initial_state)
-	#runAndWriteWithoutZooming(1, goal, initial_state)
+	runAndWriteWithoutZooming(1, goal, initial_state)
 
 if __name__ == "__main__":
+	global trialCount
 	singleRunTest = False
-	global_variables.init()
-	global_variables.complexity_level = 3 # TODO change this number to change the complexity level
-	global_variables.file_name_preASP_ToI_planning = global_variables.ASP_subfolder +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI_planning.txt' # Used for astract planning and diagnosis with ToI
-	global_variables.file_name_preASP_abstract_belief = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_belief.txt' # used for updating controller abstract belief
-	global_variables.file_name_preASP_refined_planning = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_planning.txt' # used for zoomed refined planning
-	global_variables.file_name_preASP_inferring_indirect_observations = global_variables.ASP_subfolder+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_inferring_indirect_observations.txt' # used for inferring coarse observations
-	global_variables.file_name_preASP_refined_world = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_'+str(global_variables.complexity_level) + '/preASP_refined_world.txt' # used for creating simulated world
+	trialCount = 0
+	with open('experimental_results_new.csv', 'a') as writeFile:
+		writer = csv.writer(writeFile)
+		writer.writerow(['Trial Number', 'Complexity Level', 'Zooming run-time', 'Planning Time - zooming', '# Abstract Plans - zooming', '# Refined Plans - zooming', '# Abstract Actions - zooming', '# Refined Actions - zooming', 'Non_zooming run-time', 'Planning Time non_zooming', '# Abstract Plans non_zooming', '# Refined Plans non_zooming', '# Abstract Actions non_zooming', '# Refined Actions non_zooming'])
+	writeFile.close()
+	for level in [1,2,3,4]:
+		global_variables.init()
+		global_variables.complexity_level = level # TODO change this number to change the complexity level
+		global_variables.file_name_preASP_ToI_planning = global_variables.ASP_subfolder +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI_planning.txt' # Used for astract planning and diagnosis with ToI
+		global_variables.file_name_preASP_abstract_belief = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_belief.txt' # used for updating controller abstract belief
+		global_variables.file_name_preASP_refined_planning = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_planning.txt' # used for zoomed refined planning
+		global_variables.file_name_preASP_inferring_indirect_observations = global_variables.ASP_subfolder+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_inferring_indirect_observations.txt' # used for inferring coarse observations
+		global_variables.file_name_preASP_refined_world = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_'+str(global_variables.complexity_level) + '/preASP_refined_world.txt' # used for creating simulated world
 
-	global_variables.file_name_preASP_abstract_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_abstract_domain.txt'
-	global_variables.file_name_preASP_ToI_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_ToI_domain.txt'
-	global_variables.file_name_preASP_refined_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_refined_domain.txt'
-	createPreASP_AbstractBeliefFile()
- 	createPreASP_RefinedWorldFile()
-	createPreASP_InferringIndirectObservationsFile()
-	createPreASP_RefinedPlanningFile()
-	createPreASP_ToIPlanningFile()
+		global_variables.file_name_preASP_abstract_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_abstract_domain.txt'
+		global_variables.file_name_preASP_ToI_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_ToI_domain.txt'
+		global_variables.file_name_preASP_refined_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_refined_domain.txt'
+		createPreASP_AbstractBeliefFile()
+	 	createPreASP_RefinedWorldFile()
+		createPreASP_InferringIndirectObservationsFile()
+		createPreASP_RefinedPlanningFile()
+		createPreASP_ToIPlanningFile()
 
 
-	sys_random = random.SystemRandom()
-	domain_info = DomainInfo(global_variables.complexity_level)
-	number_runs = 200
-	if(singleRunTest): number_runs = 1
-	for x in range (0,number_runs):
-		if(singleRunTest): runGivenInitialState()
-		else: createConditionsAndRun(x+1)
+
+		sys_random = random.SystemRandom()
+		domain_info = DomainInfo(global_variables.complexity_level)
+		number_runs = 200
+		if(singleRunTest): number_runs = 1
+		for x in range (0,number_runs):
+			trialCount += 1
+			print 'Trial Number ' + str(trialCount)
+			if(singleRunTest): runGivenInitialState()
+			else: createConditionsAndRun()

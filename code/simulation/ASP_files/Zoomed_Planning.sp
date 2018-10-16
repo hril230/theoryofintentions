@@ -3,8 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {kitchen, office1}.
-#place = {c5, c6, c7, c8, c9, c10, c11, c12}.
+#coarse_place = {library, kitchen}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8}.
 #robot = {rob1}.
 #coarse_thing = #robot.
 #thing = #robot.
@@ -66,6 +66,7 @@ holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
+%% STATE CONSTRAINTS GO HERE
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 
@@ -126,8 +127,8 @@ holds(can_be_tested(rob1, loc(T, C), V), I) :- holds(loc(rob1, C), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R), holds(loc(T,C),I).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T), holds(loc(Z,C),I).
 holds(indirectly_observed(rob1, coarse_loc(T, R), false), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), -holds(may_discover(rob1, coarse_loc(T, R), true), I).
 holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), holds(directly_observed(rob1, loc(T, C), undet), I).
 holds(directly_observed(rob1, F, undet), I) :- not holds(directly_observed(rob1, F, true), I), not holds(directly_observed(rob1, F, false), I).
@@ -171,6 +172,7 @@ occurs(A,I) :- hpd(A,I).
 %% Awareness axiom.
 holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 
+
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
 %%%%%%%%%%%%%%%%%%%%
@@ -188,33 +190,33 @@ something_happened(I) :- occurs(A, I).
 %%%%%%%%%%%%%%%
 %% Attributes.
 %%%%%%%%%%%%%%%
+next_to(c1, c2).
+next_to(c2, c3).
+next_to(c3, c4).
+next_to(c4, c5).
 next_to(c5, c6).
 next_to(c6, c7).
 next_to(c7, c8).
-next_to(c8, c9).
-next_to(c9, c10).
-next_to(c10, c11).
-next_to(c11, c12).
 
+comp(c1, library).
+comp(c2, library).
+comp(c3, library).
+comp(c4, library).
 comp(c5, kitchen).
 comp(c6, kitchen).
 comp(c7, kitchen).
 comp(c8, kitchen).
-comp(c9, office1).
-comp(c10, office1).
-comp(c11, office1).
-comp(c12, office1).
 
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,office1),I).
+goal(I) :- holds(coarse_loc(rob1,kitchen),I).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c5), 0).
+holds(loc(rob1,c1), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

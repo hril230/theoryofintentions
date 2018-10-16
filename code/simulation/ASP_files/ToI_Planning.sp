@@ -527,54 +527,36 @@ next_to(office1, office2).
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-holds(my_goal,I) :- holds(loc(book3,office1),I).
+holds(my_goal,I) :- holds(loc(book3,kitchen),I).
 
 
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(7).
+current_step(2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-obs(loc(book2,office1),true,3).
-obs(loc(book1,office2),true,3).
-obs(loc(rob1,office1),true,3).
-obs(loc(book2,kitchen),true,4).
-obs(loc(rob1,kitchen),true,4).
-obs(loc(book2,kitchen),true,5).
-obs(loc(book3,kitchen),true,6).
-obs(in_hand(rob1,book3),true,6).
-obs(loc(rob1,kitchen),true,6).
-obs(loc(book2,kitchen),true,6).
-obs(loc(rob1,office1),true,7).
-obs(loc(book2,kitchen),true,7).
-obs(loc(book3,office1),true,7).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
-attempt(move(rob1,office1),2).
-attempt(move(rob1,kitchen),3).
-attempt(put_down(rob1,book2),4).
-attempt(pickup(rob1,book3),5).
-attempt(move(rob1,office1),6).
 activity_goal(1,my_goal).
 activity_component(1,1,move(rob1,office1)).
 activity_component(1,2,move(rob1,kitchen)).
-activity_component(1,3,put_down(rob1,book2)).
+activity_component(1,3,move(rob1,library)).
 activity_component(1,4,pickup(rob1,book3)).
-activity_component(1,5,move(rob1,office1)).
+activity_component(1,5,move(rob1,kitchen)).
 activity_length(1,5).
-explanation(0,7).
+explanation(0,2).
 holds(loc(book2,office2),0).
-holds(loc(book1,office2),0).
 holds(loc(rob1,office2),0).
-holds(loc(book3,kitchen),0).
-holds(in_hand(rob1,book2),0).
+holds(loc(book3,library),0).
+holds(loc(book1,library),0).
 -holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book3),0).
+-holds(in_hand(rob1,book2),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

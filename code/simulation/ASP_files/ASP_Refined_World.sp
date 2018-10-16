@@ -86,6 +86,7 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 
 % Defined fluents do not hold unless specified.
 -holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
+-holds(in_hand(rob1,O),I) :- not holds(in_hand(rob1,O),I).
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -132,9 +133,9 @@ holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
-holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R), holds(loc(T,C),I).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T), holds(loc(Z,C),I).
+holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O), holds(in_hand(rob1, OP), I).
 holds(indirectly_observed(rob1, coarse_loc(T, R), false), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), -holds(may_discover(rob1, coarse_loc(T, R), true), I).
 holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), false), I) :- -holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I), -holds(may_discover(R, coarse_in_hand(rob1, O), true), I).
 holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), holds(directly_observed(rob1, loc(T, C), undet), I).
@@ -178,6 +179,7 @@ occurs(A,I) :- hpd(A,I).
 
 %% Awareness axiom.
 holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
+
 
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
@@ -240,25 +242,25 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref2_book1,c5),0).
 -holds(in_hand(rob1,ref1_book3),0).
-holds(loc(ref1_book2,c12),0).
-holds(loc(ref1_book3,c15),0).
+holds(loc(ref1_book1,c2),0).
+holds(loc(ref3_book3,c1),0).
 -holds(in_hand(rob1,ref3_book3),0).
--holds(in_hand(rob1,ref1_book1),0).
+-holds(in_hand(rob1,ref2_book1),0).
 -holds(in_hand(rob1,ref3_book2),0).
-holds(loc(ref2_book2,c12),0).
+-holds(in_hand(rob1,ref1_book1),0).
 -holds(in_hand(rob1,ref1_book2),0).
 -holds(in_hand(rob1,ref3_book1),0).
 -holds(in_hand(rob1,ref2_book2),0).
-holds(loc(ref3_book1,c5),0).
-holds(loc(ref3_book3,c15),0).
--holds(in_hand(rob1,ref2_book1),0).
-holds(loc(rob1,c5),0).
-holds(loc(ref2_book3,c15),0).
+holds(loc(ref1_book3,c1),0).
+holds(loc(ref2_book3,c1),0).
+holds(loc(ref2_book2,c15),0).
+holds(loc(ref3_book1,c2),0).
+holds(loc(ref2_book1,c2),0).
+holds(loc(rob1,c13),0).
+holds(loc(ref3_book2,c15),0).
 -holds(in_hand(rob1,ref2_book3),0).
-holds(loc(ref1_book1,c5),0).
-holds(loc(ref3_book2,c12),0).
+holds(loc(ref1_book2,c15),0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

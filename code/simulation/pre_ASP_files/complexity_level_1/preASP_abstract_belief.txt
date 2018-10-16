@@ -8,8 +8,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {library, kitchen, office1, office2}.
-#book = {book1, book2, book3}.
+#room = {library, kitchen}.
+#book = {book1}.
 #robot = {rob1}.
 #object = #book.
 #thing = #object + #robot.
@@ -148,19 +148,11 @@ diag(A,I) :- occurs(A,I),
 %% Attributes.
 %%%%%%%%%%%%%%%%
 next_to(library, kitchen).
-next_to(kitchen, office1).
-next_to(office1, office2).
 
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
--holds(in_hand(rob1,book1),0).
-holds(loc(book2,office2),0).
-holds(loc(rob1,office2),0).
--holds(in_hand(rob1,book3),0).
-holds(loc(book3,library),0).
-holds(loc(book1,library),0).
--holds(in_hand(rob1,book2),0).
+%% HISTORY GOES HERE
 
 
 %%%%%%%%%%

@@ -1,12 +1,13 @@
-#const numSteps = 8.
+#const numSteps = 10. % maximum number of steps.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {library,kitchen,office1,office2}.
-#coarse_object = {book1,book2,book3}.
-#object = {ref1_book1,ref2_book1,ref3_book1, ref1_book2,ref2_book2,ref3_book2, ref1_book3,ref2_book3,ref3_book3}.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
+#coarse_place = {library,kitchen,office1,office2,storage_cupboard}.
+#coarse_object = {book1,book2,book3,book4}.
+#object = {ref1_book1,ref2_book1,ref3_book1,ref4_book1, ref1_book2,ref2_book2,ref3_book2,ref4_book2, ref1_book3,ref2_book3,ref3_book3,ref4_book3, ref1_book4,ref2_book4,ref3_book4,ref4_book4}.
+
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25}.
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
@@ -162,7 +163,12 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %%%%%%%%%%%%%%%%%%%
 %% Testing Actions
 %%%%%%%%%%%%%%%%%%%
-%% TESTING RULES GO HERE
+% Make sure the outcome of any concrete action is tested
+occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).
+occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
+occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
+-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
+-occurs(pickup(rob1, OP), I) :- I = 0.
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -192,7 +198,15 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
 %%%%%%%%%%%%%%%%%%%%
-%% PLANNING RULES GO HERE
+%% Failure is not an option.
+success :- goal(I).
+:- not success.
+%% Plan Actions minimally
+occurs(A,I):+ not goal(I).
+%% Preventing preASP_refined_domain_no_planning
+something_happened(I) :- occurs(A, I).
+:- not goal(I), not something_happened(I).
+:- not something_happened(0).
 
 
 %%%%%%%%%%%%%%%
@@ -213,33 +227,54 @@ next_to(c12, c13).
 next_to(c13, c14).
 next_to(c14, c15).
 next_to(c15, c16).
-
-comp(c1, library).
+next_to(c16, c17).
+next_to(c17, c18).
+next_to(c18, c19).
+next_to(c19, c20).
+next_to(c20, c21).
+next_to(c21, c22).
+next_to(c22, c23).
+next_to(c23, c24).
+next_to(c24, c25).comp(c1, library).
 comp(c2, library).
 comp(c3, library).
 comp(c4, library).
-comp(c5, kitchen).
+comp(c5, library).
 comp(c6, kitchen).
 comp(c7, kitchen).
 comp(c8, kitchen).
-comp(c9, office1).
-comp(c10, office1).
+comp(c9, kitchen).
+comp(c10, kitchen).
 comp(c11, office1).
 comp(c12, office1).
-comp(c13, office2).
-comp(c14, office2).
-comp(c15, office2).
+comp(c13, office1).
+comp(c14, office1).
+comp(c15, office1).
 comp(c16, office2).
-
-comp(ref1_book1, book1).
+comp(c17, office2).
+comp(c18, office2).
+comp(c19, office2).
+comp(c20, office2).
+comp(c21, storage_cupboard).
+comp(c22, storage_cupboard).
+comp(c23, storage_cupboard).
+comp(c24, storage_cupboard).
+comp(c25, storage_cupboard).comp(ref1_book1, book1).
 comp(ref2_book1, book1).
 comp(ref3_book1, book1).
+comp(ref4_book1, book1).
 comp(ref1_book2, book2).
 comp(ref2_book2, book2).
 comp(ref3_book2, book2).
+comp(ref4_book2, book2).
 comp(ref1_book3, book3).
 comp(ref2_book3, book3).
 comp(ref3_book3, book3).
+comp(ref4_book3, book3).
+comp(ref1_book4, book4).
+comp(ref2_book4, book4).
+comp(ref3_book4, book4).
+comp(ref4_book4, book4).
 
 %%%%%%%%%
 %% Goal:
@@ -250,70 +285,6 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(coarse_loc(book2,office2),0).
-holds(coarse_in_hand(rob1,book3),0).
-holds(coarse_loc(rob1,library),0).
--holds(coarse_in_hand(rob1,book2),0).
-holds(coarse_loc(book3,library),0).
--holds(coarse_in_hand(rob1,book1),0).
-holds(coarse_loc(book1,library),0).
-holds(loc(rob1,c1),0).
-hpd(move(rob1,c3),2).
-obs(loc(ref1_book1,c3),false,4).
-
-holds(directly_observed(rob1,loc(ref1_book1,c4),false),6).
-holds(directly_observed(rob1,loc(ref1_book2,c4),false),6).
-hpd(test(rob1,loc(rob1,c2),true),1).
-holds(directly_observed(rob1,loc(rob1,c2),true),2).
-obs(loc(ref1_book1,c5),false,8).
-
-holds(directly_observed(rob1,loc(ref1_book3,c5),false),8).
-hpd(test(rob1,loc(rob1,c5),true),7).
-holds(directly_observed(rob1,loc(ref1_book2,c2),false),2).
-holds(directly_observed(rob1,loc(ref1_book3,c3),false),4).
-obs(loc(ref1_book2,c2),false,2).
-
-hpd(test(rob1,loc(rob1,c3),true),3).
-hpd(move(rob1,c4),4).
-obs(loc(ref1_book2,c4),false,6).
-
-holds(directly_observed(rob1,loc(ref1_book1,c3),false),4).
-obs(loc(rob1,c5),true,8).
-
-holds(directly_observed(rob1,loc(ref1_book3,c2),false),2).
-holds(directly_observed(rob1,loc(ref1_book3,c4),false),6).
-holds(directly_observed(rob1,loc(rob1,c4),true),6).
-holds(directly_observed(rob1,loc(ref1_book1,c5),false),8).
-obs(loc(rob1,c3),true,4).
-
-holds(directly_observed(rob1,loc(rob1,c3),true),4).
-obs(loc(ref1_book1,c2),true,2).
-
-holds(directly_observed(rob1,loc(rob1,c5),true),8).
-holds(directly_observed(rob1,loc(ref1_book2,c3),false),4).
-obs(loc(rob1,c4),true,6).
-
-hpd(move(rob1,c2),0).
-obs(loc(rob1,c2),true,2).
-
-holds(directly_observed(rob1,loc(ref1_book2,c5),false),8).
-hpd(test(rob1,loc(rob1,c4),true),5).
-hpd(move(rob1,c5),6).
-obs(loc(ref1_book3,c4),false,6).
-
-obs(loc(ref1_book2,c3),false,4).
-
-obs(loc(ref1_book3,c5),false,8).
-
-obs(loc(ref1_book3,c3),false,4).
-
-obs(loc(ref1_book1,c4),false,6).
-
-obs(loc(ref1_book2,c5),false,8).
-
-holds(directly_observed(rob1,loc(ref1_book1,c2),true),2).
-obs(loc(ref1_book3,c2),false,2).
-
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
@@ -323,4 +294,4 @@ obs(loc(ref1_book3,c2),false,2).
 display
 %%%%%%%%%
 
-holds(indirectly_observed(rob1,B,C),numSteps).
+occurs.

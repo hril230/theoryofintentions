@@ -57,8 +57,8 @@ class DomainInfo():
 			self.In_handBook4_Ref4_index = 24
 		self.num_coarse_indexes = complexity_level*2 + 1
 		self.num_refined_indexes = (complexity_level+1)**2
-		self.coarse_state = ['false'] * self.num_coarse_indexes
-		self.refined_state = ['false'] * self.num_refined_indexes
+		#coarse_state = ['false'] * self.num_coarse_indexes
+		#refined_state = ['false'] * self.num_refined_indexes
 
 	def observations_to_obs_set(self, observations, robotLocation, step):
 		obsSet = Set()
@@ -99,6 +99,7 @@ class DomainInfo():
 		return obsSet
 
 	def abstractAnswerToCoarseState(self,answer):
+		coarse_state = ['false'] * self.num_coarse_indexes
 		answer = answer.rstrip().strip('{').strip('}')
 		for holds in answer.split(', '):
 			if holds[0] == '-':
@@ -106,43 +107,44 @@ class DomainInfo():
 				if(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'false'
+					if(split_fluent[1] == 'book1'): coarse_state[self.In_handBook1_index] = 'false'
 					if self.complexity_level > 1:
-						if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
+						if(split_fluent[1] == 'book2'): coarse_state[self.In_handBook2_index] = 'false'
 					if self.complexity_level > 2:
-						if(split_fluent[1] == 'book3'): self.coarse_state[self.In_handBook3_index] = 'false'
+						if(split_fluent[1] == 'book3'): coarse_state[self.In_handBook3_index] = 'false'
 					if self.complexity_level > 3:
-						if(split_fluent[1] == 'book4'): self.coarse_state[self.In_handBook4_index] = 'false'
+						if(split_fluent[1] == 'book4'): coarse_state[self.In_handBook4_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
 				if(fluent[0:4] == 'loc('):
 					fluent = fluent[4:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[0] == 'rob1'): self.coarse_state[self.LocationRobot_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book1'): self.coarse_state[self.LocationBook1_index] = split_fluent[1]
+					if(split_fluent[0] == 'rob1'): coarse_state[self.LocationRobot_index] = split_fluent[1]
+					elif(split_fluent[0] == 'book1'): coarse_state[self.LocationBook1_index] = split_fluent[1]
 					if self.complexity_level > 1:
-						if(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
+						if(split_fluent[0] == 'book2'): coarse_state[self.LocationBook2_index] = split_fluent[1]
 					if self.complexity_level > 2:
-						if(split_fluent[0] == 'book3'): self.coarse_state[self.LocationBook3_index] = split_fluent[1]
+						if(split_fluent[0] == 'book3'): coarse_state[self.LocationBook3_index] = split_fluent[1]
 					if self.complexity_level > 3:
-						if(split_fluent[0] == 'book4'): self.coarse_state[self.LocationBook4_index] = split_fluent[1]
+						if(split_fluent[0] == 'book4'): coarse_state[self.LocationBook4_index] = split_fluent[1]
 				elif(fluent[0:8] == 'in_hand('):
 					fluent = fluent[8:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'true'
+					if(split_fluent[1] == 'book1'): coarse_state[self.In_handBook1_index] = 'true'
 					if self.complexity_level > 1:
-						if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
+						if(split_fluent[1] == 'book2'): coarse_state[self.In_handBook2_index] = 'true'
 					if self.complexity_level > 2:
-						if(split_fluent[1] == 'book3'): self.coarse_state[self.In_handBook3_index] = 'true'
+						if(split_fluent[1] == 'book3'): coarse_state[self.In_handBook3_index] = 'true'
 					if self.complexity_level > 3:
-						if(split_fluent[1] == 'book4'): self.coarse_state[self.In_handBook4_index] = 'true'
-		return self.coarse_state
+						if(split_fluent[1] == 'book4'): coarse_state[self.In_handBook4_index] = 'true'
+		return coarse_state
 
 	def refinedAnswerToRefinedState(self,answer):
 		answer = answer.split('}')
 		answer = answer[0]
 		answer = answer.rstrip().strip('{').strip('}')
-		new_refined_state = self.refined_state[:]
+		#new_refined_state = refined_state[:]
+		new_refined_state =  ['false'] * self.num_refined_indexes
 		new_refined_state[self.In_handBook1_Ref1_index] = 'false'
 		if self.complexity_level > 1:
 			new_refined_state[self.In_handBook1_Ref2_index] = 'false'
@@ -195,7 +197,7 @@ class DomainInfo():
 						if(split_fluent[0] == 'ref4_book2'):
 							new_refined_state[self.LocationBook2_index] = split_fluent[1]
 						if(split_fluent[0] == 'ref4_book3'):
-							new_refined_state[self.LocationBook3_index] = split_fluent[1]				
+							new_refined_state[self.LocationBook3_index] = split_fluent[1]
 						if(split_fluent[0] == 'ref1_book4'):
 							new_refined_state[self.LocationBook4_index] = split_fluent[1]
 						if(split_fluent[0] == 'ref2_book4'):
@@ -243,50 +245,51 @@ class DomainInfo():
 			if (new_refined_state[self.In_handBook2_Ref4_index] == 'true'): new_refined_state[self.In_handBook2_index] = 'true'
 			if (new_refined_state[self.In_handBook3_Ref4_index] == 'true'): new_refined_state[self.In_handBook3_index] = 'true'
 			if (new_refined_state[self.In_handBook4_Ref1_index] == 'true') or (new_refined_state[self.In_handBook4_Ref2_index] == 'true') or (new_refined_state[self.In_handBook4_Ref3_index] == 'true') or (new_refined_state[self.In_handBook4_Ref4_index] == 'true'): new_refined_state[self.In_handBook4_index] = 'true'
-		self.refined_state = new_refined_state
+		#refined_state = new_refined_state
 		return new_refined_state
 
 	def refinedAnswerToCoarseState(self,answer):
+		coarse_state = ['false'] * self.num_coarse_indexes
 		for holds in answer.split(', '):
 			if holds[0] == '-':
 				fluent = holds[7:holds.rfind(',')]
 				if(fluent[0:15] == 'coarse_in_hand('):
 					fluent = fluent[15:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'false'
+					if(split_fluent[1] == 'book1'): coarse_state[self.In_handBook1_index] = 'false'
 					if self.complexity_level > 1:
-						if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'false'
+						if(split_fluent[1] == 'book2'): coarse_state[self.In_handBook2_index] = 'false'
 					if self.complexity_level > 2:
-						if(split_fluent[1] == 'book3'): self.coarse_state[self.In_handBook3_index] = 'false'
+						if(split_fluent[1] == 'book3'): coarse_state[self.In_handBook3_index] = 'false'
 					if self.complexity_level > 3:
-						if(split_fluent[1] == 'book4'): self.coarse_state[self.In_handBook4_index] = 'false'
+						if(split_fluent[1] == 'book4'): coarse_state[self.In_handBook4_index] = 'false'
 			else:
 				fluent = holds[6:holds.rfind(',')]
 				if(fluent[0:11] == 'coarse_loc('):
 					fluent = fluent[11:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[0] == 'rob1'): self.coarse_state[self.LocationRobot_index] = split_fluent[1]
-					elif(split_fluent[0] == 'book1'): self.coarse_state[self.LocationBook1_index] = split_fluent[1]
+					if(split_fluent[0] == 'rob1'): coarse_state[self.LocationRobot_index] = split_fluent[1]
+					elif(split_fluent[0] == 'book1'): coarse_state[self.LocationBook1_index] = split_fluent[1]
 					if self.complexity_level > 1:
-						if(split_fluent[0] == 'book2'): self.coarse_state[self.LocationBook2_index] = split_fluent[1]
+						if(split_fluent[0] == 'book2'): coarse_state[self.LocationBook2_index] = split_fluent[1]
 					if self.complexity_level > 2:
-						if(split_fluent[0] == 'book3'): self.coarse_state[self.LocationBook3_index] = split_fluent[1]
+						if(split_fluent[0] == 'book3'): coarse_state[self.LocationBook3_index] = split_fluent[1]
 					if self.complexity_level > 3:
-						if(split_fluent[0] == 'book4'): self.coarse_state[self.LocationBook4_index] = split_fluent[1]
+						if(split_fluent[0] == 'book4'): coarse_state[self.LocationBook4_index] = split_fluent[1]
 				elif(fluent[0:15] == 'coarse_in_hand('):
 					fluent = fluent[15:-1]
 					split_fluent = fluent.split(',')
-					if(split_fluent[1] == 'book1'): self.coarse_state[self.In_handBook1_index] = 'true'
+					if(split_fluent[1] == 'book1'): coarse_state[self.In_handBook1_index] = 'true'
 					if self.complexity_level > 1:
-						if(split_fluent[1] == 'book2'): self.coarse_state[self.In_handBook2_index] = 'true'
+						if(split_fluent[1] == 'book2'): coarse_state[self.In_handBook2_index] = 'true'
 					if self.complexity_level > 2:
-						if(split_fluent[1] == 'book3'): self.coarse_state[self.In_handBook3_index] = 'true'
+						if(split_fluent[1] == 'book3'): coarse_state[self.In_handBook3_index] = 'true'
 					if self.complexity_level > 3:
-						if(split_fluent[1] == 'book4'): self.coarse_state[self.In_handBook4_index] = 'true'
-		return self.coarse_state
+						if(split_fluent[1] == 'book4'): coarse_state[self.In_handBook4_index] = 'true'
+		return coarse_state
 
 
-	def coarseStateToAstractHoldsSet(self,state,step):
+	def coarseStateToAbstractHoldsSet(self,state,step):
 		holdsSet = set([])
 		if(state[self.LocationRobot_index] != 'unknown'):
 			holdsSet.add('holds(loc(rob1,'+str(state[self.LocationRobot_index])+'),'+str(step)+').')
@@ -433,7 +436,7 @@ class DomainInfo():
 		return newSet
 
 	def directObservationToRefinedObs(self,directObservation,step):
-		directObservation = directObservation.replace('holds(directly_observed(rob1,','obs(')
+		directObservation = directObservation.replace('holds(directly_observed(rob1,','obs(').replace('e,', 'e')
 		directObservation = directObservation[:directObservation.rfind('),')]+','+str(step)+').\n'
 		return directObservation
 
