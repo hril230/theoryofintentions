@@ -3,13 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {library,kitchen}.
-#coarse_object = {book1}.
-#object = {ref1_book1}.
-#place = {c1, c2, c3, c4}.
-#robot = {rob1}.
-#coarse_thing = #coarse_object + #robot.
-#thing = #object + #robot.
+%% SORTS GO HERE
+
 
 #step = 0..numSteps.
 #boolean = {true, false}.
@@ -198,16 +193,7 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%
 %% Attributes.
 %%%%%%%%%%%%%%%
-next_to(c1, c2).
-next_to(c2, c3).
-next_to(c3, c4).
-
-comp(c1, library).
-comp(c2, library).
-comp(c3, kitchen).
-comp(c4, kitchen).
-
-comp(ref1_book1, book1).
+%% ATTRIBUTES GO HERE
 
 %%%%%%%%%
 %% Goal:

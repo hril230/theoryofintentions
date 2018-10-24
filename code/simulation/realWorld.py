@@ -80,7 +80,6 @@ class World(object):
 			self.__updateStateFromAnswer(answer)
 			self.history.append(action)
 		direct_observation = self.__getDirectObservation(answer)
-		print ('ASP direct observation: ' + direct_observation)
 		return direct_observation
 
 	def __getDirectObservation(self,answer):
@@ -95,45 +94,45 @@ class World(object):
 		if('in_hand' in testedFluent):
 			observed = 'holds('+(testedFluent[:testedFluent.rfind(',')+1]).replace('test','directly_observed')
 			if('book1' in testedFluent):
-				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref1_index] +'),1)'
-				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref2_index] +'),1)'
-				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref3_index] +'),1)'
-				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref4_index] +'),1)'
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref1_index] +'),1).'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref2_index] +'),1).'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref3_index] +'),1).'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook1_Ref4_index] +'),1).'
 			elif('book2' in testedFluent):
-				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref1_index] +'),1)'
-				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref2_index] +'),1)'
-				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref3_index] +'),1)'
-				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref4_index] +'),1)'
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref1_index] +'),1).'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref2_index] +'),1).'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref3_index] +'),1).'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook2_Ref4_index] +'),1).'
 			elif('book3' in testedFluent):
-				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref1_index] +'),1)'
-				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref2_index] +'),1)'
-				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref3_index] +'),1)'
-				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref4_index] +'),1)'
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref1_index] +'),1).'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref2_index] +'),1).'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref3_index] +'),1).'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook3_Ref4_index] +'),1).'
 			elif('book4' in testedFluent):
-				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref1_index] +'),1)'
-				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref2_index] +'),1)'
-				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref3_index] +'),1)'
-				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref4_index] +'),1)'
+				if('ref1' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref1_index] +'),1).'
+				elif('ref2' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref2_index] +'),1).'
+				elif('ref3' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref3_index] +'),1).'
+				elif('ref4' in testedFluent): observed = observed + self.RefinedState[self.domain_info.In_handBook4_Ref4_index] +'),1).'
 		if('loc' in testedFluent):
 			observed = 'holds(' + (testedFluent[:testedFluent.rfind(',')+1]).replace('test', 'directly_observed')
 			if('book1' in testedFluent):
 			 	if self.RefinedState[self.domain_info.LocationBook1_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
-					 observed = observed + 'true),1)'
-				else: observed = observed + 'false),1)'
+					 observed = observed + 'true),1).'
+				else: observed = observed + 'false),1).'
 			elif('book2' in testedFluent):
 			 	if self.RefinedState[self.domain_info.LocationBook2_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
-				 	observed = observed + 'true),1)'
-				else: observed = observed + 'false),1)'
+				 	observed = observed + 'true),1).'
+				else: observed = observed + 'false),1).'
 			elif('book3' in testedFluent):
 			 	if self.RefinedState[self.domain_info.LocationBook3_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
-					 observed = observed + 'true),1)'
-				else: observed = observed + 'false),1)'
+					 observed = observed + 'true),1).'
+				else: observed = observed + 'false),1).'
 			elif('book4' in testedFluent):
 			 	if self.RefinedState[self.domain_info.LocationBook4_index] == self.RefinedState[self.domain_info.LocationRobot_index]:
-					 observed = observed + 'true),1)'
-				else: observed = observed + 'false),1)'
+					 observed = observed + 'true),1).'
+				else: observed = observed + 'false),1).'
 			else:
-				observed = observed[:observed.rfind('rob1,')] + 'rob1,' + self.RefinedState[self.domain_info.LocationRobot_index] +'),true),1)'
+				observed = observed[:observed.rfind('rob1,')] + 'rob1,' + self.RefinedState[self.domain_info.LocationRobot_index] +'),true),1).'
 		return observed
 
 

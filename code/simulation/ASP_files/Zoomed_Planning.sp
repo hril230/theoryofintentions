@@ -1,13 +1,14 @@
-#const numSteps = 10. % maximum number of steps.
+#const numSteps = 5.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #coarse_place = {library, kitchen}.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8}.
+#place = {c1, c2, c3, c4}.
 #robot = {rob1}.
 #coarse_thing = #robot.
 #thing = #robot.
+
 
 #step = 0..numSteps.
 #boolean = {true, false}.
@@ -193,30 +194,22 @@ something_happened(I) :- occurs(A, I).
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
-next_to(c4, c5).
-next_to(c5, c6).
-next_to(c6, c7).
-next_to(c7, c8).
 
 comp(c1, library).
 comp(c2, library).
-comp(c3, library).
-comp(c4, library).
-comp(c5, kitchen).
-comp(c6, kitchen).
-comp(c7, kitchen).
-comp(c8, kitchen).
+comp(c3, kitchen).
+comp(c4, kitchen).
 
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,kitchen),I).
+goal(I) :- holds(coarse_loc(rob1,library),I).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c1), 0).
+holds(loc(rob1,c4), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

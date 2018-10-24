@@ -3,14 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {library,kitchen,office1}.
-#coarse_object = {book1,book2}.
-#object = {ref1_book1,ref2_book1, ref1_book2,ref2_book2}.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9}.
+%% SORTS GO HERE
 
-#robot = {rob1}.
-#coarse_thing = #coarse_object + #robot.
-#thing = #object + #robot.
 
 #step = 0..numSteps.
 #boolean = {true, false}.
@@ -199,29 +193,7 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%
 %% Attributes.
 %%%%%%%%%%%%%%%
-next_to(c1, c2).
-next_to(c2, c3).
-next_to(c3, c4).
-next_to(c4, c5).
-next_to(c5, c6).
-next_to(c6, c7).
-next_to(c7, c8).
-next_to(c8, c9).
-
-comp(c1, library).
-comp(c2, library).
-comp(c3, library).
-comp(c4, kitchen).
-comp(c5, kitchen).
-comp(c6, kitchen).
-comp(c7, office1).
-comp(c8, office1).
-comp(c9, office1).
-
-comp(ref1_book1, book1).
-comp(ref2_book1, book1).
-comp(ref1_book2, book2).
-comp(ref2_book2, book2).
+%% ATTRIBUTES GO HERE
 
 %%%%%%%%%
 %% Goal:

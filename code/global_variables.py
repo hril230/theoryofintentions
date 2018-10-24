@@ -1,7 +1,8 @@
 def init():
     global complexity_level
     global controller_type
-    global error
+    global errorCode
+
     global file_name_preASP_refined_domain
     global file_name_preASP_ToI_domain
     global file_name_preASP_abstract_domain
@@ -13,7 +14,8 @@ def init():
     global file_name_preASP_inferring_indirect_observations
     global file_name_preASP_refined_world
 
-    global abstract_sorts_string
+    global abstract_locations_string
+    global abstract_objects_string
     global abstract_attributes_string
     global refined_sorts_string
     global refined_attributes_string
@@ -22,28 +24,63 @@ def init():
     global testing_rules_string
     global planning_rules_string
     global max_number_steps_ToI_planning
+    global max_number_steps_refined_planning
+    global number_steps_refined_planning
     global refined_world_causal_law
     global new_refined_world_executability_condition
     global old_refined_world_executability_condition
     global in_hand_state_constraints
     global sparc_path
     global results_file_name
+    global refined_places_list
+    global abstract_locations_list
+    global abstract_objects_list
+    global refined_objects_list
+    global refined_locations_components_list
+    global sort_of_sorts_string
+
+    global character_code_too_many_answers
+    global character_code_timeout
+    global character_code_inconsistency
+    global character_code_complete_run
+
+    character_code_too_many_answers = 'A'
+    character_code_timeout = 'T'
+    character_code_inconsistency = 'I'
+    character_code_complete_run = 'C'
 
     results_file_name = "simulation/results/"
     sparc_path = "$HOME/work/solverfiles/sparc.jar"
 
     ASP_subfolder = 'simulation/'
 
-    abstract_sorts_string = ['#room = {library, kitchen}.\n#book = {book1}.',
-                            '#room = {library, kitchen, office1}.\n#book = {book1, book2}.',
-                            '#room = {library, kitchen, office1, office2}.\n#book = {book1, book2, book3}.',
-                            '#room = {library, kitchen, office1, office2, storage_cupboard}.\n#book = {book1, book2, book3, book4}.']
-
+    abstract_locations_string = ['#room = {library, kitchen}.',
+                            '#room = {library, kitchen, office1}.',
+                            '#room = {library, kitchen, office1, office2}.',
+                            '#room = {library, kitchen, office1, office2, storage_cupboard}.']
+    abstract_objects_string = ['#book = {book1}.',
+                                '#book = {book1, book2}.',
+                                '#book = {book1, book2, book3}.',
+                                '#book = {book1, book2, book3, book4}.']
     abstract_attributes_string = ['next_to(library, kitchen).',
                             'next_to(library, kitchen).\nnext_to(kitchen, office1).',
                             'next_to(library, kitchen).\nnext_to(kitchen, office1).\nnext_to(office1, office2).',
                             'next_to(library, kitchen).\nnext_to(kitchen, office1).\nnext_to(office1, office2).\nnext_to(office2, storage_cupboard).']
+    refined_places_list = [['c1','c2','c3','c4'],['c1','c2','c3','c4','c5','c6','c7','c8','c9'],['c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16'],['c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16','c17','c18','c19','c20','c21','c22','c23','c24','c25']]
+    abstract_locations_list = [['library', 'kitchen'],['library', 'kitchen', 'office1'],['library', 'kitchen', 'office1', 'office2'],['library', 'kitchen', 'office1', 'office2', 'storage_cupboard']]
+    abstract_objects_list =[['book1'],['book1', 'book2'],['book1', 'book2', 'book3'],['book1', 'book2', 'book3', 'book4']]
+    refined_locations_components_list = [['comp(c1,library)','comp(c2,library)','comp(c3,kitchen)','comp(c4,kitchen)'],
+                                    ['comp(c1,library)','comp(c2,library)','comp(c3,library)','comp(c4,kitchen)','comp(c5,kitchen)','comp(c6,kitchen)','comp(c7,office1)','comp(c8,office1)','comp(c9,office1)'],
+                                    ['comp(c1,library)','comp(c2,library)','comp(c3,library)','comp(c4,library)','comp(c5,kitchen)','comp(c6,kitchen)','comp(c7,kitchen)','comp(c8,kitchen)','comp(c9,office1)','comp(c10,office1)','comp(c11,office1)','comp(c12,office1)','comp(c13,office2)','comp(c14,office2)','comp(c15,office2)','comp(c16,office2)'],
+                                    ['comp(c1,library)','comp(c2,library)','comp(c3,library)','comp(c4,library)','comp(c5,library)','comp(c6,kitchen)','comp(c7,kitchen)','comp(c8,kitchen)','comp(c9,kitchen)','comp(c10,kitchen)','comp(c11,office1)','comp(c12,office1)','comp(c13,office1)','comp(c14,office1)','comp(c15,office1)','comp(c16,office2)','comp(c17,office2)','comp(c18,office2)','comp(c19,office2)','comp(c20,office2)','comp(c21,storage_cupboard)','comp(c22,storage_cupboard)','comp(c23,storage_cupboard)','comp(c24,storage_cupboard)','comp(c25,storage_cupboard)' ]]
+    refined_objects_list = [['ref1_book1'],
+                            ['ref1_book1','ref2_book1', 'ref1_book2','ref2_book2'],
+                            ['ref1_book1','ref2_book1','ref3_book1', 'ref1_book2','ref2_book2','ref3_book2', 'ref1_book3','ref2_book3','ref3_book3'],
+                            ['ref1_book1','ref2_book1','ref3_book1','ref4_book1',' ref1_book2','ref2_book2','ref3_book2','ref4_book2',' ref1_book3','ref2_book3','ref3_book3','ref4_book3',' ref1_book4','ref2_book4','ref3_book4','ref4_book4']]
 
+    sort_of_sorts_string = ('\n#robot = {rob1}.\n'
+                            '#coarse_thing = #coarse_object + #robot.\n'
+                            '#thing = #object + #robot.')
     refined_sorts_string = [('#coarse_place = {library,kitchen}.\n'
                             '#coarse_object = {book1}.\n'
                             '#object = {ref1_book1}.\n'
@@ -60,19 +97,21 @@ def init():
                             '#coarse_object = {book1,book2,book3,book4}.\n'
                             '#object = {ref1_book1,ref2_book1,ref3_book1,ref4_book1, ref1_book2,ref2_book2,ref3_book2,ref4_book2, ref1_book3,ref2_book3,ref3_book3,ref4_book3, ref1_book4,ref2_book4,ref3_book4,ref4_book4}.\n\n'
                             '#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25}.')]
-    refined_attributes_string = [('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).\n\n'
-                                'comp(c1, library).\ncomp(c2, library).\ncomp(c3, kitchen).\ncomp(c4, kitchen).\n\n'
-                                'comp(ref1_book1, book1).'),
-                                ('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).\nnext_to(c4, c5).\nnext_to(c5, c6).\nnext_to(c6, c7).\nnext_to(c7, c8).\nnext_to(c8, c9).\n\n'
-                                'comp(c1, library).\ncomp(c2, library).\ncomp(c3, library).\ncomp(c4, kitchen).\ncomp(c5, kitchen).\ncomp(c6, kitchen).\ncomp(c7, office1).\ncomp(c8, office1).\ncomp(c9, office1).\n\n'
-                                'comp(ref1_book1, book1).\ncomp(ref2_book1, book1).\ncomp(ref1_book2, book2).\ncomp(ref2_book2, book2).'),
-                                ('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).\nnext_to(c4, c5).\nnext_to(c5, c6).\nnext_to(c6, c7).\nnext_to(c7, c8).\nnext_to(c8, c9).\nnext_to(c9, c10).\nnext_to(c10, c11).\nnext_to(c11, c12).\nnext_to(c12, c13).\nnext_to(c13, c14).\nnext_to(c14, c15).\nnext_to(c15, c16).\n\n'
-                                'comp(c1, library).\ncomp(c2, library).\ncomp(c3, library).\ncomp(c4, library).\ncomp(c5, kitchen).\ncomp(c6, kitchen).\ncomp(c7, kitchen).\ncomp(c8, kitchen).\ncomp(c9, office1).\ncomp(c10, office1).\ncomp(c11, office1).\ncomp(c12, office1).\ncomp(c13, office2).\ncomp(c14, office2).\ncomp(c15, office2).\ncomp(c16, office2).\n\n'
-                                'comp(ref1_book1, book1).\ncomp(ref2_book1, book1).\ncomp(ref3_book1, book1).\ncomp(ref1_book2, book2).\ncomp(ref2_book2, book2).\ncomp(ref3_book2, book2).\ncomp(ref1_book3, book3).\ncomp(ref2_book3, book3).\ncomp(ref3_book3, book3).'),
+    refined_attributes_string = [('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).'
+                                '\n\ncomp(c1, library).\ncomp(c2, library).\ncomp(c3, kitchen).\ncomp(c4, kitchen).'
+                                '\n\ncomp(ref1_book1, book1).'),
+                                ('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).\nnext_to(c4, c5).\nnext_to(c5, c6).\nnext_to(c6, c7).\nnext_to(c7, c8).\nnext_to(c8, c9).'
+                                '\n\ncomp(c1, library).\ncomp(c2, library).\ncomp(c3, library).\ncomp(c4, kitchen).\ncomp(c5, kitchen).\ncomp(c6, kitchen).\ncomp(c7, office1).\ncomp(c8, office1).\ncomp(c9, office1).'
+                                '\n\ncomp(ref1_book1, book1).\ncomp(ref2_book1, book1).\ncomp(ref1_book2, book2).\ncomp(ref2_book2, book2).'),
+                                ('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).\nnext_to(c4, c5).\nnext_to(c5, c6).\nnext_to(c6, c7).\nnext_to(c7, c8).\nnext_to(c8, c9).\nnext_to(c9, c10).\nnext_to(c10, c11).\nnext_to(c11, c12).\nnext_to(c12, c13).\nnext_to(c13, c14).\nnext_to(c14, c15).\nnext_to(c15, c16).'
+                                '\n\ncomp(c1, library).\ncomp(c2, library).\ncomp(c3, library).\ncomp(c4, library).\ncomp(c5, kitchen).\ncomp(c6, kitchen).\ncomp(c7, kitchen).\ncomp(c8, kitchen).\ncomp(c9, office1).\ncomp(c10, office1).\ncomp(c11, office1).\ncomp(c12, office1).\ncomp(c13, office2).\ncomp(c14, office2).\ncomp(c15, office2).\ncomp(c16, office2).'
+                                '\n\ncomp(ref1_book1, book1).\ncomp(ref2_book1, book1).\ncomp(ref3_book1, book1).\ncomp(ref1_book2, book2).\ncomp(ref2_book2, book2).\ncomp(ref3_book2, book2).\ncomp(ref1_book3, book3).\ncomp(ref2_book3, book3).\ncomp(ref3_book3, book3).'),
                                 ('next_to(c1, c2).\nnext_to(c2, c3).\nnext_to(c3, c4).\nnext_to(c4, c5).\nnext_to(c5, c6).\nnext_to(c6, c7).\nnext_to(c7, c8).\nnext_to(c8, c9).\nnext_to(c9, c10).\nnext_to(c10, c11).\nnext_to(c11, c12).\nnext_to(c12, c13).\nnext_to(c13, c14).\nnext_to(c14, c15).\nnext_to(c15, c16).\nnext_to(c16, c17).\nnext_to(c17, c18).\nnext_to(c18, c19).\nnext_to(c19, c20).\nnext_to(c20, c21).\nnext_to(c21, c22).\nnext_to(c22, c23).\nnext_to(c23, c24).\nnext_to(c24, c25).'
-                                'comp(c1, library).\ncomp(c2, library).\ncomp(c3, library).\ncomp(c4, library).\ncomp(c5, library).\ncomp(c6, kitchen).\ncomp(c7, kitchen).\ncomp(c8, kitchen).\ncomp(c9, kitchen).\ncomp(c10, kitchen).\ncomp(c11, office1).\ncomp(c12, office1).\ncomp(c13, office1).\ncomp(c14, office1).\ncomp(c15, office1).\ncomp(c16, office2).\ncomp(c17, office2).\ncomp(c18, office2).\ncomp(c19, office2).\ncomp(c20, office2).\ncomp(c21, storage_cupboard).\ncomp(c22, storage_cupboard).\ncomp(c23, storage_cupboard).\ncomp(c24, storage_cupboard).\ncomp(c25, storage_cupboard).'
-                                'comp(ref1_book1, book1).\ncomp(ref2_book1, book1).\ncomp(ref3_book1, book1).\ncomp(ref4_book1, book1).\ncomp(ref1_book2, book2).\ncomp(ref2_book2, book2).\ncomp(ref3_book2, book2).\ncomp(ref4_book2, book2).\ncomp(ref1_book3, book3).\ncomp(ref2_book3, book3).\ncomp(ref3_book3, book3).\ncomp(ref4_book3, book3).\ncomp(ref1_book4, book4).\ncomp(ref2_book4, book4).\ncomp(ref3_book4, book4).\ncomp(ref4_book4, book4).')]
+                                '\n\ncomp(c1, library).\ncomp(c2, library).\ncomp(c3, library).\ncomp(c4, library).\ncomp(c5, library).\ncomp(c6, kitchen).\ncomp(c7, kitchen).\ncomp(c8, kitchen).\ncomp(c9, kitchen).\ncomp(c10, kitchen).\ncomp(c11, office1).\ncomp(c12, office1).\ncomp(c13, office1).\ncomp(c14, office1).\ncomp(c15, office1).\ncomp(c16, office2).\ncomp(c17, office2).\ncomp(c18, office2).\ncomp(c19, office2).\ncomp(c20, office2).\ncomp(c21, storage_cupboard).\ncomp(c22, storage_cupboard).\ncomp(c23, storage_cupboard).\ncomp(c24, storage_cupboard).\ncomp(c25, storage_cupboard).'
+                                '\n\ncomp(ref1_book1, book1).\ncomp(ref2_book1, book1).\ncomp(ref3_book1, book1).\ncomp(ref4_book1, book1).\ncomp(ref1_book2, book2).\ncomp(ref2_book2, book2).\ncomp(ref3_book2, book2).\ncomp(ref4_book2, book2).\ncomp(ref1_book3, book3).\ncomp(ref2_book3, book3).\ncomp(ref3_book3, book3).\ncomp(ref4_book3, book3).\ncomp(ref1_book4, book4).\ncomp(ref2_book4, book4).\ncomp(ref3_book4, book4).\ncomp(ref4_book4, book4).')]
     max_number_steps_ToI_planning = [3,6,8,10]
+    max_number_steps_refined_planning = [6,11,16,21]
+    number_steps_refined_planning = [5,5,5,5]
 
     testing_rules_string = ('% Make sure the outcome of any concrete action is tested\n'
                         'occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).\n'

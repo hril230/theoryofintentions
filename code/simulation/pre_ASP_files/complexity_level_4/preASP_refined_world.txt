@@ -12,6 +12,7 @@ sorts
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
 
+
 #step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
@@ -214,7 +215,9 @@ next_to(c20, c21).
 next_to(c21, c22).
 next_to(c22, c23).
 next_to(c23, c24).
-next_to(c24, c25).comp(c1, library).
+next_to(c24, c25).
+
+comp(c1, library).
 comp(c2, library).
 comp(c3, library).
 comp(c4, library).
@@ -238,7 +241,9 @@ comp(c21, storage_cupboard).
 comp(c22, storage_cupboard).
 comp(c23, storage_cupboard).
 comp(c24, storage_cupboard).
-comp(c25, storage_cupboard).comp(ref1_book1, book1).
+comp(c25, storage_cupboard).
+
+comp(ref1_book1, book1).
 comp(ref2_book1, book1).
 comp(ref3_book1, book1).
 comp(ref4_book1, book1).

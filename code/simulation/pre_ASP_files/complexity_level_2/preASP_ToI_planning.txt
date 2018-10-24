@@ -1,5 +1,5 @@
-#const numSteps = 6
-#const max_len = 7
+#const numSteps = 6.
+#const max_len = 7.
 #const max_name = 1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

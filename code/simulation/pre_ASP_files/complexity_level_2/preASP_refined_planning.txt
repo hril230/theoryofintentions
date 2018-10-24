@@ -1,4 +1,4 @@
-#const numSteps = 10. % maximum number of steps.
+#const numSteps = 5.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -11,6 +11,7 @@ sorts
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
+
 
 #step = 0..numSteps.
 #boolean = {true, false}.

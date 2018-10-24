@@ -437,7 +437,7 @@ class DomainInfo():
 
 	def directObservationToRefinedObs(self,directObservation,step):
 		directObservation = directObservation.replace('holds(directly_observed(rob1,','obs(').replace('e,', 'e')
-		directObservation = directObservation[:directObservation.rfind('),')]+','+str(step)+').\n'
+		directObservation = directObservation[:directObservation.rfind('),')]+','+str(step)+').'
 		return directObservation
 
 	def getIndexesRelevantToGoal(self,goal):

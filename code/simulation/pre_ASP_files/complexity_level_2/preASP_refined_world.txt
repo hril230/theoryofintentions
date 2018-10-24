@@ -12,6 +12,7 @@ sorts
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
 
+
 #step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
