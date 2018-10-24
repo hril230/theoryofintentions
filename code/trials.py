@@ -68,51 +68,49 @@ def runAndWrite(initial_conditions_index, goal, initial_state):
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
 	error = multiprocessing.Event()
 	planningTime = multiprocessing.Value('d', 0)
-	inferringObservationsTime = multiprocessing.Value('d',0)
 	numAbsPlans = multiprocessing.Value('i', 0)
 	numRefPlans = multiprocessing.Value('i', 0)
 	numAbsAct = multiprocessing.Value('i', 0)
 	numRefAct = multiprocessing.Value('i', 0)
 	completeRun = multiprocessing.Value('c','_')
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime,inferringObservationsTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
 	timeTakenZooming = 0
 	timeout = False
 	p1.start()
 	startTime = datetime.now()
   	while True:
 		if error.is_set():
+			timeTakenZooming = (datetime.now()-startTime).total_seconds()
+			p1.terminate()
+			p1.join()
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			p1.terminate()
-			p1.join()
-			return['ERROR in line ' + str(int(planningTime.value)),'0','0','0','0','0','0',str(completeRun.value)]
-
+			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
+			results.write('\n' + global_variables.controller_type + ' ERROR FOUND')
+			results.close()
+			break
+		'''
 		if int((datetime.now()-startTime).total_seconds()) > maxTimeZooming and p1.is_alive():
-			timeout = True
+			timeTakenZooming = (datetime.now()-startTime).total_seconds()
+			completeRun.value = global_variables.character_code_timeout
 			p1.terminate()
 			p1.join()
-			completeRun.value = global_variables.character_code_timeout
 			try:
 				subprocess.check_output('killall clingo', shell=True)
 			except subprocess.CalledProcessError:
 				print('Clingo was not running.')
+			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   TIMEOUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-			results.write('\nTIMEOUT: running the zooming controller took ' + str(maxTimeZooming) + ' seconds.')
+			results.write('\n' + global_variables.controller_type + ' TIMEOUT REACHED')
 			results.close()
-			print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
-			print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ TIMEOUT: running the zooming controller took ' + str(maxTimeZooming) + ' seconds.'
-			timeTakenZooming = 0
-			return['TIMEOUT '+str(maxTimeZooming),'0','0','0','0','0','0',str(completeRun.value)]
+			break
+		'''
 		if not p1.is_alive(): break
-
-	if not error.is_set() and timeout == False :
-		timeTakenZooming = (datetime.now()-startTime).total_seconds()
-		results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-		results.write('\nTotal trial time with zooming: ' + str("{0:.2f}".format(planningTime.value)) + ' seconds.')
-		results.close()
-		print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
-		print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str("{0:.2f}".format(timeTakenZooming)) + ' seconds.'
-
- 	return [str("{0:.2f}".format(timeTakenZooming)),str("{0:.2f}".format(planningTime.value)),str("{0:.2f}".format(inferringObservationsTime.value)),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value),str(completeRun.value)]
+	timeTakenZooming = (datetime.now()-startTime).total_seconds()
+	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
+	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
+	results.write('\nTotal trial time with zooming: ' + str(timeTakenZooming) + ' seconds.')
+	results.close()
+	return [str("{0:.2f}".format(timeTakenZooming)),str("{0:.2f}".format(planningTime.value)),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value),str(completeRun.value)]
 
 
 
@@ -132,50 +130,49 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
 	error = multiprocessing.Event()
 	planningTime = multiprocessing.Value('d', 0)
-	inferringObservationsTime = multiprocessing.Value('d',0)
 	numAbsPlans = multiprocessing.Value('i', 0)
 	numRefPlans = multiprocessing.Value('i', 0)
 	numAbsAct = multiprocessing.Value('i', 0)
 	numRefAct = multiprocessing.Value('i', 0)
 	completeRun = multiprocessing.Value('c','_')
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime,inferringObservationsTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
 	timeTakenNonZooming = 0
 	p1.start()
 	startTime = datetime.now()
 	timeout = False
   	while True:
 		if error.is_set():
-			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			p1.terminate()
 			p1.join()
-			return['ERROR in line ' + str(int(planningTime.value)),'0','0','0','0','0','0',str(completeRun.value)]
+			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
+			results.write('\n' + global_variables.controller_type + ' ERROR FOUND')
+			results.close()
+			break
+		'''
 		if int((datetime.now()-startTime).total_seconds()) > maxTimeNonZooming and p1.is_alive():
 			timeout = True
 			p1.terminate()
 			p1.join()
 			completeRun.value = global_variables.character_code_timeout
-
 			try:
 				subprocess.check_output('killall clingo', shell=True)
 			except subprocess.CalledProcessError:
 				print('Clingo was not running.')
+			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   TIMEOUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-			results.write('\nTIMEOUT: running the non zooming controller took ' + str(maxTimeNonZooming) + ' seconds.')
+			results.write('\n' + global_variables.controller_type + ' TIMEOUT REACHED')
 			results.close()
-			print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
-			print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$  TIMEOUT: running the non zooming controller took ' + str(maxTimeNonZooming) + ' seconds.'
-			return['TIMEOUT '+str(maxTimeNonZooming),'0','0','0','0','0','0',str(completeRun.value)]
+			break
+		'''
 		if not p1.is_alive(): break
 
-	if not error.is_set() and timeout == False :
-		timeTakenNonZooming = (datetime.now()-startTime).total_seconds()
-		results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-		results.write('\nTotal trial time with non zooming: ' + str(timeTakenNonZooming) + ' seconds.')
-		results.close()
-		print('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n')
-		print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken non zooming: ' + str(timeTakenNonZooming) + ' seconds.'
-
-	return [str("{0:.2f}".format(timeTakenNonZooming)),str("{0:.2f}".format(planningTime.value)),str("{0:.2f}".format(inferringObservationsTime.value)),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value),str(completeRun.value)]
+	timeTakenNonZooming = (datetime.now()-startTime).total_seconds()
+	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken non zooming: ' + str(timeTakenNonZooming) + ' seconds.'
+	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
+	results.write('\nTotal trial time with non zooming: ' + str(timeTakenNonZooming) + ' seconds.')
+	results.close()
+	return [str("{0:.2f}".format(timeTakenNonZooming)),str("{0:.2f}".format(planningTime.value)),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value),str(completeRun.value)]
 
 
 def createPreASP_AbstractBeliefFile():
@@ -393,7 +390,7 @@ if __name__ == "__main__":
 	global trialCount
 	singleRunTest = False
 
-	for level in [2,1]:
+	for level in [4,3,2,1]:
 		trialCount = 0
 		global_variables.init()
 		global_variables.complexity_level = level # TODO change this number to change the complexity level
@@ -414,7 +411,7 @@ if __name__ == "__main__":
 
 		with open('experimental_results_'+ str(global_variables.complexity_level)+'.csv', 'a') as writeFile:
 			writer = csv.writer(writeFile)
-			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming', 'Planning Time - zooming', 'Inferring Time - zooming', '# Abstract Plans - zooming', '# Refined Plans - zooming', '# Abstract Actions - zooming', '# Refined Actions - zooming', 'Complete Run - zooming', 'Run-time non_zooming', 'Planning Time non_zooming', 'Inferring Time - non_zooming','# Abstract Plans non_zooming', '# Refined Plans non_zooming', '# Abstract Actions non_zooming', '# Refined Actions non_zooming','Complete Run - non_zooming'])
+			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming', 'Planning Time - zooming', '# Abstract Plans - zooming', '# Refined Plans - zooming', '# Abstract Actions - zooming', '# Refined Actions - zooming', 'Complete Run - zooming', 'Run-time non_zooming', 'Planning Time non_zooming', '# Abstract Plans non_zooming', '# Refined Plans non_zooming', '# Abstract Actions non_zooming', '# Refined Actions non_zooming','Complete Run - non_zooming'])
 		writeFile.close()
 
 

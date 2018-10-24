@@ -18,13 +18,8 @@ class ControllerToI():
 		self.lines_to_write = []
 		self.acting_times = []
 		self.testing_times = []
-		self.inferring_times = []
 		self.last_abstract_planning_time = None
 		self.abstract_action_plan = ''
-		self.abstract_plan_count = 0
-		self.refined_plan_count = 0
-		self.abstract_action_count = 0
-		self.refined_action_count = 0
 		self.error = multiprocessing.Event()
 
 		self.goal = goal
@@ -48,7 +43,7 @@ class ControllerToI():
 		self.history_marker = '%% HISTORY GOES HERE'
 
 		# variables relevant for the ASP_ToI planning and diagnosis
-		self.number_steps = 4 #initial total number of steps the controller assumes it will need for planning
+		self.number_toi_steps = 4 #initial total number of steps the controller assumes it will need for planning
 		self.number_activities = 1 #keeping record of the number of activitites the ASP needs
 		self.goal_correction = 0 #keeping record of the number of times the goal has been assumed to be true but it was False
 		self.current_diagnosis = '' #keeping the latest diagnosis
@@ -64,7 +59,7 @@ class ControllerToI():
 		print ('Controller ToI - initial refined location: ' + str(self.refined_location))
 
 
-	def run(self,error, final_planning_time, final_inferring_observations_time, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun):
+	def run(self,error, final_planning_time, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun):
 		self.completeRun = completeRun
 		self.final_planning_time = final_planning_time
 		self.planning_time = datetime.now()-datetime.now()
@@ -73,7 +68,7 @@ class ControllerToI():
 		self.history_ToI_diagnosis.append("hpd(select(my_goal), true,0).")
 
 		if(global_variables.controller_type == 'zooming'): self.lines_to_write.append('\nZOOMING CONTROLLER')
-		if(global_variables.controller_type == 'non_zooming'): self.lines_to_write.append('\nNON - ZOOMING CONTROLLER')
+		else: self.lines_to_write.append('\nNON - ZOOMING CONTROLLER')
 
 
 		self.diagnose()
@@ -109,16 +104,16 @@ class ControllerToI():
 			# to pass this as an input to the ASP_ToI_Planning
 			if(abstract_action[0:4] == 'stop'):
 				self.number_activities += 1
-				self.number_steps += 1
+				self.number_toi_steps += 1
 			elif(abstract_action[0:5] == 'start'):
-				self.abstract_plan_count = self.abstract_plan_count + 1
+				numAbsPlans.value += 1
 				self.lines_to_write.append('\nAbstract action plan: ')
 				self.lines_to_write.append(self.abstract_action_plan)
 				self.lines_to_write.append('\nTime taken to plan abstract action plan: ' + str(self.last_abstract_planning_time))
 			else:
 				print ('\nControllerToI - ref location and coarse belief: ' +self.refined_location + ', '+ str(self.belief))
 				print ('\nControllerToI ' + global_variables.controller_type + ' - next abstract action: ' + abstract_action)
-				self.abstract_action_count = self.abstract_action_count + 1
+				numAbsAct.value += numAbsAct.value
 				need_refined_plan = True
 				refined_plan_step = 0
 				refined_history = self.refine(abstract_action, self.refined_location) #holds all the history of the refined plan created wtih refined domain in form of 'hpd' and 'obs'
@@ -129,6 +124,7 @@ class ControllerToI():
 
 					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_actions = self.runRefinedPlanning(abstract_action,refined_plan_step)
+					numRefPlans.value += 1
 					endTime = datetime.now()
 					timeTaken = endTime - startTime
 					need_refined_plan = False
@@ -137,7 +133,7 @@ class ControllerToI():
 						print ('ControllerToI ' + global_variables.controller_type + ' : \t\t No refined plan ')
 						lineno = self.lineno()
 						print 'Error set at line:  '+str(lineno)
-						self.final_planning_time.value = int(lineno)
+						self.final_planning_time.value = self.planning_time.total_seconds()
 						self.completeRun = global_variables.character_code_inconsistency
 						self.error.set()
 					'''
@@ -152,7 +148,7 @@ class ControllerToI():
 					last_action_needs_testing = False
 					last_action = ''
 					for i in range(len(refined_actions)):
-						self.refined_action_count = self.refined_action_count + 1
+						numRefAct.value += 1
 						refined_occurence = refined_actions[i]
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
@@ -239,13 +235,6 @@ class ControllerToI():
 		results.write(str(self.planning_time))
 		results.close()
 
-		timeTakenInferring = self.inferring_times[0]
-		for i in range(1,len(self.inferring_times)): self.timeTakenInferring = timeTakenInferring + self.inferring_times[i]
-		results = open('experimental_results_'+ str(global_variables.complexity_level)+'.txt', 'a')
-		results.write('\nTotal time taken inferring: ')
-		results.write(str(timeTakenInferring))
-		results.close()
-		final_inferring_observations_time.value = timeTakenInferring.total_seconds()
 
 		# write results to text file
 		timeTakenActing = self.acting_times[0]
@@ -262,11 +251,6 @@ class ControllerToI():
 		results.write('\nTotal time taken testing: ')
 		results.write(str(timeTakenTesting))
 		results.close()
-
-		numAbsPlans.value = self.abstract_plan_count
-		numRefPlans.value = self.refined_plan_count
-		numAbsAct.value = self.abstract_action_count
-		numRefAct.value = self.refined_action_count
 
 
  	def test_in_hand_all_refined_parts(self, put_down_action):
@@ -452,12 +436,12 @@ class ControllerToI():
 		if answer_set == '' or answer_set =='\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			if answer_set == '': self.completeRun.value = global_variables.character_code_too_many_answers
 			elif answer_set == '\n':  self.completeRun.value = global_variables.character_code_inconsistency
 			self.error.set()
 		timeTaken = datetime.now() - startTime
-		self.inferring_times.append(timeTaken)
+		self.planning_time += timeTaken
 		observations = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
@@ -489,10 +473,10 @@ class ControllerToI():
 			print 'Error set at line:  '+str(lineno)
 			if answer_set == '': self.completeRun.value = global_variables.character_code_too_many_answers
 			elif answer_set == '\n': self.completeRun.value = global_variables.character_code_inconsistency
-			self.final_planning_time.value = int(lineno)			
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.error.set()
 		timeTaken = datetime.now() - startTime
-		self.inferring_times.append(timeTaken)
+		self.planning_time += timeTaken
 		observations = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
@@ -514,7 +498,6 @@ class ControllerToI():
 	### This file is updated with the refined history through the function addObsRefinedDomain
 	###########################################################################################
 	def runRefinedPlanning(self, abstract_action,refined_plan_step):
-		self.refined_plan_count = self.refined_plan_count + 1
 		myRefinedFile = ''
 		if(global_variables.controller_type == 'zooming'): myRefinedFile = self.asp_zoomed_domain_file
 		elif(global_variables.controller_type == 'non_zooming'): myRefinedFile = self.asp_non_zoomed_domain_file
@@ -525,7 +508,7 @@ class ControllerToI():
 		if answer_set == '':
 			lineno = self.lineno()
 			print 'Too many answers: '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.error.set()
 
@@ -553,13 +536,13 @@ class ControllerToI():
 			if answer_set == '':
 				lineno = self.lineno()
 				print 'Too many answers: '+str(lineno)
-				self.final_planning_time.value = int(lineno)
+				self.final_planning_time.value = self.planning_time.total_seconds()
 				self.completeRun.value = global_variables.character_code_too_many_answers
 				self.error.set()
 		if answer_set == '\n' and maxStepsPlanning >= global_variables.max_number_steps_refined_planning[global_variables.complexity_level -1]:
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_inconsistency
 			self.error.set()
 		answer_set_split = answer_set.rstrip().split('\n\n')
@@ -579,8 +562,8 @@ class ControllerToI():
 		abstract_action = None
 		current_asp_split = self.preASP_ToI_split[:self.index_beginning_history_ToI +1] + input + self.preASP_ToI_split[self.index_beginning_history_ToI +1:]
 		current_asp_split[self.ToI_current_step_index +1] = 'current_step('+str(self.current_step)+').'
-		current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
-		current_asp_split[1] = "#const max_len = "+str(self.number_steps)+". % maximum activity_length of an activity."
+		current_asp_split[0] = "#const numSteps = "+str(self.number_toi_steps+1)+". % maximum number of steps."
+		current_asp_split[1] = "#const max_len = "+str(self.number_toi_steps)+". % maximum activity_length of an activity."
 		current_asp_split[2] = "#const max_name = " + str(self.number_activities) + "."
 		asp = '\n'.join(current_asp_split)
 		f1 = open(self.asp_ToI_planning_file, 'w')
@@ -591,17 +574,17 @@ class ControllerToI():
 		if answer_set == '':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.error.set()
 
 		max_step = int(self.current_step + self.max_plan_length+3)
-		step_num = int(self.number_steps)
+		step_num = int(self.number_toi_steps)
 		if (step_num < max_step): max_reached = True
 		else: max_reached = False
 		while( not ("intended_action" in answer_set) and not ("selected_goal_holds" in answer_set) and max_reached):
-			current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
-			current_asp_split[1] = "#const max_len = "+str(self.number_steps)+". % maximum activity_length of an activity."
+			current_asp_split[0] = "#const numSteps = "+str(self.number_toi_steps+1)+". % maximum number of steps."
+			current_asp_split[1] = "#const max_len = "+str(self.number_toi_steps)+". % maximum activity_length of an activity."
 			asp = '\n'.join(current_asp_split)
 			f1 = open(self.asp_ToI_planning_file, 'w')
 			f1.write(asp)
@@ -611,11 +594,11 @@ class ControllerToI():
 			if answer_set == '':
 				lineno = self.lineno()
 				print 'Error set at line:  '+str(lineno)
-				self.final_planning_time.value = int(lineno)
+				self.final_planning_time.value = self.planning_time.total_seconds()
 				self.completeRun.value = global_variables.character_code_too_many_answers
 				self.error.set()
-			self.number_steps +=1
-			step_num = int(self.number_steps)
+			self.number_toi_steps +=1
+			step_num = int(self.number_toi_steps)
 			if (step_num < max_step): max_reached = True
 			else: max_reached = False
 		possibleAnswers = answer_set.rstrip().split('\n\n')
@@ -646,8 +629,8 @@ class ControllerToI():
 		input.append("explaining("+str(self.current_step)+").")
 		current_asp_split = self.preASP_ToI_split[: self.index_beginning_history_ToI +1] + input +self.preASP_ToI_split[self.index_beginning_history_ToI +1:]
 		current_asp_split[self.ToI_current_step_index +1] = 'current_step('+str(self.current_step)+').'
-		current_asp_split[0] = "#const numSteps = "+str(self.number_steps+1)+". % maximum number of steps."
-		current_asp_split[1] = "#const max_len = "+str(self.number_steps)+". % maximum activity_length of an activity."
+		current_asp_split[0] = "#const numSteps = "+str(self.number_toi_steps+1)+". % maximum number of steps."
+		current_asp_split[1] = "#const max_len = "+str(self.number_toi_steps)+". % maximum activity_length of an activity."
 		current_asp_split[2] = "#const max_name = " + str(self.number_activities) + "."
 		asp = '\n'.join(current_asp_split)
 		f1 = open(self.asp_ToI_diagnosing_file, 'w')
@@ -658,7 +641,7 @@ class ControllerToI():
 		if answer_set == '':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.error.set()
 		answers = answer_set.rstrip().split('\n\n')
@@ -731,7 +714,7 @@ class ControllerToI():
 		if answer_set == '\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_inconsistency
 			self.error.set()
 		answer_set = answer_set.rstrip().strip('{').strip('}')
@@ -752,7 +735,7 @@ class ControllerToI():
 		if answer_set == '' or answer_set == '\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
-			self.final_planning_time.value = int(lineno)
+			self.final_planning_time.value = self.planning_time.total_seconds()
 			if answer_set == '': self.completeRun.value = global_variables.character_code_too_many_answers
 			elif answer_set == '\n': self.completeRun.value = global_variables.character_code_inconsistency
 			self.error.set()

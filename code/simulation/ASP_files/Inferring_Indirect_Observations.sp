@@ -1,12 +1,12 @@
-#const numSteps = 4.
+#const numSteps = 10.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {library,kitchen}.
-#coarse_object = {book1}.
-#object = {ref1_book1}.
-#place = {c1, c2, c3, c4}.
+#coarse_place = {kitchen,office1}.
+#coarse_object = {book4}.
+#object = { ref1_book4,ref2_book4,ref3_book4,ref4_book4}.
+#place = {c6,c7,c8,c9,c10,c11,c12,c13,c14,c15}.
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
@@ -199,16 +199,31 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%
 %% Attributes.
 %%%%%%%%%%%%%%%
-next_to(c1, c2).
-next_to(c2, c3).
-next_to(c3, c4).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c8, c9).
+next_to(c9, c10).
+next_to(c10, c11).
+next_to(c11, c12).
+next_to(c12, c13).
+next_to(c13, c14).
+next_to(c14, c15).
 
-comp(c1, library).
-comp(c2, library).
-comp(c3, kitchen).
-comp(c4, kitchen).
+comp(c6, kitchen).
+comp(c7, kitchen).
+comp(c8, kitchen).
+comp(c9, kitchen).
+comp(c10, kitchen).
+comp(c11, office1).
+comp(c12, office1).
+comp(c13, office1).
+comp(c14, office1).
+comp(c15, office1).
 
-comp(ref1_book1, book1).
+comp(ref1_book4, book4).
+comp(ref2_book4, book4).
+comp(ref3_book4, book4).
+comp(ref4_book4, book4).
 
 %%%%%%%%%
 %% Goal:
@@ -219,22 +234,37 @@ comp(ref1_book1, book1).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-hpd(move(rob1,c3),0).
-holds(coarse_loc(book1,kitchen),0).
-holds(coarse_in_hand(rob1,book1),0).
-holds(coarse_loc(rob1,kitchen),0).
-holds(loc(rob1,c4),0).
-hpd(test(rob1,loc(rob1,c3),true),1).
-hpd(move(rob1,c2),2).
-obs(loc(rob1,c3),true,2).
-obs(loc(ref1_book1,c3),false,2).
-hpd(test(rob1,loc(rob1,c2),true),3).
-obs(loc(rob1,c2),true,4).
-obs(loc(ref1_book1,c2),false,4).
-holds(directly_observed(rob1,loc(ref1_book1,c3),false),2).
-holds(directly_observed(rob1,loc(rob1,c3),true),2).
-holds(directly_observed(rob1,loc(rob1,c2),true),4).
-holds(directly_observed(rob1,loc(ref1_book1,c2),false),4).
+hpd(move(rob1,c7),0).
+holds(loc(rob1,c6),0).
+hpd(test(rob1,loc(rob1,c7),true),1).
+hpd(move(rob1,c8),2).
+obs(loc(ref1_book4,c7),false,2).
+obs(loc(rob1,c7),true,2).
+hpd(test(rob1,loc(rob1,c8),true),3).
+hpd(move(rob1,c9),4).
+obs(loc(ref1_book4,c8),false,4).
+obs(loc(rob1,c8),true,4).
+hpd(test(rob1,loc(rob1,c9),true),5).
+obs(loc(ref1_book4,c9),false,6).
+hpd(move(rob1,c10),6).
+obs(loc(rob1,c9),true,6).
+hpd(test(rob1,loc(rob1,c10),true),7).
+obs(loc(rob1,c10),true,8).
+hpd(move(rob1,c11),8).
+obs(loc(ref1_book4,c10),false,8).
+hpd(test(rob1,loc(rob1,c11),true),9).
+obs(loc(ref1_book4,c11),false,10).
+obs(loc(rob1,c11),true,10).
+holds(directly_observed(rob1,loc(rob1,c7),true),2).
+holds(directly_observed(rob1,loc(ref1_book4,c7),false),2).
+holds(directly_observed(rob1,loc(ref1_book4,c8),false),4).
+holds(directly_observed(rob1,loc(rob1,c8),true),4).
+holds(directly_observed(rob1,loc(ref1_book4,c9),false),6).
+holds(directly_observed(rob1,loc(rob1,c9),true),6).
+holds(directly_observed(rob1,loc(rob1,c10),true),8).
+holds(directly_observed(rob1,loc(ref1_book4,c10),false),8).
+holds(directly_observed(rob1,loc(ref1_book4,c11),false),10).
+holds(directly_observed(rob1,loc(rob1,c11),true),10).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:

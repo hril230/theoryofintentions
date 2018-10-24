@@ -1,10 +1,11 @@
-#const numSteps = 5.
+#const numSteps = 9.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {library, kitchen}.
-#place = {c1, c2, c3, c4}.
+#coarse_place = {kitchen, office1}.
+
+#place = {c6, c7, c8, c9, c10, c11, c12, c13, c14, c15}.
 #robot = {rob1}.
 #coarse_thing = #robot.
 #thing = #robot.
@@ -191,25 +192,37 @@ something_happened(I) :- occurs(A, I).
 %%%%%%%%%%%%%%%
 %% Attributes.
 %%%%%%%%%%%%%%%
-next_to(c1, c2).
-next_to(c2, c3).
-next_to(c3, c4).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c8, c9).
+next_to(c9, c10).
+next_to(c10, c11).
+next_to(c11, c12).
+next_to(c12, c13).
+next_to(c13, c14).
+next_to(c14, c15).
 
-comp(c1, library).
-comp(c2, library).
-comp(c3, kitchen).
-comp(c4, kitchen).
+comp(c6, kitchen).
+comp(c7, kitchen).
+comp(c8, kitchen).
+comp(c9, kitchen).
+comp(c10, kitchen).
+comp(c11, office1).
+comp(c12, office1).
+comp(c13, office1).
+comp(c14, office1).
+comp(c15, office1).
 
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,library),I).
+goal(I) :- holds(coarse_loc(rob1,office1),I).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c4), 0).
+holds(loc(rob1,c6), 0).
 
 %%%%%%%%%%%%%%%%%
 %% End of History:
