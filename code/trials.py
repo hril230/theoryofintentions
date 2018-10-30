@@ -68,14 +68,13 @@ def runAndWrite(initial_conditions_index, goal, initial_state):
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
 	error = multiprocessing.Event()
 	planningTime = multiprocessing.Value('d', 0)
-	numAbsPlans = multiprocessing.Value('i', 0)
-	numRefPlans = multiprocessing.Value('i', 0)
-	numAbsAct = multiprocessing.Value('i', 0)
-	numRefAct = multiprocessing.Value('i', 0)
+	numAbsPlans = multiprocessing.Value('d', 0)
+	numRefPlans = multiprocessing.Value('d', 0)
+	numAbsAct = multiprocessing.Value('d', 0)
+	numRefAct = multiprocessing.Value('d', 0)
 	completeRun = multiprocessing.Value('c','_')
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
 	timeTakenZooming = 0
-	timeout = False
 	p1.start()
 	startTime = datetime.now()
   	while True:
@@ -83,6 +82,11 @@ def runAndWrite(initial_conditions_index, goal, initial_state):
 			timeTakenZooming = (datetime.now()-startTime).total_seconds()
 			p1.terminate()
 			p1.join()
+			try:
+				subprocess.check_output('killall clingo', shell=True)
+			except subprocess.CalledProcessError:
+				print('Clingo was not running.')
+
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
 			results.write('\n' + global_variables.controller_type + ' ERROR FOUND')
@@ -104,22 +108,21 @@ def runAndWrite(initial_conditions_index, goal, initial_state):
 			results.close()
 			break
 		'''
-		if not p1.is_alive(): break
+		if not p1.is_alive():
+			print ( ' not process alive: ')
+			break
 	timeTakenZooming = (datetime.now()-startTime).total_seconds()
 	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
 	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
 	results.write('\nTotal trial time with zooming: ' + str(timeTakenZooming) + ' seconds.')
 	results.close()
-	return [str("{0:.2f}".format(timeTakenZooming)),str("{0:.2f}".format(planningTime.value)),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value),str(completeRun.value)]
+	return [timeTakenZooming,planningTime.value,numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
 
 
 
 def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	global_variables.controller_type = 'non_zooming'
 	maxTimeNonZooming = 4*(timeTakenZooming)
-	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-	results.write('\nTime limit for non-zooming: ' + str(maxTimeNonZooming) + ' seconds.')
-	results.close()
 	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
 	my_world = World(initial_state,domain_info)
 	executer = Executer(my_world)
@@ -130,10 +133,10 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
 	error = multiprocessing.Event()
 	planningTime = multiprocessing.Value('d', 0)
-	numAbsPlans = multiprocessing.Value('i', 0)
-	numRefPlans = multiprocessing.Value('i', 0)
-	numAbsAct = multiprocessing.Value('i', 0)
-	numRefAct = multiprocessing.Value('i', 0)
+	numAbsPlans = multiprocessing.Value('d', 0)
+	numRefPlans = multiprocessing.Value('d', 0)
+	numAbsAct = multiprocessing.Value('d', 0)
+	numRefAct = multiprocessing.Value('d', 0)
 	completeRun = multiprocessing.Value('c','_')
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
 	timeTakenNonZooming = 0
@@ -142,8 +145,19 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	timeout = False
   	while True:
 		if error.is_set():
+			print planningTime.value
+			print numAbsPlans.value
+			print numAbsAct.value
+			print numRefPlans.value
+			print numRefAct.value
+			print completeRun.value
 			p1.terminate()
 			p1.join()
+			try:
+				subprocess.check_output('killall clingo', shell=True)
+			except subprocess.CalledProcessError:
+				print('Clingo was not running.')
+
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
 			results.write('\n' + global_variables.controller_type + ' ERROR FOUND')
@@ -172,7 +186,16 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
 	results.write('\nTotal trial time with non zooming: ' + str(timeTakenNonZooming) + ' seconds.')
 	results.close()
-	return [str("{0:.2f}".format(timeTakenNonZooming)),str("{0:.2f}".format(planningTime.value)),str(numAbsPlans.value),str(numRefPlans.value),str(numAbsAct.value),str(numRefAct.value),str(completeRun.value)]
+	print 'just before returning values from runAndWriteWithoutZooming '
+	print timeTakenNonZooming
+	print planningTime.value
+	print numAbsPlans.value
+	print numAbsAct.value
+	print numRefPlans.value
+	print numRefAct.value
+	print completeRun.value
+
+	return [timeTakenNonZooming,planningTime.value,numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
 
 
 def createPreASP_AbstractBeliefFile():
@@ -363,7 +386,20 @@ def createConditionsAndRun():
 	print (initial_state)
 	resultsListZooming = runAndWrite(initial_conditions_index, goal, initial_state)
 	resultsListNonZooming = runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
-	resultsList = [trialCount, str(global_variables.complexity_level)] + resultsListZooming + resultsListNonZooming
+	print('Back to writting trial.runAndWrite, line 377 ')
+	resultsList = [trialCount, str(global_variables.complexity_level)]
+	for i in range(len(resultsListZooming)-1):
+		if(i < 2):
+			resultsList.append("{0:.2f}".format(resultsListZooming[i]))
+			resultsList.append("{0:.2f}".format(resultsListNonZooming[i]))
+		else:
+			resultsList.append(int(resultsListZooming[i]))
+			resultsList.append(int(resultsListNonZooming[i]))
+		try: resultsList.append("{0:.2f}".format(resultsListNonZooming[i]/resultsListZooming[i]))
+		except ZeroDivisionError: resultsList.append(float("inf"))
+	resultsList.append(resultsListZooming[-1])
+	resultsList.append(resultsListNonZooming[-1])
+
 	with open('experimental_results_'+ str(global_variables.complexity_level)+'.csv', 'a') as writeFile:
 		writer = csv.writer(writeFile)
 		writer.writerow(resultsList)
@@ -391,7 +427,7 @@ if __name__ == "__main__":
 	singleRunTest = False
 
 	for level in [4,3,2,1]:
-		trialCount = 0
+		trialCount = 36
 		global_variables.init()
 		global_variables.complexity_level = level # TODO change this number to change the complexity level
 		global_variables.file_name_preASP_ToI_planning = global_variables.ASP_subfolder +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI_planning.txt' # Used for astract planning and diagnosis with ToI
@@ -411,8 +447,7 @@ if __name__ == "__main__":
 
 		with open('experimental_results_'+ str(global_variables.complexity_level)+'.csv', 'a') as writeFile:
 			writer = csv.writer(writeFile)
-			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming', 'Planning Time - zooming', '# Abstract Plans - zooming', '# Refined Plans - zooming', '# Abstract Actions - zooming', '# Refined Actions - zooming', 'Complete Run - zooming', 'Run-time non_zooming', 'Planning Time non_zooming', '# Abstract Plans non_zooming', '# Refined Plans non_zooming', '# Abstract Actions non_zooming', '# Refined Actions non_zooming','Complete Run - non_zooming'])
-		writeFile.close()
+			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming','Run-time non_zooming','Run-time Ratio', 'Planning Time - zooming','Planning Time - non_zooming','Planning Time - Ratio', '# Abstract Plans - zooming', '# Abstract Plans - non_zooming','# Abstract Plans - Ratio','# Abstract Actions - zooming','# Abstract Actions - non_zooming','# Abstract Actions - Ratio','# Refined Plans - zooming','# Refined Plans - non_zooming','# Refined Plans - Ratio',  '# Refined Actions - zooming','# Refined Actions - non_zooming' ,'# Refined Actions - Ratio','Complete Run - zooming','Complete Run - non_zooming'])
 
 
 		sys_random = random.SystemRandom()

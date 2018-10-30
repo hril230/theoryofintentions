@@ -1,0 +1,24 @@
+Complexity level,1,2,3,4
+Average Runtime zooming,7.12245,10.9719,19.3682,34.68595
+Average Runtime non_zooming,7.3178,14.68915,93.46355,67.11305
+Average Runtime Ratio,1.02755,1.3414,5.39065,2.2845
+Average Planning Time zooming,7.72725,10.2315,14.86615,21.52015
+Average Planning Time non_zooming,7.91795,13.9612,91.6653,68.21825
+Avarage Planning Time Ratio,1.02465,1.3632,6.5936,3.518
+Average Num Abstract Plans zooming,1,1,1,1
+Average Num Abstract Plans non_zooming,1,1,1,1
+Average Num Abstract Plans Ratio,1,1,1,1
+Average Num Abstract Actions zooming,2.52,3.235,4.075,4.69
+Average Num Abstract Actions non_zooming,2.52,3.235,2.2,0
+Average Num Abstract Actions Ratio,1,1,0.5197,0
+Average Num Refined Plans zooming,3.005,4.255,5.63,6.555
+Average Num Refined Plans non_zooming,3.005,4.245,4.67,0.895
+Average Num Refined Plans Ratio,1,0.9984,0.833,0.15695
+Average Num Refined Actions zooming,8.41,15.03,25.39,36.16
+Average Num Refined Actions non_zooming,8.41,14.99,13.57,0
+Average Num Refined Actions Ratio,1,0.9984,0.52275,0
+Percentage Completed Goals zooming,100%,100%,100%,100%
+Percentage Completed Goals non_zooming,100%,100%,0%,0%
+Percentage Too Many Answers non_zooming,0%,0%,100%,100%
+Av planning time/ Av Num Refined Plans – zooming,2.57,2.40,2.64,3.28
+Av planning time/ Av Num Refind Plans – non_zooming,2.63,3.29,19.63,76.22

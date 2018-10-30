@@ -26,6 +26,7 @@ class ControllerToI():
 		self.executer = executer
 		self.domain_info = domain_info
 		self.max_plan_length = max_plan_length
+		self.planning_time = datetime.now()-datetime.now()
 
 
 
@@ -62,18 +63,17 @@ class ControllerToI():
 	def run(self,error, final_planning_time, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun):
 		self.completeRun = completeRun
 		self.final_planning_time = final_planning_time
-		self.planning_time = datetime.now()-datetime.now()
 		self.error = error
 		self.believes_goal_holds = False
 		self.history_ToI_diagnosis.append("hpd(select(my_goal), true,0).")
 
 		if(global_variables.controller_type == 'zooming'): self.lines_to_write.append('\nZOOMING CONTROLLER')
 		else: self.lines_to_write.append('\nNON - ZOOMING CONTROLLER')
-
+		self.lines_to_write.append('Refined Location and Abstract Belief: ' + self.refined_location + ' ' + str(self.belief))
 
 		self.diagnose()
 		finish = False # flag that breaks the loop that calls the ASP_ToI_Planning when finish == True
-		while(finish == False and not self.error.is_set()):
+		while(finish == False):
 			abstract_action = self.runToIPlanning(self.input_for_planning)
 			if(abstract_action == 'finish'):
 				#check if the assuption that the goal has been reached is true.
@@ -113,42 +113,31 @@ class ControllerToI():
 			else:
 				print ('\nControllerToI - ref location and coarse belief: ' +self.refined_location + ', '+ str(self.belief))
 				print ('\nControllerToI ' + global_variables.controller_type + ' - next abstract action: ' + abstract_action)
-				numAbsAct.value += numAbsAct.value
+
 				need_refined_plan = True
 				refined_plan_step = 0
 				refined_history = self.refine(abstract_action, self.refined_location) #holds all the history of the refined plan created wtih refined domain in form of 'hpd' and 'obs'
 				direct_observations_history = Set() #holds only the direct observations made during the execution of refined plan in form of 'holds(directly_observed...)'
 				initial_refined_location = self.refined_location #holds the refined location before the refined plan is executed. It is used as initial
 																 #condition for the ASP that infers coarse observations from the refined direct observations
-				while(need_refined_plan and not self.error.is_set()):
-
+				while(need_refined_plan):
 					startTime = datetime.now() # record the time taken to plan the refined plan
 					refined_actions = self.runRefinedPlanning(abstract_action,refined_plan_step)
 					numRefPlans.value += 1
 					endTime = datetime.now()
 					timeTaken = endTime - startTime
 					need_refined_plan = False
-					'''
-					if (refined_actions == ['']) or (refined_actions == None):
-						print ('ControllerToI ' + global_variables.controller_type + ' : \t\t No refined plan ')
-						lineno = self.lineno()
-						print 'Error set at line:  '+str(lineno)
-						self.final_planning_time.value = self.planning_time.total_seconds()
-						self.completeRun = global_variables.character_code_inconsistency
-						self.error.set()
-					'''
+
 					refined_actions.sort(key=self.getStep)
 					print ('ControllerToI ' + global_variables.controller_type + ' - refined plan: ' + str(refined_actions[refined_plan_step:]))
 					# store refined plan
 					self.lines_to_write.append('\nAbstract action: ' + str(abstract_action))
 					self.lines_to_write.append('\nRefined plan: ' + str(refined_actions))
 					self.lines_to_write.append('\nTime taken to create refined plan: ' + str(timeTaken))
-					self.planning_time += timeTaken
 
 					last_action_needs_testing = False
 					last_action = ''
 					for i in range(len(refined_actions)):
-						numRefAct.value += 1
 						refined_occurence = refined_actions[i]
 						refined_action = refined_occurence[refined_occurence.find('(')+1 : refined_occurence.rfind(',')]
 						occurrence_step = int(refined_occurence[refined_occurence.rfind(',')+1:refined_occurence.rfind(')')])
@@ -168,6 +157,7 @@ class ControllerToI():
 							totalTime = endTime - startTime
 							self.testing_times.append(totalTime)
 							refined_history.add('hpd(' + refined_action + ',' + str(refined_plan_step) +').')
+
 							refined_plan_step += 1
 							if(action_test_result==True and 'loc(rob1' in refined_action):
 								self.refined_location = action_direct_observation.split(',')[2][:-1]
@@ -206,7 +196,8 @@ class ControllerToI():
 							last_action_needs_testing = True
 
 							refined_plan_step += 1
-
+						numRefAct.value += 1
+				numAbsAct.value += 1
 				refined_history_list = list(refined_history)
 				refined_history_list.sort(key=self.getStep)
 				direct_observations_history_list = list(direct_observations_history)
@@ -431,8 +422,9 @@ class ControllerToI():
 		print ('\nControllerToI ' + global_variables.controller_type + ' : Inferring indirect coarse obs from refined history ')
 		print self.asp_inferring_indirect_observations_file
 		startTime = datetime.now()
-
 		answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + self.asp_inferring_indirect_observations_file +' -A ', shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '' or answer_set =='\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
@@ -440,8 +432,6 @@ class ControllerToI():
 			if answer_set == '': self.completeRun.value = global_variables.character_code_too_many_answers
 			elif answer_set == '\n':  self.completeRun.value = global_variables.character_code_inconsistency
 			self.error.set()
-		timeTaken = datetime.now() - startTime
-		self.planning_time += timeTaken
 		observations = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
@@ -468,6 +458,8 @@ class ControllerToI():
 		print self.asp_inferring_indirect_observations_file
 		startTime = datetime.now()
 		answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + self.asp_inferring_indirect_observations_file +' -A ', shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '' or answer_set =='\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
@@ -475,8 +467,6 @@ class ControllerToI():
 			elif answer_set == '\n': self.completeRun.value = global_variables.character_code_inconsistency
 			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.error.set()
-		timeTaken = datetime.now() - startTime
-		self.planning_time += timeTaken
 		observations = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
 		return self.domain_info.indirectObservationsToObsSet(observations,self.current_step+1)
 
@@ -504,14 +494,16 @@ class ControllerToI():
 		answer_set = ''
 
 		print myRefinedFile
+		startTime = datetime.now()
 		answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + myRefinedFile +' -A',shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '':
 			lineno = self.lineno()
 			print 'Too many answers: '+str(lineno)
 			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.error.set()
-
 		chosenAnswer = ''
 		numStepsPlanning = refined_plan_step+1 #starting one step ahead of the plan we have so far, if it has already startes
 		if refined_plan_step == 0:
@@ -532,7 +524,10 @@ class ControllerToI():
 
 
 			print myRefinedFile
+			startTime = datetime.now()
 			answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + myRefinedFile +' -A',shell=True)
+			timeTaken = datetime.now() - startTime
+			self.planning_time += timeTaken
 			if answer_set == '':
 				lineno = self.lineno()
 				print 'Too many answers: '+str(lineno)
@@ -570,14 +565,16 @@ class ControllerToI():
 		f1.write(asp)
 		f1.close()
 		print self.asp_ToI_planning_file + ' \t\t Finding next intended action'
+		startTime = datetime.now()
 		answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
 			self.final_planning_time.value = self.planning_time.total_seconds()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.error.set()
-
 		max_step = int(self.current_step + self.max_plan_length+3)
 		step_num = int(self.number_toi_steps)
 		if (step_num < max_step): max_reached = True
@@ -590,7 +587,10 @@ class ControllerToI():
 			f1.write(asp)
 			f1.close()
 			print self.asp_ToI_planning_file
+			startTime = datetime.now()
 			answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + self.asp_ToI_planning_file +' -A ',shell=True)
+			timeTaken = datetime.now() - startTime
+			self.planning_time += timeTaken
 			if answer_set == '':
 				lineno = self.lineno()
 				print 'Error set at line:  '+str(lineno)
@@ -637,7 +637,10 @@ class ControllerToI():
 		f1.write(asp)
 		f1.close()
 		print self.asp_ToI_diagnosing_file
+		startTime = datetime.now()
 		answer_set = subprocess.check_output('java -jar '+global_variables.sparc_path + ' ' + self.asp_ToI_diagnosing_file +' -A ',shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
@@ -645,8 +648,6 @@ class ControllerToI():
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.error.set()
 		answers = answer_set.rstrip().split('\n\n')
-		endTime = datetime.now()
-		timeTaken = endTime -  startTime
 
 		if self.current_diagnosis in answer_set:
 			for a in answers:
@@ -672,7 +673,6 @@ class ControllerToI():
 
 		self.lines_to_write.append('\nDiagnosis ' + str(self.current_diagnosis))
 		self.lines_to_write.append('\nTime taken to diagnose : ' + str(timeTaken))
-		self.planning_time += timeTaken
 		return
 
 
@@ -710,7 +710,10 @@ class ControllerToI():
 		f1.write(asp)
 		f1.close()
 		print self.asp_abstract_belief_file
+		startTime = datetime.now()
 		answer_set = subprocess.check_output('java -jar '+ global_variables.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
@@ -731,7 +734,10 @@ class ControllerToI():
 		f1.close()
 		print ('\nControllerToI ' + global_variables.controller_type + ' : Setting initial belief')
 		print self.asp_abstract_belief_file
+		startTime = datetime.now()
 		answer_set = subprocess.check_output('java -jar '+ global_variables.sparc_path + ' ' + self.asp_abstract_belief_file +' -A',shell=True)
+		timeTaken = datetime.now() - startTime
+		self.planning_time += timeTaken
 		if answer_set == '' or answer_set == '\n':
 			lineno = self.lineno()
 			print 'Error set at line:  '+str(lineno)
