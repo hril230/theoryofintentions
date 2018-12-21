@@ -1,18 +1,16 @@
-#const numSteps = 5.
-
+#const numSteps = 1. % maximum number of steps.
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#coarse_place = {library,kitchen,office1,office2}.
-#coarse_object = {book1,book2,book3}.
-#object = {ref1_book1,ref2_book1,ref3_book1, ref1_book2,ref2_book2,ref3_book2, ref1_book3,ref2_book3,ref3_book3}.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16}.
+#step = 0..numSteps.
+#coarse_place = {library,kitchen}.
+#coarse_object = {book1}.
+#object = {ref1_book1}.
+#place = {c1, c2, c3, c4}.
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
-
-
-#step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
 #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
@@ -23,12 +21,9 @@ sorts
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
-
-
-
-
-
+#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
 #refined_component = #place + #object.
 #coarse_component = #coarse_place + #coarse_object.
 
@@ -53,7 +48,7 @@ comp(#refined_component, #coarse_component).
 %%%%%%%%%%%%%%%%%
 %% Causal Laws %%
 %%%%%%%%%%%%%%%%%
-%% CAUSAL LAWS GO HERE
+-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).
 % Moving changes location to target room (if the door is not locked).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
@@ -63,10 +58,8 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 % Putting an object down causes it to no longer be in hand.
 -holds(in_hand(R, OP), I+1) :- occurs(put_down(R, OP), I).
 
-
-
-
-
+%% exogenous moving an object causes the object to be in a different location.
+holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
@@ -89,9 +82,7 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -coarse_next_to(L1,L2) :- not coarse_next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
-% Defined fluents do not hold unless specified.
--holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
--holds(in_hand(rob1,O),I) :- not holds(in_hand(rob1,O),I).
+% A thing cannot be at two places at the same time.
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,26 +104,22 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 -occurs(move(R, C2), I) :- holds(loc(R, C1), I), -next_to(C1,C2).
 
 % Cannot put down an object unless it is in hand.
--occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).
+-occurs(put_down(R,OP),I) :- comp(OP,B), -holds(coarse_in_hand(rob1,B),I).
 
 % Cannot pick up an object if it has something in hand.
--occurs(pickup(R, OP1), I) :- holds(in_hand(R, OP2), I).
+-occurs(pickup(R, O), I) :- holds(in_hand(R, CO), I).
 
 % Cannot pick up an object if you are not in the same room.
 -occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
 
 % Cannot execute two actions at the same time.
-:- occurs(A1,I), occurs(A2,I), A1 != A2, #action(A1), #action(A2).
+:- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
+%% An exogenous move of an object cannot be done to the same location.
+-occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
 
-
-
-
-
-
-
-
-
+%% An exogenous move of an object cannot happen if it is being in hand
+-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
@@ -163,12 +150,7 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %%%%%%%%%%%%%%%%%%%
 %% Testing Actions
 %%%%%%%%%%%%%%%%%%%
-% Make sure the outcome of any concrete action is tested
-occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).
-occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
-occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
--occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
--occurs(pickup(rob1, OP), I) :- I = 0.
+%% TESTING RULES GO HERE
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -176,10 +158,11 @@ occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
 holds(F,I+1) :- #inertial_fluent(F), holds(F,I), not -holds(F,I+1).
 -holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
 
-%%%%%%%%%%%%%%%%%%%%
-%% CWA for Actions.
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CWA for Actions and Defined Fluents.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -occurs(A,I) :- not occurs(A,I).
+-holds(F,I) :- #defined_fluent(F), not holds(F,I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History and initial state rules
@@ -191,69 +174,28 @@ occurs(A,I) :- hpd(A,I).
 :- obs(F, true, I), -holds(F, I).
 :- obs(F, false, I), holds(F, I).
 
+%%%%%%%%%%%%%%%%%%%%
 %% Awareness axiom.
-holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
+%%%%%%%%%%%%%%%%%%%%
+holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
 
 
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
 %%%%%%%%%%%%%%%%%%%%
-%% Failure is not an option.
-success :- goal(I).
-:- not success.
-%% Plan Actions minimally
-occurs(A,I):+ not goal(I).
-%% Preventing preASP_refined_domain_no_planning
-something_happened(I) :- occurs(A, I).
-:- not goal(I), not something_happened(I).
-:- not something_happened(0).
-
+%% PLANNING RULES GO HERE
 
 %%%%%%%%%%%%%%%
-%% Attributes.
+%% Attributes:
 %%%%%%%%%%%%%%%
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
-next_to(c4, c5).
-next_to(c5, c6).
-next_to(c6, c7).
-next_to(c7, c8).
-next_to(c8, c9).
-next_to(c9, c10).
-next_to(c10, c11).
-next_to(c11, c12).
-next_to(c12, c13).
-next_to(c13, c14).
-next_to(c14, c15).
-next_to(c15, c16).
-
 comp(c1, library).
 comp(c2, library).
-comp(c3, library).
-comp(c4, library).
-comp(c5, kitchen).
-comp(c6, kitchen).
-comp(c7, kitchen).
-comp(c8, kitchen).
-comp(c9, office1).
-comp(c10, office1).
-comp(c11, office1).
-comp(c12, office1).
-comp(c13, office2).
-comp(c14, office2).
-comp(c15, office2).
-comp(c16, office2).
-
+comp(c3, kitchen).
+comp(c4, kitchen).
 comp(ref1_book1, book1).
-comp(ref2_book1, book1).
-comp(ref3_book1, book1).
-comp(ref1_book2, book2).
-comp(ref2_book2, book2).
-comp(ref3_book2, book2).
-comp(ref1_book3, book3).
-comp(ref2_book3, book3).
-comp(ref3_book3, book3).
 
 %%%%%%%%%
 %% Goal:
@@ -264,13 +206,15 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-
-%%%%%%%%%%%%%%%%%
-%% End of History:
-%%%%%%%%%%%%%%%%%
+holds(loc(ref1_book1,c2),0).
+holds(loc(rob1,c2),0).
+-holds(coarse_in_hand(rob1,book1),0).
 
 %%%%%%%%%
 display
 %%%%%%%%%
 
-occurs.
+holds(loc(A,B),numSteps).
+holds(in_hand(A,B),numSteps).
+holds(coarse_loc(A,B),numSteps).
+holds(coarse_in_hand(A,B),numSteps).

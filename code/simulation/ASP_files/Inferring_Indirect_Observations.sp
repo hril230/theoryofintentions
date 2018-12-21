@@ -1,36 +1,31 @@
 #const numSteps = 2.
-
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#step = 0..numSteps.
 #coarse_place = {library,kitchen}.
 #coarse_object = {book1}.
 #object = {ref1_book1}.
-#place = {c1, c2, c3, c4}.
+#place = {c3,c2,c1,c4}.
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
-
-
-#step = 0..numSteps.
-#boolean = {true, false}.
-#outcome = {true, false, undet}.
-#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
-#physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
+#boolean = {true,false}.
+#outcome = {true,false,undet}.
+#physical_inertial_fluent = loc(#thing,#place) + in_hand(#robot,#object).
+#physical_defined_fluent = coarse_loc(#coarse_thing,#coarse_place) + coarse_in_hand(#robot,#coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
-#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
-#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
-#inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
-#defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
+#knowledge_inertial_fluent = directly_observed(#robot,#physical_inertial_fluent,#outcome) + can_be_tested(#robot,#physical_inertial_fluent,#boolean).
+#knowledge_defined_fluent = observed(#robot,#physical_fluent,#outcome) + may_discover(#robot,#physical_defined_fluent,#boolean) + indirectly_observed(#robot,#physical_defined_fluent,#outcome).
+#inertial_fluent = #knowledge_inertial_fluent + #physical_inertial_fluent.
+#defined_fluent = #knowledge_defined_fluent + #physical_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
-
-
-
-
-
-#refined_component = #place + #object.
-#coarse_component = #coarse_place + #coarse_object.
+#rob_action = test(#robot,#physical_inertial_fluent,#boolean) + pickup(#robot,#object) + move(#robot,#place) + put_down(#robot,#object).
+#exo_action = exo_move(#object,#place).
+#action = #exo_action + #rob_action.
+#refined_component = #object + #place.
+#coarse_component = #coarse_object + #coarse_place.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
@@ -63,10 +58,8 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 % Putting an object down causes it to no longer be in hand.
 -holds(in_hand(R, OP), I+1) :- occurs(put_down(R, OP), I).
 
-
-
-
-
+%% exogenous moving an object causes the object to be in a different location.
+holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
@@ -89,9 +82,7 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -coarse_next_to(L1,L2) :- not coarse_next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
-% Defined fluents do not hold unless specified.
--holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
--holds(in_hand(rob1,O),I) :- not holds(in_hand(rob1,O),I).
+% A thing cannot be at two places at the same time.
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,23 +107,19 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 -occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).
 
 % Cannot pick up an object if it has something in hand.
--occurs(pickup(R, OP1), I) :- holds(in_hand(R, OP2), I).
+-occurs(pickup(R, O), I) :- holds(in_hand(R, CO), I).
 
 % Cannot pick up an object if you are not in the same room.
 -occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
 
 % Cannot execute two actions at the same time.
-:- occurs(A1,I), occurs(A2,I), A1 != A2, #action(A1), #action(A2).
+:- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
+%% An exogenous move of an object cannot be done to the same location.
+-occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
 
-
-
-
-
-
-
-
-
+%% An exogenous move of an object cannot happen if it is being in hand
+-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
@@ -171,10 +158,11 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 holds(F,I+1) :- #inertial_fluent(F), holds(F,I), not -holds(F,I+1).
 -holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
 
-%%%%%%%%%%%%%%%%%%%%
-%% CWA for Actions.
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CWA for Actions and Defined Fluents.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -occurs(A,I) :- not occurs(A,I).
+-holds(F,I) :- #defined_fluent(F), not holds(F,I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History and initial state rules
@@ -186,8 +174,10 @@ occurs(A,I) :- hpd(A,I).
 :- obs(F, true, I), -holds(F, I).
 :- obs(F, false, I), holds(F, I).
 
+%%%%%%%%%%%%%%%%%%%%
 %% Awareness axiom.
-holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
+%%%%%%%%%%%%%%%%%%%%
+holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -195,19 +185,16 @@ holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%%%%%%
 %% PLANNING RULES GO HERE
 
-
 %%%%%%%%%%%%%%%
-%% Attributes.
+%% Attributes:
 %%%%%%%%%%%%%%%
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
-
 comp(c1, library).
 comp(c2, library).
 comp(c3, kitchen).
 comp(c4, kitchen).
-
 comp(ref1_book1, book1).
 
 %%%%%%%%%
@@ -218,21 +205,17 @@ comp(ref1_book1, book1).
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-%% HISTORY GOES HERE
 hpd(move(rob1,c3),0).
 holds(coarse_in_hand(rob1,book1),0).
+holds(in_hand(rob1,ref1_book1),0).
 holds(loc(rob1,c2),0).
-holds(coarse_loc(book1,library),0).
 holds(coarse_loc(rob1,library),0).
+holds(coarse_loc(book1,library),0).
 hpd(test(rob1,loc(rob1,c3),true),1).
+obs(loc(ref1_book1,c3),true,2).
 obs(loc(rob1,c3),true,2).
-obs(loc(ref1_book1,c3),false,2).
-holds(directly_observed(rob1,loc(ref1_book1,c3),false),2).
+holds(directly_observed(rob1,loc(ref1_book1,c3),true),2).
 holds(directly_observed(rob1,loc(rob1,c3),true),2).
-
-%%%%%%%%%%%%%%%%%
-%% End of History:
-%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%
 display

@@ -1,7 +1,7 @@
-#const numSteps = 6.
-#const max_len = 7.
+#const numSteps = 3.
+#const max_len = 4.
 #const max_name = 1.
-
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% This ASP is used to plan with ToI and to Diagnose with ToI.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,28 +9,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {library, kitchen, office1}.
-#book = {book1, book2}.
+#step = 0..numSteps.
+#object = {book1}.
+#place = {library, kitchen}.
 #robot = {rob1}.
-#object = #book.
 #thing = #object + #robot.
 
 #boolean = {true, false}.
-#step = 0..numSteps.
 
 #integer = 0..numSteps.
 #positive_index = 1..max_len.
 #index = #positive_index + {neg1, 0}.
 #activity_name = 1..max_name.
 
-#physical_inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
+#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
 #possible_goal = {my_goal}.
 #physical_defined_fluent = #possible_goal.
 
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 
-#physical_agent_action = move(#robot,#room) + pickup(#robot,#object) + put_down(#robot,#object).
-#physical_exogenous_action = exo_move(#object, #room).
+#physical_agent_action = move(#robot,#place) + pickup(#robot,#object) + put_down(#robot,#object).
+#physical_exogenous_action = exo_move(#object, #place).
 
 #mental_agent_action = start(#activity_name) + stop(#activity_name).
 
@@ -52,7 +51,7 @@ sorts
 predicates
 %%%%%%%%%%%%%
 %% static relations
-next_to(#room,#room).
+next_to(#place,#place).
 holds(#fluent,#step).
 occurs(#action,#step).
 
@@ -113,7 +112,6 @@ next_to(L1,L2) :- next_to(L2,L1).
 holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
 -holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1!=O2.
 -next_to(L1,L2) :- not next_to(L1,L2).
--holds(in_hand(R,O),0) :- not holds(in_hand(R,O),0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Executability Condition %%
@@ -128,18 +126,13 @@ impossible(pickup(R,O), I) :- holds(loc(R,L), I), not holds(loc(O,L), I).
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
 impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
 
-%%%%%%%%%%%%%%
-%% Defaults %%
-%%%%%%%%%%%%%%
-%holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-%holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Inertial axiom + CWA %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %% CWA for Defined Fluents (Thesis: 2.12)
 -holds(F,I) :- #defined_fluent(F), not holds(F,I).
+
 %%  General inertia axioms... (Thesis: 2.15)
 holds(F,I+1) :- #inertial_fluent(F),  holds(F,I), not -holds(F,I+1).
 -holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
@@ -232,6 +225,9 @@ impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History records and initial state rules %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Awareness axiom.
+holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
+
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
 -holds(F, 0) :- obs(F, false, 0).
@@ -519,7 +515,6 @@ has_intention(I) :- intended_action(A,I).
 %% Attributes.
 %%%%%%%%%%%%%%%%
 next_to(library, kitchen).
-next_to(kitchen, office1).
 
 
 %%%%%%%%%

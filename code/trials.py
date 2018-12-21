@@ -1,10 +1,9 @@
-
 from datetime import datetime
 
 from simulation.realWorld import World
-#from controllerTraditionalPlanning import ControllerTraditionalPlanning
 from controllerToI import ControllerToI
 from simulation.executer import Executer
+from sets import Set
 import subprocess
 import  csv
 import random
@@ -14,58 +13,21 @@ import global_variables
 from simulation.domain_info import DomainInfo
 import sys
 import csv
-import psutil
 from decimal import getcontext, Decimal
-
+from pprint import pprint
+from collections import OrderedDict
 
 global trialCount
 
-max_plan_length = 17
-maxTimeZooming = 300
-timeTakenZooming = 0
-def refine_goal_location(book_goal_loc, refined_location_possibilities):
-	if book_goal_loc == 'library':
-		book_loc_start_index = 0
-		book_loc_end_index = global_variables.complexity_level+1
-	elif book_goal_loc == 'kitchen':
-		book_loc_start_index = global_variables.complexity_level+1
-		book_loc_end_index = (global_variables.complexity_level+1)*2
-	elif book_goal_loc == 'office1':
-		book_loc_start_index = (global_variables.complexity_level+1)*2
-		book_loc_end_index = (global_variables.complexity_level+1)*3
-	elif book_goal_loc == 'office2':
-		book_loc_start_index = (global_variables.complexity_level+1)*3
-		book_loc_end_index = (global_variables.complexity_level+1)*4
-	else:
-		book_loc_start_index = (global_variables.complexity_level+1)*4
-		book_loc_end_index = (global_variables.complexity_level+1)*5
-	return (refined_location_possibilities[book_loc_start_index:book_loc_end_index])
 
-
-def runAndWrite(initial_conditions_index, goal, initial_state):
-	global_variables.controller_type = 'zooming'
-	global timeTakenZooming
-	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
-	my_world = World(initial_state,domain_info)
+def runAndWrite( goal, dic_initial_state):
+	my_world = World(dic_initial_state,domain_info)
 	executer = Executer(my_world)
-	known_world = my_world.getCoarseState()
-	print('my_world.getCoarseState() ')
-	print(known_world)
-
-	initial_conditions = list(domain_info.coarseStateToAbstractHoldsSet(known_world,0))
+	dic_known_world = my_world.getAbstractState()
+	initial_history = list(domain_info.dic_abstractStateToAbstractHoldsSet(dic_known_world,0))
 	robot_refined_location = my_world.getRobotRefinedLocation()
 
-	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-	results.write('\n\nTrial Number: ' + str(trialCount))
-	if global_variables.complexity_level == 1: results.write('\nInitial state: [rob1_loc, book1_loc, book1_in_hand, refined_object_parts_in_hand] = \n ')
-	elif global_variables.complexity_level == 2: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book1_in_hand, book2_in_hand, refined_object_parts_in_hand] = \n ')
-	elif global_variables.complexity_level == 3: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book1_in_hand, book2_in_hand, book3_in_hand, refined_object_parts_in_hand] = \n')
-	elif global_variables.complexity_level == 4: results.write('\nInitial state: [rob1_loc, book1_loc, book2_loc, book3_loc, book4_loc, book1_in_hand, book2_in_hand, book3_in_hand, book4_in_hand, refined_object_parts_in_hand] = \n')
-	results.write(str(initial_state))
-	results.write('\nGoal: ')
-	results.write(goal)
-	results.close()
-	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions, goal, max_plan_length)
+	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_history , goal)
 	error = multiprocessing.Event()
 	planningTime = multiprocessing.Value('d', 0)
 	numAbsPlans = multiprocessing.Value('d', 0)
@@ -74,72 +36,7 @@ def runAndWrite(initial_conditions_index, goal, initial_state):
 	numRefAct = multiprocessing.Value('d', 0)
 	completeRun = multiprocessing.Value('c','_')
 	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
-	timeTakenZooming = 0
-	p1.start()
-	startTime = datetime.now()
-  	while True:
-		if error.is_set():
-			timeTakenZooming = (datetime.now()-startTime).total_seconds()
-			p1.terminate()
-			p1.join()
-			try:
-				subprocess.check_output('killall clingo', shell=True)
-			except subprocess.CalledProcessError:
-				print('Clingo was not running.')
-
-			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-			results.write('\n' + global_variables.controller_type + ' ERROR FOUND')
-			results.close()
-			break
-		'''
-		if int((datetime.now()-startTime).total_seconds()) > maxTimeZooming and p1.is_alive():
-			timeTakenZooming = (datetime.now()-startTime).total_seconds()
-			completeRun.value = global_variables.character_code_timeout
-			p1.terminate()
-			p1.join()
-			try:
-				subprocess.check_output('killall clingo', shell=True)
-			except subprocess.CalledProcessError:
-				print('Clingo was not running.')
-			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   TIMEOUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-			results.write('\n' + global_variables.controller_type + ' TIMEOUT REACHED')
-			results.close()
-			break
-		'''
-		if not p1.is_alive():
-			print ( ' not process alive: ')
-			break
-	timeTakenZooming = (datetime.now()-startTime).total_seconds()
-	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken zooming: ' + str(timeTakenZooming) + ' seconds.'
-	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-	results.write('\nTotal trial time with zooming: ' + str(timeTakenZooming) + ' seconds.')
-	results.close()
-	return [timeTakenZooming,planningTime.value,numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
-
-
-
-def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
-	global_variables.controller_type = 'non_zooming'
-	maxTimeNonZooming = 4*(timeTakenZooming)
-	indexes_relevant_goal = domain_info.getIndexesRelevantToGoal(goal)
-	my_world = World(initial_state,domain_info)
-	executer = Executer(my_world)
-	known_world = my_world.getCoarseState()
-	initial_conditions = list(domain_info.coarseStateToAbstractHoldsSet(known_world,0))
-	robot_refined_location = my_world.getRobotRefinedLocation()
-
-	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_conditions , goal, max_plan_length)
-	error = multiprocessing.Event()
-	planningTime = multiprocessing.Value('d', 0)
-	numAbsPlans = multiprocessing.Value('d', 0)
-	numRefPlans = multiprocessing.Value('d', 0)
-	numAbsAct = multiprocessing.Value('d', 0)
-	numRefAct = multiprocessing.Value('d', 0)
-	completeRun = multiprocessing.Value('c','_')
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error,planningTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
-	timeTakenNonZooming = 0
+	timeTaken = 0
 	p1.start()
 	startTime = datetime.now()
 	timeout = False
@@ -159,234 +56,69 @@ def runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state):
 				print('Clingo was not running.')
 
 			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
+			results = open(global_variables.txt_results_file, 'a')
 			results.write('\n' + global_variables.controller_type + ' ERROR FOUND')
 			results.close()
 			break
-		'''
-		if int((datetime.now()-startTime).total_seconds()) > maxTimeNonZooming and p1.is_alive():
-			timeout = True
-			p1.terminate()
-			p1.join()
-			completeRun.value = global_variables.character_code_timeout
-			try:
-				subprocess.check_output('killall clingo', shell=True)
-			except subprocess.CalledProcessError:
-				print('Clingo was not running.')
-			print(' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   TIMEOUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-			results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-			results.write('\n' + global_variables.controller_type + ' TIMEOUT REACHED')
-			results.close()
-			break
-		'''
 		if not p1.is_alive(): break
 
-	timeTakenNonZooming = (datetime.now()-startTime).total_seconds()
-	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken non zooming: ' + str(timeTakenNonZooming) + ' seconds.'
-	results = open('experimental_results_' + str(global_variables.complexity_level) + '.txt', 'a')
-	results.write('\nTotal trial time with non zooming: ' + str(timeTakenNonZooming) + ' seconds.')
+	timeTaken = (datetime.now()-startTime).total_seconds()
+	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$      time taken non zooming: ' + str(timeTaken) + ' seconds.'
+	results = open(global_variables.txt_results_file, 'a')
+	results.write('\nTotal trial time: ' + str(timeTaken) + ' seconds.')
 	results.close()
-	print 'just before returning values from runAndWriteWithoutZooming '
-	print timeTakenNonZooming
 	print planningTime.value
 	print numAbsPlans.value
 	print numAbsAct.value
 	print numRefPlans.value
 	print numRefAct.value
 	print completeRun.value
+	return [timeTaken,planningTime.value,numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
 
-	return [timeTakenNonZooming,planningTime.value,numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
 
-
-def createPreASP_AbstractBeliefFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_abstract_domain, 'r')
-	my_text = reader.read()
+def create_pre_ASP_abstract_belief_file():
+	## read
+	reader = open(domain_info.file_name_preASP_abstract_domain, 'r')
+	pre_ASP_lines = reader.read().split('\n')
 	reader.close()
-	my_text_split = my_text.split('\n')
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.abstract_locations_string[global_variables.complexity_level-1]+'\n'+global_variables.abstract_objects_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
-	writer = open(global_variables.file_name_preASP_abstract_belief, 'w')
-	writer.write('\n'.join(my_text_split))
+	## add abstract constants and attributes for the appropriate complexity (given by domain_info already)
+	pre_ASP_lines[pre_ASP_lines.index(domain_info.constants_marker)] = '\n'.join(domain_info.abstract_constants_lines)
+	pre_ASP_lines[pre_ASP_lines.index(domain_info.attributes_marker)] = '\n'.join(domain_info.abstract_attributes_lines)
+	## write
+	writer = open(domain_info.file_name_preASP_abstract_belief, 'w')
+	writer.write('\n'.join(pre_ASP_lines))
 	writer.close()
 
-def createPreASP_ToIPlanningFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_ToI_domain, 'r')
-	my_text = reader.read()
+def create_pre_ASP_ToI_planning_file():
+	## read
+	reader = open(domain_info.file_name_preASP_ToI_domain, 'r')
+	pre_ASP_lines = reader.read().split('\n')
 	reader.close()
-	my_text_split = my_text.split('\n')
-	my_text_split[0] = '#const numSteps = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1]) +'.'
-	my_text_split[1] = '#const max_len = ' + str(global_variables.max_number_steps_ToI_planning[global_variables.complexity_level-1]+1) +'.'
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.abstract_locations_string[global_variables.complexity_level-1]+'\n'+global_variables.abstract_objects_string[global_variables.complexity_level-1]
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.abstract_attributes_string[global_variables.complexity_level-1]
-	writer = open(global_variables.file_name_preASP_ToI_planning, 'w')
-	writer.write('\n'.join(my_text_split))
+	## add abstract constants and attributes for the appropriate complexity (given by domain_info already)
+	pre_ASP_lines[0] = '#const numSteps = ' + str(domain_info.max_number_steps_ToI_planning) +'.'
+	pre_ASP_lines[1] = '#const max_len = ' + str(domain_info.max_number_steps_ToI_planning+1) +'.'
+	pre_ASP_lines[pre_ASP_lines.index(domain_info.constants_marker)] = '\n'.join(domain_info.abstract_constants_lines)
+	pre_ASP_lines[pre_ASP_lines.index(domain_info.attributes_marker)] = '\n'.join(domain_info.abstract_attributes_lines)
+	## write
+	writer = open(domain_info.file_name_preASP_ToI_planning, 'w')
+	writer.write('\n'.join(pre_ASP_lines))
 	writer.close()
 
-def createPreASP_RefinedWorldFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	causal_law_marker = '%% CAUSAL LAWS GO HERE'
-	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1] + global_variables.sort_of_sorts_string
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
-	causal_law_index = my_text_split.index(causal_law_marker)
-	my_text_split[causal_law_index] = global_variables.refined_world_causal_law
-	exec_condition_index = my_text_split.index(global_variables.old_refined_world_executability_condition)
-	my_text_split[exec_condition_index] = global_variables.new_refined_world_executability_condition
-	my_text_split.append(global_variables.refined_world_display_string)
-	writer = open(global_variables.file_name_preASP_refined_world, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-def createPreASP_InferringIndirectObservationsFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	#sorts_index = my_text_split.index(sorts_marker)
-	#my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]+global_variables.sort_of_sorts_string
-	#attributes_index = my_text_split.index(attributes_marker)
-	#my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
-	my_text_split.append(global_variables.inferring_indirect_observations_display_string)
-	#removing exo actions
-	for i, line in enumerate(my_text_split):
-		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
-		if('exo' in line): my_text_split[i] = '\n'
-	writer = open(global_variables.file_name_preASP_inferring_indirect_observations, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-def createPreASP_RefinedPlanningFile():
-	sorts_marker = '%% SORTS GO HERE'
-	attributes_marker = '%% ATTRIBUTES GO HERE'
-	planning_marker = '%% PLANNING RULES GO HERE'
-	testing_marker = '%% TESTING RULES GO HERE'
-	reader = open(global_variables.file_name_preASP_refined_domain, 'r')
-	my_text = reader.read()
-	reader.close()
-	my_text_split = my_text.split('\n')
-	my_text_split[0] = '#const numSteps = ' + str(global_variables.number_steps_refined_planning[global_variables.complexity_level-1]) +'.'
-	sorts_index = my_text_split.index(sorts_marker)
-	my_text_split[sorts_index] = global_variables.refined_sorts_string[global_variables.complexity_level-1]+global_variables.sort_of_sorts_string
-	attributes_index = my_text_split.index(attributes_marker)
-	my_text_split[attributes_index] = global_variables.refined_attributes_string[global_variables.complexity_level-1]
-	planning_index = my_text_split.index(planning_marker)
-	my_text_split[planning_index] = global_variables.planning_rules_string
-	testing_index = my_text_split.index(testing_marker)
-	my_text_split[testing_index] = global_variables.testing_rules_string
-	my_text_split.append('occurs.')
-	my_text = '\n'.join(my_text_split)
-	#removing exo actions
-	for i, line in enumerate(my_text_split):
-		if('rob_action' in line): my_text_split[i] = line.replace('rob_action','action')
-		if('exo' in line): my_text_split[i] = '\n'
-	writer = open(global_variables.file_name_preASP_refined_planning, 'w')
-	writer.write('\n'.join(my_text_split))
-	writer.close()
-
-def createConditionsAndRun():
-	# set the domain to match the complexity number
-	total_refined_location_possibilities = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21', 'c22', 'c23', 'c24', 'c25']
-	location_possibilities_index = (global_variables.complexity_level+1)**2
-	refined_location_possibilities = total_refined_location_possibilities[0:location_possibilities_index]
-	total_book_choice_possibilities = ['book1', 'book2', 'book3', 'book4']
-	book_choice_possibilities = total_book_choice_possibilities[0:global_variables.complexity_level]
-	total_book_loc_possibilities = ['library', 'kitchen', 'office1', 'office2', 'storage_cupboard']
-	book_loc_possibilities = total_book_loc_possibilities[0:global_variables.complexity_level+1]
-
-	initial_conditions_index = 0
-	controlled_run = False
-
-	# set initial conditions
-	repeat = True # repeat until initial conditions and a goal have been chosen that means planning has to be done to achieve the goal
-	while (repeat):
-		#in_hand_possibilities = ['false', 'true']
-		in_hand_possibilities = ['false'] # experiments are set up so the robot is not holding anything at the start
-		robot_refined_location = sys_random.choice(refined_location_possibilities)
-		book1_refined_location = sys_random.choice(refined_location_possibilities)
-		book2_refined_location = sys_random.choice(refined_location_possibilities)
-		book3_refined_location = sys_random.choice(refined_location_possibilities)
-		book4_refined_location = sys_random.choice(refined_location_possibilities)
-		if robot_refined_location == book1_refined_location:
-			in_handBook1 = sys_random.choice(in_hand_possibilities)
-		else: in_handBook1 = 'false'
-		if (robot_refined_location == book2_refined_location) and (in_handBook1 == 'false'):
-			in_handBook2 = sys_random.choice(in_hand_possibilities)
-		else: in_handBook2 = 'false'
-		if (robot_refined_location == book3_refined_location) and (in_handBook1 == 'false') and (in_handBook2 == 'false'):
-			in_handBook3 = sys_random.choice(in_hand_possibilities)
-		else: in_handBook3 = 'false'
-		if (robot_refined_location == book4_refined_location) and (in_handBook1 == 'false') and (in_handBook2 == 'false') and (in_handBook3 == 'false'):
-			in_handBook4 = sys_random.choice(in_hand_possibilities)
-		else: in_handBook4 = 'false'
-		if in_handBook1 == 'true':
-			in_handBook1Ref1, in_handBook1Ref2, in_handBook1Ref3, in_handBook1Ref4 = 'true', 'false', 'false', 'false'
-		else:
-			in_handBook1Ref1, in_handBook1Ref2, in_handBook1Ref3, in_handBook1Ref4 = 'false', 'false', 'false', 'false'
-		if in_handBook2 == 'true':
-			in_handBook2Ref1, in_handBook2Ref2, in_handBook2Ref3, in_handBook2Ref4 = 'true', 'false', 'false', 'false'
-		else:
-			in_handBook2Ref1, in_handBook2Ref2, in_handBook2Ref3, in_handBook2Ref4 = 'false', 'false', 'false', 'false'
-		if in_handBook3 == 'true':
-			in_handBook3Ref1, in_handBook3Ref2, in_handBook3Ref3, in_handBook3Ref4 = 'true', 'false', 'false', 'false'
-		else:
-			in_handBook3Ref1, in_handBook3Ref2, in_handBook3Ref3, in_handBook3Ref4 = 'false', 'false', 'false', 'false'
-		if in_handBook4 == 'true':
-			in_handBook4Ref1, in_handBook4Ref2, in_handBook4Ref3, in_handBook4Ref4 = 'true', 'false', 'false', 'false'
-		else:
-			in_handBook4Ref1, in_handBook4Ref2, in_handBook4Ref3, in_handBook4Ref4 = 'false', 'false', 'false', 'false'
-
-		# initial state includes the initial conditions that match the domain of the selected complexity level
-		if global_variables.complexity_level == 1: initial_state = [robot_refined_location , book1_refined_location, in_handBook1, in_handBook1Ref1]
-		elif global_variables.complexity_level == 2: initial_state = [robot_refined_location , book1_refined_location, book2_refined_location, in_handBook1, in_handBook2, in_handBook1Ref1, in_handBook1Ref2, in_handBook2Ref1, in_handBook2Ref2]
-		elif global_variables.complexity_level == 3: initial_state = [robot_refined_location , book1_refined_location, book2_refined_location, book3_refined_location, in_handBook1, in_handBook2, in_handBook3, in_handBook1Ref1, in_handBook1Ref2, in_handBook1Ref3, in_handBook2Ref1, in_handBook2Ref2, in_handBook2Ref3, in_handBook3Ref1, in_handBook3Ref2, in_handBook3Ref3]
-		elif global_variables.complexity_level == 4: initial_state = [robot_refined_location , book1_refined_location, book2_refined_location, book3_refined_location, book4_refined_location, in_handBook1, in_handBook2, in_handBook3, in_handBook4, in_handBook1Ref1, in_handBook1Ref2, in_handBook1Ref3, in_handBook1Ref4, in_handBook2Ref1, in_handBook2Ref2, in_handBook2Ref3, in_handBook2Ref4, in_handBook3Ref1, in_handBook3Ref2, in_handBook3Ref3, in_handBook3Ref4, in_handBook4Ref1, in_handBook4Ref2, in_handBook4Ref3, in_handBook4Ref4]
-
-		# chose goal randomly - move one randomly chosen object to one randomly chosen location
-		book_choice = sys_random.choice(book_choice_possibilities)
-		if book_choice == 'book1': book_refined_location = book1_refined_location
-		elif book_choice == 'book2': book_refined_location = book2_refined_location
-		elif book_choice == 'book3': book_refined_location = book3_refined_location
-		elif book_choice == 'book4': book_refined_location = book4_refined_location
-		book_goal_loc = sys_random.choice(book_loc_possibilities)
-		goal = 'holds(loc('+book_choice+','+book_goal_loc+'),I).'
-		book_loc_refinements = refine_goal_location(book_goal_loc, refined_location_possibilities)
-		# make sure the goal won't already be completed at start time
-		count = 0
-		while (book_refined_location in book_loc_refinements) and (count < 10):
-			count = count + 1
-			book_goal_loc = sys_random.choice(book_loc_possibilities)
-			book_loc_refinements = refine_goal_location(book_goal_loc, refined_location_possibilities)
-			goal = 'holds(loc('+book_choice+','+book_goal_loc+'),I).'
-		# check that the goal choosing loop completed before it ran out of attempts - it not, need to choose new initial conditions
-		if count < 10: repeat = False
 
 
-
+def runPairwiseControllersAndWrite(dic_initial_state, goal):
 	print ('\nComplexity level:')
 	print (global_variables.complexity_level)
 	print ('Goal:')
 	print (goal)
 	print ('Initial_state:')
-	print (initial_state)
-	resultsListZooming = runAndWrite(initial_conditions_index, goal, initial_state)
-	resultsListNonZooming = runAndWriteWithoutZooming(initial_conditions_index, goal, initial_state)
-	print('Back to writting trial.runAndWrite, line 377 ')
+	print(dic_initial_state)
+	pprint(dic_initial_state.items())
+
+	global_variables.controller_type = 'zooming'
+	resultsListZooming = runAndWrite(goal, dic_initial_state)
+	global_variables.controller_type = 'non_zooming'
+	resultsListNonZooming = runAndWrite(goal, dic_initial_state)
 	resultsList = [trialCount, str(global_variables.complexity_level)]
 	for i in range(len(resultsListZooming)-1):
 		if(i < 2):
@@ -400,7 +132,7 @@ def createConditionsAndRun():
 	resultsList.append(resultsListZooming[-1])
 	resultsList.append(resultsListNonZooming[-1])
 
-	with open('experimental_results_'+ str(global_variables.complexity_level)+'.csv', 'a') as writeFile:
+	with open(global_variables.csv_results_file, 'a') as writeFile:
 		writer = csv.writer(writeFile)
 		writer.writerow(resultsList)
 	writeFile.close()
@@ -408,54 +140,70 @@ def createConditionsAndRun():
 
 def runGivenInitialState():
 	global_variables.complexity_level = 4
-	goal = 'holds(loc(book4,storage_cupboard),I).'
-	initial_state = ['c13', 'c22', 'c9', 'c21', 'c14', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false']
-
+	goal = 'holds(loc(book2,kitchen),I).'
+	dic_initial_state = OrderedDict([('loc(ref1_book1', 'c18'), ('loc(ref2_book1', 'c18'), ('loc(ref3_book1', 'c18'), ('loc(ref4_book1', 'c18'), ('loc(ref1_book2', 'c4'), ('loc(ref2_book2', 'c4'), ('loc(ref3_book2', 'c4'), ('loc(ref4_book2', 'c4'), ('loc(ref1_book3', 'c7'), ('loc(ref2_book3', 'c7'), ('loc(ref3_book3', 'c7'), ('loc(ref4_book3', 'c7'), ('loc(ref1_book4', 'c20'), ('loc(ref2_book4', 'c20'), ('loc(ref3_book4', 'c20'), ('loc(ref4_book4', 'c20'), ('in_hand(rob1', 'ref4_book3'), ('loc(rob1', 'c7')])
 	print (goal)
 	print ('Initial_state:')
-	print (initial_state)
-	resultsListZooming = runAndWrite(0, goal, initial_state)
-	resultsListNonZooming = runAndWriteWithoutZooming(0, goal, initial_state)
-	resultsList = [trialCount, str(global_variables.complexity_level)] + resultsListZooming + resultsListNonZooming
-	with open('experimental_results_'+ str(global_variables.complexity_level)+'.csv', 'a') as writeFile:
-		writer = csv.writer(writeFile)
-		writer.writerow(resultsList)
-	writeFile.close()
+	print (dic_initial_state)
+	global_variables.controller_type = 'zooming'
+	runAndWrite(goal, dic_initial_state)
+
+
+def createInitialConditionsAndGoal():
+	dic_initial_state = OrderedDict()
+	refined_objects = list(domain_info.sorts_hierarchy_dic['#object'])
+	refined_locations = list(domain_info.sorts_hierarchy_dic['#place'])
+	abstract_objects = list(domain_info.sorts_hierarchy_dic['#coarse_object'])
+	for book in abstract_objects:
+		chosen_location = random.choice(refined_locations)
+		for ref_book in refined_objects:
+			if book in ref_book: dic_initial_state['loc('+ref_book] = chosen_location
+	if(random.uniform(0, 1) < 0.2):
+		ref_object_holding = random.choice(refined_objects)
+		dic_initial_state['in_hand(rob1'] = ref_object_holding
+		dic_initial_state['loc(rob1'] = dic_initial_state['loc('+ref_object_holding]
+	else: dic_initial_state['loc(rob1'] = random.choice(refined_locations)
+
+	#creating gol
+	book_choice = random.choice(abstract_objects)
+	locations = list(domain_info.sorts_hierarchy_dic['#coarse_place'])
+	chosen_book_location = dic_initial_state['loc(ref1_'+book_choice]
+	chosen_book_abstract_location = domain_info.components_dic[chosen_book_location]
+	locations.remove(chosen_book_abstract_location)
+	location_choice = random.choice(locations)
+	goal = 'holds(loc('+book_choice+','+location_choice+'),I).'
+
+	return dic_initial_state, goal
+
+
 
 if __name__ == "__main__":
 	global trialCount
+	trialCount = 0
 	singleRunTest = False
-
-	for level in [4,3,2,1]:
-		trialCount = 36
+	for level in [1,2,3,4]:
 		global_variables.init()
 		global_variables.complexity_level = level # TODO change this number to change the complexity level
-		global_variables.file_name_preASP_ToI_planning = global_variables.ASP_subfolder +'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_ToI_planning.txt' # Used for astract planning and diagnosis with ToI
-		global_variables.file_name_preASP_abstract_belief = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_abstract_belief.txt' # used for updating controller abstract belief
-		global_variables.file_name_preASP_refined_planning = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_refined_planning.txt' # used for zoomed refined planning
-		global_variables.file_name_preASP_inferring_indirect_observations = global_variables.ASP_subfolder+ 'pre_ASP_files/complexity_level_' + str(global_variables.complexity_level) + '/preASP_inferring_indirect_observations.txt' # used for inferring coarse observations
-		global_variables.file_name_preASP_refined_world = global_variables.ASP_subfolder + 'pre_ASP_files/complexity_level_'+str(global_variables.complexity_level) + '/preASP_refined_world.txt' # used for creating simulated world
+		global_variables.csv_results_file = 'simulation/results/experimental_results_' +  str(global_variables.complexity_level) +  '.csv'
+		global_variables.txt_results_file = 'simulation/results/experimental_results_' +  str(global_variables.complexity_level) +  '.txt'
+		domain_info = DomainInfo()
+		## The next two files would normally be created already, but in this case we need to create them
+		## now as the constants of the domain change with each complexity level. These functions will use
+		## the complexity level (initialised above) and the paths of the files with the pre ASP info, initialised
+		## in DomainInfo().
+		create_pre_ASP_abstract_belief_file()
+		create_pre_ASP_ToI_planning_file()
 
-		global_variables.file_name_preASP_abstract_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_abstract_domain.txt'
-		global_variables.file_name_preASP_ToI_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_ToI_domain.txt'
-		global_variables.file_name_preASP_refined_domain = global_variables.ASP_subfolder +'pre_ASP_files/preASP_refined_domain.txt'
-		createPreASP_AbstractBeliefFile()
-	 	createPreASP_RefinedWorldFile()
-		createPreASP_InferringIndirectObservationsFile()
-		createPreASP_RefinedPlanningFile()
-		createPreASP_ToIPlanningFile()
-
-		with open('experimental_results_'+ str(global_variables.complexity_level)+'.csv', 'a') as writeFile:
+		with open(global_variables.csv_results_file, 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming','Run-time non_zooming','Run-time Ratio', 'Planning Time - zooming','Planning Time - non_zooming','Planning Time - Ratio', '# Abstract Plans - zooming', '# Abstract Plans - non_zooming','# Abstract Plans - Ratio','# Abstract Actions - zooming','# Abstract Actions - non_zooming','# Abstract Actions - Ratio','# Refined Plans - zooming','# Refined Plans - non_zooming','# Refined Plans - Ratio',  '# Refined Actions - zooming','# Refined Actions - non_zooming' ,'# Refined Actions - Ratio','Complete Run - zooming','Complete Run - non_zooming'])
 
-
-		sys_random = random.SystemRandom()
-		domain_info = DomainInfo(global_variables.complexity_level)
-		number_runs = 200
+		number_runs = 100
 		if(singleRunTest): number_runs = 1
 		for x in range (0,number_runs):
 			trialCount += 1
 			print 'Trial Number: ' + str(trialCount) + '\tComplexity Level: ' + str(global_variables.complexity_level)
 			if(singleRunTest): runGivenInitialState()
-			else: createConditionsAndRun()
+			else:
+				dic_initial_state, goal = createInitialConditionsAndGoal()
+				runPairwiseControllersAndWrite(dic_initial_state, goal)

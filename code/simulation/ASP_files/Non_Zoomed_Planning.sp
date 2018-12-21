@@ -1,8 +1,9 @@
-#const numSteps = 5.
-
+#const numSteps = 1.
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#step = 0..numSteps.
 #coarse_place = {library,kitchen}.
 #coarse_object = {book1}.
 #object = {ref1_book1}.
@@ -10,9 +11,6 @@ sorts
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
-
-
-#step = 0..numSteps.
 #boolean = {true, false}.
 #outcome = {true, false, undet}.
 #physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
@@ -23,12 +21,9 @@ sorts
 #inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
 #defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
-
-
-
-
-
+#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
 #refined_component = #place + #object.
 #coarse_component = #coarse_place + #coarse_object.
 
@@ -64,10 +59,6 @@ holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 -holds(in_hand(R, OP), I+1) :- occurs(put_down(R, OP), I).
 
 
-
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%
 %% State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -89,9 +80,7 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
 -coarse_next_to(L1,L2) :- not coarse_next_to(L1,L2), #coarse_place(L1), #coarse_place(L2).
 
-% Defined fluents do not hold unless specified.
--holds(coarse_in_hand(rob1, O), I) :- not holds(coarse_in_hand(rob1, O), I).
--holds(in_hand(rob1,O),I) :- not holds(in_hand(rob1,O),I).
+% A thing cannot be at two places at the same time.
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,21 +105,13 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 -occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).
 
 % Cannot pick up an object if it has something in hand.
--occurs(pickup(R, OP1), I) :- holds(in_hand(R, OP2), I).
+-occurs(pickup(R, O), I) :- holds(in_hand(R, CO), I).
 
 % Cannot pick up an object if you are not in the same room.
 -occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
 
 % Cannot execute two actions at the same time.
-:- occurs(A1,I), occurs(A2,I), A1 != A2, #action(A1), #action(A2).
-
-
-
-
-
-
-
-
+:- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
 
 
@@ -176,10 +157,11 @@ occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
 holds(F,I+1) :- #inertial_fluent(F), holds(F,I), not -holds(F,I+1).
 -holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
 
-%%%%%%%%%%%%%%%%%%%%
-%% CWA for Actions.
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CWA for Actions and Defined Fluents.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -occurs(A,I) :- not occurs(A,I).
+-holds(F,I) :- #defined_fluent(F), not holds(F,I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History and initial state rules
@@ -191,8 +173,10 @@ occurs(A,I) :- hpd(A,I).
 :- obs(F, true, I), -holds(F, I).
 :- obs(F, false, I), holds(F, I).
 
+%%%%%%%%%%%%%%%%%%%%
 %% Awareness axiom.
-holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
+%%%%%%%%%%%%%%%%%%%%
+holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -208,37 +192,30 @@ something_happened(I) :- occurs(A, I).
 :- not goal(I), not something_happened(I).
 :- not something_happened(0).
 
-
 %%%%%%%%%%%%%%%
-%% Attributes.
+%% Attributes:
 %%%%%%%%%%%%%%%
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
-
 comp(c1, library).
 comp(c2, library).
 comp(c3, kitchen).
 comp(c4, kitchen).
-
 comp(ref1_book1, book1).
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,kitchen), I).
+goal(I) :- -holds(coarse_in_hand(rob1,book1),I),holds(coarse_loc(rob1,kitchen),I),holds(coarse_loc(book1,kitchen),I).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
+holds(coarse_loc(book1,kitchen),0).
 holds(loc(rob1,c2),0).
 holds(coarse_loc(rob1,library),0).
-holds(coarse_loc(book1,library),0).
-holds(coarse_in_hand(rob1,book1),0).
-
-%%%%%%%%%%%%%%%%%
-%% End of History:
-%%%%%%%%%%%%%%%%%
+-holds(coarse_in_hand(rob1,book1),0).
 
 %%%%%%%%%
 display

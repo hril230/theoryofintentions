@@ -14,21 +14,13 @@ class Executer(object):
 	# False, 'holds(directly_observed(rob1,loc(ref_book1,c11),false),1)'
 	######################################################
 	def test(self,test_action):
-		tested_fluent = test_action[test_action.find(',')+1:test_action.rfind(',')]
-		tested_value = test_action[test_action.rfind(',')+1:-1]
-		test_result = None
-		direct_observation = self.world.executeAction(test_action)
-		short_observation = direct_observation[:direct_observation.rfind(',')]
-		real_value = short_observation[short_observation.rfind(',')+1:-1]
-		if tested_value != real_value: test_result = False
-		else: test_result = True
-		if 'loc(rob1' in test_action and test_result == False: raw_input('robot location test result is false ')
-		return test_result,  direct_observation
+		fluent_to_observe = test_action[test_action.find(',')+1:test_action.rfind(',')]
+		value_to_check = test_action[test_action.rfind(',')+1:-1]
+		observed_value = self.world.directlyObserve(fluent_to_observe)
+		directly_observed_string = 'directly_observed(rob1,'+fluent_to_observe+','+str(observed_value).lower()+')'
+		return value_to_check == str(observed_value).lower(), directly_observed_string
 
 
-	def getGoalFeedback(self):
-		return self.world.getGoalFeedback()
-
-
-	def __del__(self):
-		print('deleting executer ')
+	def isGoalReached(self,goal):
+		return self.world.isGoalReached(goal)
+ 

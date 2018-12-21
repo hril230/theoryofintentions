@@ -4,31 +4,30 @@
 %% This ASP is used to update the abstract belief of the ControllerToI.
 %% It does not have planning module.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#room = {library, kitchen}.
-#book = {book1}.
-#robot = {rob1}.
-#object = #book.
-#thing = #object + #robot.
-
-#boolean = {true, false}.
 #step = 0..numSteps.
 
-#inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
+#object = {book1}.
+#place = {library, kitchen}.
+#robot = {rob1}.
+#thing = #object + #robot.
+#boolean = {true, false}.
+
+#inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
 #fluent = #inertial_fluent.
-#rob_action = move(#robot, #room) + pickup(#robot, #object)
+#rob_action = move(#robot, #place) + pickup(#robot, #object)
 	+ put_down(#robot, #object).
-#exo_action = exo_move(#object,#room).
+#exo_action = exo_move(#object,#place).
 #action = #rob_action + #exo_action.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-next_to(#room,#room).
+next_to(#place,#place).
 holds(#fluent,#step).
 occurs(#action,#step).
 obs(#fluent, #boolean, #step).
@@ -99,11 +98,6 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 -occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
 
-%%%%%%%%%%%%%%
-%% Defaults %%
-%%%%%%%%%%%%%%
-%holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-%holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -121,6 +115,9 @@ holds(F,I+1) :- #inertial_fluent(F),
 %% CWA for Actions.
 -occurs(A,I) :- not occurs(A,I).
 
+%% CWA for Defined Fluents.(Not defined in this domain.)
+%%-holds(F,I) :- #defined_fluent(F), not holds(F,I).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History and initial state rules %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -133,7 +130,7 @@ occurs(A,I) :- hpd(A,I).
 :- obs(F, false, I), holds(F, I).
 
 %% Awareness axiom.
-holds(F, 0) | -holds(F, 0) :- #inertial_fluent(F).
+holds(F,0) | -holds(F,0) :- #inertial_fluent(F).
 
 
 %%%%%%%%%%%%%%
@@ -154,10 +151,8 @@ next_to(library, kitchen).
 %%%%%%%%%%%%
 holds(loc(rob1,library),0).
 holds(loc(book1,library),0).
-holds(in_hand(rob1,book1),0).
-hpd(move(rob1,kitchen), 0).
-obs(loc(rob1,kitchen),true,1).
-
+-holds(in_hand(rob1,book1),0).
+hpd(pickup(rob1,book1), 0).
 
 %%%%%%%%%%
 display
