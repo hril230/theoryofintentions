@@ -36,9 +36,12 @@ boolean = ['true', 'false']
 
 runCount = 0
 
-def run_and_write(scenario, initial_conditions_index, initial_state):
+def run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge):
 	global runCount
 	runCount +=1
+
+	print 'World conditions: [locked, rob_loc, book1_loc, book2_loc, in_handBook1, in_handBook2]'
+	print 'World conditions: ' + str(initial_state)
 	#print("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"    $$$$$$$$$$$$$$$$$$$")
 	history_toi = [""]
 	time_planning_toi = 0
@@ -51,7 +54,7 @@ def run_and_write(scenario, initial_conditions_index, initial_state):
 	start_time_toi = datetime.now()
 	world_toi = World(sparcPath,initial_state,scenario,randomSeed)
 	executer = Executer(world_toi)
-	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer)
+	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer,initial_knowledge)
 	end_time_toi = datetime.now()
 	time_planning_toi = (end_time_toi - start_time_toi).total_seconds()
 	historyWorld_toi = world_toi.getHistory()
@@ -112,6 +115,8 @@ def run_and_write(scenario, initial_conditions_index, initial_state):
 			else:
 				scenarioRecreated_toi = 3
 
+	print historyInfo
+	print activityInfo
 	historyInfo.sort(key=lambda x:x[0])
 	historyInfo.sort(key=lambda x:int(x[1]))
 	historyInfo = [','.join(item)+')' for item in historyInfo]
@@ -144,12 +149,10 @@ def run_and_write(scenario, initial_conditions_index, initial_state):
 def createConditionsAndRunAll(scenario):
 	initial_conditions_index = 0
 
-	controlledRun = False
+	## lines below is to flag that we only get one run, with condition index held by controlledRunConditions variable.
+	controlledRun = True
+	controlledRunConditions = random.randrange(1,193,1)
 	controlledRunConditions = 2
-
-	if(scenario == 'random'):
-		controlledRun = True
-		controlledRunConditions = random.randrange(1,193,1)
 
 	#Cases when rob1 is holding book1
 	for locked in boolean:
@@ -157,11 +160,12 @@ def createConditionsAndRunAll(scenario):
 			for book2_location in locations:
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-                                book1_location = robot_location
-                                in_handBook1 = 'true'
-                                in_handBook2 = 'false'
+				book1_location = robot_location
+				in_handBook1 = 'true'
+				in_handBook2 = 'false'
 				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				run_and_write(scenario, initial_conditions_index, initial_state)
+				initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
+				run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge)
 
 	#Cases when rob1 is holding book2
 	for locked in boolean:
@@ -169,23 +173,25 @@ def createConditionsAndRunAll(scenario):
 			for book1_location in locations:
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-                                book2_location = robot_location
-                                in_handBook1 = 'false'
-                                in_handBook2 = 'true'
-  				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				run_and_write(scenario, initial_conditions_index, initial_state)
+				book2_location = robot_location
+				in_handBook1 = 'false'
+				in_handBook2 = 'true'
+				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+				initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
+				run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge)
 
 	#Cases when rob1 is not holding any book
 	for locked in boolean:
 		for robot_location in locations:
 			for book1_location in locations:
-			     	for book2_location in locations:
+				for book2_location in locations:
 					initial_conditions_index +=1
 					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-                                	in_handBook1 = 'false'
-                                	in_handBook2 = 'false'
-	  				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				run_and_write(scenario, initial_conditions_index, initial_state)
+					in_handBook1 = 'false'
+					in_handBook2 = 'false'
+					initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+					initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
+					run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge)
 
 if __name__ == "__main__":
 	global goal
@@ -195,6 +201,14 @@ if __name__ == "__main__":
 	#initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 	initial_state = ['false', 'library', 'library', 'kitchen', 'true', 'false']
 
-	run_and_write('random_exo_actions',0,initial_state)
+
+	LibraryLocked_index = 0
+	LocationRobot_index = 1
+	LocationBook1_index = 2
+	LocationBook2_index = 3
+	In_handBook1_index = 4
+	In_handBook2_index = 5
+	initial_knowledge = [[LibraryLocked_index,'false'],[LocationRobot_index,'library']]
+	run_and_write('random_exo_actions',0,initial_state,initial_knowledge)
 
 	#createConditionsAndRunAll('random_exo_actions')

@@ -1,6 +1,6 @@
-#const n = 8. % maximum number of steps.
-#const max_len = 7. % maximum activity_length of an activity.
-#const max_name = 1.
+#const n = 19. % maximum number of steps.
+#const max_len = 18. % maximum activity_length of an activity.
+#const max_name = 3.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,9 +67,8 @@ impossible(#action, #step).
 current_step(#step).
 observed_result(#action, #step).
 unobserved(#physical_exogenous_action, #step).
-number_unobserved(#integer,#step).
-explanation(#integer,#step).
 explaining(#step).
+planning(#step).
 
 %% three different situations determined by history
 no_goal_for_activity(#activity_name, #step).
@@ -93,6 +92,7 @@ different_component(#activity_name,#activity_name).
 futile_activity(#activity_name,#step).
 
 selected_goal_holds(#possible_goal,#step).
+assumed_initial_condition(#physical_inertial_fluent).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rules
@@ -325,10 +325,6 @@ unobserved(PEA,I1) :- current_step(I),
 		not hpd(PEA,true,I1),
 		#physical_exogenous_action(PEA).
 
-%%(27)
-number_unobserved(N,I) :- current_step(I),
-			explaining(I),
-			N = #count{EX:unobserved(EX,IX)}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rules for determining intended action %%
@@ -352,26 +348,26 @@ equal_activities(AN,AN1) :- activity_goal(AN,G),
 
 %  (29)
 no_activity_for_goal(G,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			holds(active_goal(G),I),
                         -holds(in_progress_goal(G),I).
 
 %% (30)
 no_goal_for_activity(AN,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			holds(active_activity(AN),I),
 			activity_goal(AN,G),
 			-holds(active_goal(G),I).
 
 %% (31)
 active_goal_activity(AN,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			holds(in_progress_activity(AN),I).
 
 
 % (32)
 intended_action(finish,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			no_goal_for_activity(AN,I).
 
 
@@ -384,14 +380,14 @@ selected_goal_holds(G,I) :- current_step(I),
 
 % (34)
 intended_action(finish,I) :- current_step(I),
-    explanation(N,I),
+    planning(I),
     selected_goal_holds(G,I).
 
 
 %%%%%% Finding intended action for active_goal_activity
 %% (35)
 occurs(AA,I1) :- current_step(I),
-		explanation(N, I),
+		planning(I),
 		I <= I1,
 		active_goal_activity(AN,I),
 		holds(in_progress_activity(AN),I1),
@@ -401,20 +397,20 @@ occurs(AA,I1) :- current_step(I),
 
 % (36)
 projected_success(AN,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			I < I1,
 		     	holds(active_activity(AN),I1),
 		     	activity_goal(AN,G),
  			holds(G,I1).
 % (37)
 -projected_success(AN,I) :-  current_step(I),
-			explanation(N, I),
+			planning(I),
 			not projected_success(AN,I).
 
 
 %% (38)
 intended_action(AA,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
                         active_goal_activity(AN,I),
 			holds(next_action(AN,AA),I),
 			projected_success(AN,I),
@@ -422,20 +418,20 @@ intended_action(AA,I) :- current_step(I),
 
 %% (39)
 :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	active_goal_activity(AN,I),
 	-projected_success(AN,I),
 	not futile_activity(AN,I).
 
 %% (40)
 futile_activity(AN,I) :+ current_step(I),
-	explanation(N, I),
+	planning(I),
         active_goal_activity(AN,I),
 	-projected_success(AN,I).
 
 %% (41)
 intended_action(stop(AN),I) :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	active_goal_activity(AN,I),
 	futile_activity(AN,I).
 
@@ -444,20 +440,20 @@ intended_action(stop(AN),I) :- current_step(I),
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% (42)
 candidate(AN,I) :-  current_step(I),
-		explanation(N, I),
+		planning(I),
 		no_activity_for_goal(G,I),
 		holds(next_available_name(AN),I).
 
 
 %% (43)
 activity_goal(AN,G) :-  current_step(I),
-		explanation(N, I),
+		planning(I),
             	no_activity_for_goal(G,I),
 		candidate(AN,I).
 
 %%  (44)
 impossible(start(AN),I) :-  current_step(I),
-			explanation(N, I),
+			planning(I),
                         no_activity_for_goal(G,I),
                         activity_goal(AN,G),
 			occurs(start(AN1),I),
@@ -465,7 +461,7 @@ impossible(start(AN),I) :-  current_step(I),
 
 %%  (45)
 occurs(start(AN),I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
          	     	no_activity_for_goal(G,I),
 			candidate(AN,I),
          	     	activity_goal(AN,G),
@@ -474,14 +470,14 @@ occurs(start(AN),I) :- current_step(I),
 
 %% (46)
 some_action_occurred(I1) :-  current_step(I),
-			explanation(N, I),
+			planning(I),
 			I <= I1,
 			occurs(A,I1).
 
 
 %% (47) original
 occurs(PAA,I1) :+ current_step(I),
-		explanation(N, I),
+		planning(I),
                 no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
@@ -493,7 +489,7 @@ occurs(PAA,I1) :+ current_step(I),
 
 % (48)
 activity_component(AN,I1-I,PAA) :- current_step(I),
-		explanation(N, I),
+		planning(I),
 		I < I1,
 		no_activity_for_goal(G,I),
 		candidate(AN,I),
@@ -503,7 +499,7 @@ activity_component(AN,I1-I,PAA) :- current_step(I),
 
 % (49)
 :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	no_activity_for_goal(G,I),
 	candidate(AN,I),
 	activity_component(AN,K,PAA1),
@@ -514,7 +510,7 @@ activity_component(AN,I1-I,PAA) :- current_step(I),
 
 % (50)
 has_component(AN,K) :- current_step(I),
-		explanation(N, I),
+		planning(I),
                 no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
@@ -522,7 +518,7 @@ has_component(AN,K) :- current_step(I),
 
 % (51)
 activity_length(AN,K) :- current_step(I),
-		explanation(N, I),
+		planning(I),
                 no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
@@ -531,7 +527,7 @@ activity_length(AN,K) :- current_step(I),
 
 % (52)
 intended_action(start(AN),I) :- current_step(I),
-		explanation(N, I),
+		planning(I),
 		no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
@@ -543,11 +539,12 @@ intended_action(start(AN),I) :- current_step(I),
 % (53)
 has_intention(I) :- intended_action(A,I).
 :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	0<I,
 	not has_intention(I).
 
 
+assumed_initial_condition(F) :- not obs(F,true,0), holds(F,0), explaining(I).
 
 %%%%%%%%%%%%%%%%%
 %%Attributes:
@@ -556,8 +553,8 @@ next_to(office2,office1).
 next_to(office1,kitchen).
 next_to(kitchen, library).
 
-
--holds(in_hand(R,O),0) :- not holds(in_hand(R,O),0).
+%% defining initial choices of unkown fluents.
+holds(loc(B,library),0) | holds(loc(B,kitchen),0) | holds(loc(B,office1),0) | holds(loc(B,office2),0) :- #book(B).
 
 %%%%%%%%%
 %% Goal:
@@ -571,7 +568,7 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% *_*_*
-current_step(3).
+current_step(12).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -580,29 +577,82 @@ current_step(3).
 %% #_#_# beginning
 obs(locked(library),false,0).
 obs(loc(rob1,library),true,0).
-obs(loc(book1,library),true,0).
-obs(loc(book2,kitchen),true,0).
-obs(in_hand(rob1,book1),true,0).
-obs(in_hand(rob1,book2),false,0).
-obs(in_hand(rob1,book2),false,2).
-obs(in_hand(rob1,book1),true,2).
-obs(loc(book1,library),true,2).
-obs(loc(book2,library),false,2).
+obs(in_hand(rob1,book2),false,3).
+obs(loc(book1,kitchen),true,3).
+obs(in_hand(rob1,book1),true,3).
+obs(loc(rob1,kitchen),true,3).
+obs(loc(book2,kitchen),false,3).
+obs(in_hand(rob1,book1),true,6).
+obs(in_hand(rob1,book2),false,6).
+obs(loc(rob1,office1),true,6).
+obs(loc(book1,office1),true,6).
+obs(loc(book2,office1),false,6).
+obs(loc(book1,office1),true,9).
+obs(in_hand(rob1,book1),true,9).
+obs(in_hand(rob1,book2),false,9).
+obs(loc(book2,office1),false,9).
+obs(loc(book2,kitchen),false,10).
+obs(loc(rob1,kitchen),true,10).
+obs(in_hand(rob1,book1),true,10).
+obs(in_hand(rob1,book2),false,10).
+obs(loc(book1,kitchen),true,10).
+obs(loc(book2,library),true,11).
+obs(in_hand(rob1,book1),true,11).
+obs(in_hand(rob1,book2),false,11).
+obs(loc(rob1,library),true,11).
+obs(loc(book1,library),true,11).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
+attempt(move(rob1,kitchen),2).
+attempt(stop(1),3).
+attempt(start(2),4).
+attempt(move(rob1,office1),5).
+attempt(stop(2),6).
+attempt(start(3),7).
+attempt(pickup(rob1,book1),8).
+attempt(move(rob1,kitchen),9).
+attempt(move(rob1,library),10).
 activity_goal(1,my_goal).
-activity_component(1,1,put_down(rob1,book1)).
-activity_component(1,2,move(rob1,kitchen)).
-activity_component(1,3,pickup(rob1,book2)).
-activity_component(1,4,move(rob1,library)).
-activity_component(1,5,put_down(rob1,book2)).
-activity_length(1,5).
-attempt(put_down(rob1,book1),2).
-obs(in_hand(rob1,book1),false,3).
-obs(loc(book2,library),true,3).
-obs(in_hand(rob1,book2),false,3).
-obs(loc(book1,library),true,3).
-explaining(3).
+activity_goal(2,my_goal).
+activity_goal(3,my_goal).
+activity_component(1,1,move(rob1,kitchen)).
+activity_component(1,2,move(rob1,office1)).
+activity_component(1,3,pickup(rob1,book1)).
+activity_component(1,4,move(rob1,kitchen)).
+activity_component(1,5,move(rob1,library)).
+activity_component(1,6,put_down(rob1,book1)).
+activity_component(1,7,move(rob1,kitchen)).
+activity_component(1,8,move(rob1,office1)).
+activity_component(1,9,move(rob1,office2)).
+activity_component(1,10,pickup(rob1,book2)).
+activity_component(1,11,move(rob1,office1)).
+activity_component(1,12,move(rob1,kitchen)).
+activity_component(1,13,move(rob1,library)).
+activity_component(1,14,put_down(rob1,book2)).
+activity_component(2,1,move(rob1,office1)).
+activity_component(2,3,move(rob1,kitchen)).
+activity_component(2,6,move(rob1,kitchen)).
+activity_component(2,7,pickup(rob1,book1)).
+activity_component(2,4,move(rob1,library)).
+activity_component(2,8,move(rob1,library)).
+activity_component(2,9,put_down(rob1,book1)).
+activity_component(2,2,pickup(rob1,book2)).
+activity_component(2,5,put_down(rob1,book2)).
+activity_component(3,2,move(rob1,kitchen)).
+activity_component(3,1,pickup(rob1,book1)).
+activity_component(3,3,move(rob1,library)).
+activity_component(3,4,put_down(rob1,book1)).
+futile_activity(1,3).
+futile_activity(2,6).
+activity_length(1,14).
+activity_length(2,9).
+activity_length(3,4).
+attempt(put_down(rob1,book1),11).
+obs(in_hand(rob1,book2),false,12).
+obs(loc(book2,library),true,12).
+obs(loc(book1,library),true,12).
+obs(in_hand(rob1,book1),false,12).
+explaining(12).
 %% #_#_# end
 
 
@@ -620,6 +670,6 @@ activity_component.
 futile_activity.
 activity_length.
 intended_action.
-number_unobserved.
 selected_goal_holds.
 unobserved.
+assumed_initial_condition.

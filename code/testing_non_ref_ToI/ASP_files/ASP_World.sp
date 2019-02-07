@@ -32,8 +32,6 @@ occurs(#action,#step).
 obs(#fluent, #boolean, #step).
 hpd(#action, #step).
 
-diag(#exo_action, #step).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  rules
@@ -118,12 +116,6 @@ holds(loc(O, L), I) :- holds(loc(R, L), I), holds(in_hand(R, O), I).
 %% An exogenous lock cannot be done to a locked room.
 -occurs(exo_lock(L),I) :- holds(locked(L),I).
 
-%%%%%%%%%%%%%%
-%% Defaults %%
-%%%%%%%%%%%%%%
-holds(loc(O,library),0) :- #book(O), not -holds(loc(O,library),0).
-holds(loc(O,office1),0) :- #book(O), -holds(loc(O,library),0), not -holds(loc(O,office1),0).
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,14 +149,6 @@ occurs(A,I) :- hpd(A,I).
 holds(F, 0) | -holds(F, 0) :- #inertial_fluent(F).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Diagnosis
-
-occurs(A,I) :+ #exo_action(A), I<numSteps.
-diag(A,I) :- occurs(A,I),
-		not hpd(A,I),
-		#exo_action(A).
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -184,17 +168,14 @@ next_to(kitchen,library).
 obs(locked(library),false,0).
 obs(loc(rob1,library),true,0).
 obs(loc(book1,library),true,0).
-obs(loc(book2,kitchen),true,0).
+obs(loc(book2,library),true,0).
 obs(in_hand(rob1,book1),true,0).
 obs(in_hand(rob1,book2),false,0).
 hpd(put_down(rob1,book1),0).
-hpd(exo_move(book2,library),0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-diag(A,I).
 holds(F,numSteps).
 -holds(in_hand(rob1,B), numSteps).
 -holds(locked(library), numSteps).
-

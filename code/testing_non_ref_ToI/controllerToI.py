@@ -1,4 +1,4 @@
-
+#this controller assumes only one exogeneous action will occur during the run.
 from datetime import datetime
 import subprocess
 from realWorld import World
@@ -11,12 +11,12 @@ import random
 goal = None  # given when initialised
 maxPlanLength = None  #given when initialised
 numberSteps = None
-toi_history = None  #sarting with initial conditions taken from world and adding occurrence
+toi_history = None  #starting with initial conditions taken from world and adding occurrence
 currentStep = None
 numberActivities = None
 inputForPlanning = None
 believes_goal_holds = False
-currentDiagnosis = None
+
 
 toi_goal_marker = '%% @_@_@'
 toi_beginning_history_marker = '%% #_#_# beginning'
@@ -36,7 +36,7 @@ executer = None
 goal_correction = None
 
 
-def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
+def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 	global executer
 	global maxPlanLength
 	global numberSteps
@@ -48,7 +48,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	global goal_correction
 	global currentDiagnosis
 	global sparcPath
-
+	global currentInitialStateAssumptions #this conditions are created by the ASP, and include the initialKnowledge. The value of some fluents may have to be assumed by choice.
 	sparcPath = thisPath
 	numberActivities = 1
 	numberSteps = 4
@@ -56,22 +56,26 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 	executer = new_executer
 	goal = newGoal
 	goal_correction = 0
-	initialConditions = list(executer.getRealValues())
-	currentDiagnosis = ''
+	currentDiagnosis = Set()
 	inputForPlanning = []
+	currentInitialStateAssumptions = Set()
 
+	print 'initial knowledge: ' + str(initialKnowledge)
 	preparePreASP_string_lists()
-	toi_history = observations_to_obsList(initialConditions,0)
-    	toi_history.append("hpd(select(my_goal), true,0).")
+	toi_history = observations_to_obsList(initialKnowledge,0)
+	toi_history.append("hpd(select(my_goal), true,0).")
 
    	currentStep = 1
+
 	diagnose()
-    	finish = False
+	print 'Initial conditions assumptions! ' + str(currentInitialStateAssumptions)
+
+	finish = False
 	while(finish == False):
+
 		nextAction = runToIPlanning(inputForPlanning)
-
-		print(' $$$$$$$$$$$$$$$$$    next action with ToI : ' +str(nextAction) +'  at step '+ str(currentStep))
-
+		print('\nNext action with ToI: ' +str(nextAction) +'  at step '+ str(currentStep))
+		actionObservations = []
 		if(nextAction == 'finish'):
 			if(executer.getGoalFeedback() == True):
 				toi_history.append('finish')
@@ -91,23 +95,26 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer):
 			break
 
 
-
-		actionObservations = []
 		toi_history.append('attempt('+nextAction+','+str(currentStep)+').')
-
+		currentStep += 1
 		if(nextAction[0:4] == 'stop'):
 			numberActivities += 1
 			numberSteps += 1
 		elif(nextAction[0:5] == 'start'): pass
 		else:
-			print('action : '+ str(nextAction))
 			actionObservations = executer.executeAction(nextAction)
-		currentStep += 1
-		relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
-		toi_history = toi_history + list(set(observations_to_obsList(relevantObservations,currentStep)))
-                diagnose()
+			relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
+			latest_observations = list(set(observations_to_obsList(relevantObservations,currentStep)))
+			print 'Latest_observations: ' + ' '.join(latest_observations)
+			toi_history = toi_history + latest_observations
 
-	if(currentDiagnosis != ''): toi_history.append(currentDiagnosis)
+		lastDiagnosis = currentDiagnosis
+		lastInitialAssumptions = currentInitialStateAssumptions
+		diagnose()
+		if(lastInitialAssumptions != currentInitialStateAssumptions):
+			print ('\nWrong Assumptions!')
+			print('New assumption: ' + ' '.join(currentInitialStateAssumptions))
+	if(currentDiagnosis): toi_history + list(currentDiagnosis)
 	return (toi_history, numberActivities, goal_correction)
 
 
@@ -155,23 +162,30 @@ def runToIPlanning(input):
 	split_answer = chosenAnswer.strip('}').strip('{').split(', ')
 	toi_history = []
 	believes_goal_holds = False
+	new_activity_name = None
 	for line in split_answer:
 		if("intended_action" in line):
 			nextAction = line[16:line.rfind(',')]
-		#elif("number_unobserved" in line): continue
+			if 'start' in nextAction:
+				new_activity_name = nextAction[nextAction.find('(')+1:nextAction.find(')')]
 		elif("selected_goal_holds" in line):
 			believes_goal_holds = True
 		else:
 			toi_history.append(line + '.')
+
+	if new_activity_name:
+		activity_info = []
+		for line in split_answer:
+			if("activity" in line and '('+new_activity_name+',' in line): activity_info.append(line)
+		print '\nNew Activity: '+' '.join(activity_info)
 	return nextAction
 
 
 
 def diagnose():
-
 	global inputForPlanning
 	global currentDiagnosis
-
+	global currentInitialStateAssumptions
 	inputForPlanning = []
 	possibleDiagnosis = []
 	input = list(toi_history)
@@ -181,8 +195,6 @@ def diagnose():
 	current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 	current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
 	current_asp_split[2] = "#const max_name = " + str(numberActivities) + "."
-
-
 	asp = '\n'.join(current_asp_split)
         f1 = open(asp_toi_diagnosing_file, 'w')
 	f1.write(asp)
@@ -190,31 +202,36 @@ def diagnose():
 
 	# running only diagnosis
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_diagnosing_file +' -A ',shell=True)
-       	answers = answerSet.rstrip().split('\n\n')
+	answers = answerSet.rstrip().split('\n\n')
 
-
-	if currentDiagnosis in answerSet:
+	chosenAnswer = None
+	for a in answers:
+		if all([v in a for v in currentInitialStateAssumptions]) and all([v in a for v in currentDiagnosis]):  chosenAnswer = a
+	if not chosenAnswer:
 		for a in answers:
-			if(currentDiagnosis in a): chosenAnswer = a
-	else:
-		chosenAnswer = answers[0]
+			if all([v in a for v in currentInitialStateAssumptions]): chosenAnswer = a
+	if not chosenAnswer:
+		for a in answers:
+			if all([v in a for v in currentDiagnosis]): chosenAnswer = a
+	if not chosenAnswer: chosenAnswer = answers[0]
 
+	currentDiagnosis = Set()
+	currentInitialStateAssumptions = Set()
  	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
 	for line in split_diagnosis:
-		if("number_unobserved" in line):
-			newLine =line.replace("number_unobserved","explanation")
-			inputForPlanning.append(newLine + '.')
-		elif("unobserved" in line):
+		if("unobserved" in line):
 			newLine = line.replace("unobserved", "occurs") + '.'
 			inputForPlanning.append(newLine)
-			currentDiagnosis = line
+			currentDiagnosis.add(line)
 		elif("selected_goal_holds" in line): pass
 		elif(line == ""): pass
+		elif('assumed_initial_condition' in line):
+			currentInitialStateAssumptions.add(line)
+			inputForPlanning.append(line.replace('assumed_initial_condition','holds')[:-1] + ',0).')
 		else:
 			inputForPlanning.append(line + '.')
-
-
-	print('current diagnosis: '+str(currentDiagnosis))
+		inputForPlanning.append('planning('+str(currentStep)+').')
+	print 'current diagnosis: ' + str(currentDiagnosis)
 	return
 
 
