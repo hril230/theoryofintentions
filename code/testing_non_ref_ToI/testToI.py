@@ -117,8 +117,9 @@ def run_and_write(scenario, initial_conditions_index, initial_state, initial_kno
 
 	print historyInfo
 	print activityInfo
-	historyInfo.sort(key=lambda x:x[0])
+	historyInfo.sort(key=lambda x:x[0],reverse=True)
 	historyInfo.sort(key=lambda x:int(x[1]))
+
 	historyInfo = [','.join(item)+')' for item in historyInfo]
 	history_toi = historyInfo + activityInfo
 
@@ -129,10 +130,9 @@ def run_and_write(scenario, initial_conditions_index, initial_state, initial_kno
 	textfile.write("Goal: "+goal+"\n")
 	textfile.write("Initial Conditions: "+str(initial_state)+"\n")
 	textfile.write("Initial Conditions Index: "+str(initial_conditions_index)+"\n")
-	textfile.write("\n\n")
 	textfile.write("Achieved goal ToI: "+ str(achieved_goal_toi)+"\n")
-	textfile.write("History World: " +str(historyWorld_toi) + "\n")
-	textfile.write("History ToI: "+ "\n"+ str(history_toi)+"\n")
+	textfile.write("\nHistory World: \n" + '\n'.join(historyWorld_toi) +"\n")
+	textfile.write("\nHistory ToI: \n"+ '\n'.join(history_toi))
 
 
 	if('Goal is futile' in history_toi):
@@ -197,18 +197,18 @@ if __name__ == "__main__":
 	global goal
 	textfile = open(results_folder +'results_ToI_test.txt', 'w')
 
-	goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
-	#initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-	initial_state = ['false', 'library', 'library', 'kitchen', 'true', 'false']
-
-
 	LibraryLocked_index = 0
 	LocationRobot_index = 1
 	LocationBook1_index = 2
 	LocationBook2_index = 3
 	In_handBook1_index = 4
 	In_handBook2_index = 5
+
+	goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
+	#initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
+	initial_state = ['false', 'library', 'library', 'kitchen', 'true', 'false']
 	initial_knowledge = [[LibraryLocked_index,'false'],[LocationRobot_index,'library']]
+
 	run_and_write('random_exo_actions',0,initial_state,initial_knowledge)
 
 	#createConditionsAndRunAll('random_exo_actions')
