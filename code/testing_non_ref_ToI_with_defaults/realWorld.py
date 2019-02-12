@@ -36,7 +36,7 @@ class World(object):
     		self.pre_asp_split = pre_asp.split('\n')
 		self.history_marker_index = self.pre_asp_split.index(history_marker) + 1
 		self.display_marker_index = self.pre_asp_split.index(display_marker) + 2
-		self.exo_action_happened = False
+		self.exo_action_happened = True
                 self.scenario = scenario
 		self.history = []
 		self.executionTimeUnits = 0

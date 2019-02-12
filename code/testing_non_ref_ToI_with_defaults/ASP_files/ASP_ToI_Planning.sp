@@ -1,5 +1,5 @@
-#const n = 18. % maximum number of steps.
-#const max_len = 17. % maximum activity_length of an activity.
+#const n = 16. % maximum number of steps.
+#const max_len = 15. % maximum activity_length of an activity.
 #const max_name = 3.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -264,6 +264,7 @@ impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent
 assumed_initial_condition(F) :- not defined_by_default(F), not obs(F,true,0), holds(F,0), diagnosing(I), current_step(I).
 holds(F,0) :- assumed_initial_condition(F), planning(I), current_step(I).
 holds(F,0) :- defined_by_default(F), not finding_defaults(I), current_step(I).
+occurs(A,I) :- unobserved(A,I).
 
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
@@ -601,110 +602,78 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% *_*_*
-current_step(17).
+current_step(12).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% #_#_# beginning
-holds(loc(book2,office2),0).
-holds(in_hand(rob1,book1),0).
-holds(locked(library),0).
+defined_by_default(loc(book1,library)).
+assumed_initial_condition(in_hand(rob1,book1)).
+assumed_initial_condition(locked(library)).
+assumed_initial_condition(loc(book2,kitchen)).
 obs(loc(rob1,library),true,0).
+hpd(select(my_goal), true,0).
 obs(my_goal,false,1).
+activity_goal(1,my_goal).
+activity_component(1,1,put_down(rob1,book1)).
+activity_length(1,1).
+attempt(start(1),1).
+attempt(put_down(rob1,book1),2).
 obs(loc(book2,library),false,3).
-obs(in_hand(rob1,book1),true,3).
+obs(in_hand(rob1,book1),false,3).
 obs(in_hand(rob1,book2),false,3).
 obs(loc(book1,library),true,3).
-obs(loc(book2,library),false,6).
+attempt(stop(1),3).
+activity_goal(2,my_goal).
+activity_component(2,1,unlock(rob1,library)).
+activity_component(2,2,move(rob1,kitchen)).
+activity_component(2,3,move(rob1,office1)).
+activity_component(2,4,move(rob1,office2)).
+activity_component(2,5,pickup(rob1,book2)).
+activity_component(2,6,move(rob1,office1)).
+activity_component(2,7,move(rob1,kitchen)).
+activity_component(2,8,move(rob1,library)).
+activity_component(2,9,put_down(rob1,book2)).
+activity_length(2,9).
+attempt(start(2),4).
+attempt(unlock(rob1,library),5).
 obs(in_hand(rob1,book2),false,6).
-obs(loc(book1,library),true,6).
+obs(locked(library),false,6).
 obs(in_hand(rob1,book1),false,6).
-obs(loc(book2,library),false,7).
-obs(loc(book1,library),true,7).
-obs(locked(library),false,7).
+obs(loc(book1,library),true,6).
+obs(loc(book2,library),false,6).
+attempt(move(rob1,kitchen),6).
+obs(loc(rob1,kitchen),true,7).
 obs(in_hand(rob1,book1),false,7).
 obs(in_hand(rob1,book2),false,7).
-obs(loc(book1,kitchen),false,8).
-obs(in_hand(rob1,book1),false,8).
-obs(loc(book2,kitchen),false,8).
-obs(in_hand(rob1,book2),false,8).
-obs(loc(rob1,kitchen),true,8).
-obs(loc(rob1,office1),true,9).
-obs(loc(book1,office1),false,9).
-obs(in_hand(rob1,book2),false,9).
-obs(loc(book2,office1),false,9).
-obs(in_hand(rob1,book1),false,9).
-obs(in_hand(rob1,book2),false,12).
-obs(loc(rob1,office2),true,12).
-obs(in_hand(rob1,book1),false,12).
-obs(loc(book2,office2),true,12).
-obs(loc(book1,office2),false,12).
-obs(loc(book1,office2),false,13).
-obs(in_hand(rob1,book2),true,13).
-obs(in_hand(rob1,book1),false,13).
-obs(loc(book2,office2),true,13).
-obs(loc(rob1,office1),true,14).
-obs(loc(book1,office1),false,14).
-obs(in_hand(rob1,book2),true,14).
-obs(loc(book2,office1),true,14).
-obs(in_hand(rob1,book1),false,14).
-obs(in_hand(rob1,book1),false,15).
-obs(in_hand(rob1,book2),true,15).
-obs(loc(book1,kitchen),false,15).
-obs(loc(rob1,kitchen),true,15).
-obs(loc(book2,kitchen),true,15).
-obs(in_hand(rob1,book1),false,16).
-obs(loc(book1,library),true,16).
-obs(loc(rob1,library),true,16).
-obs(in_hand(rob1,book2),true,16).
-obs(loc(book2,library),true,16).
-hpd(select(my_goal),true,0).
-attempt(start(1),1).
-attempt(put_down(rob1,book2),2).
-attempt(stop(1),3).
-attempt(start(2),4).
-attempt(put_down(rob1,book1),5).
-attempt(unlock(rob1,library),6).
-attempt(move(rob1,kitchen),7).
-attempt(move(rob1,office1),8).
-attempt(stop(2),9).
-attempt(start(3),10).
-attempt(move(rob1,office2),11).
-attempt(pickup(rob1,book2),12).
-attempt(move(rob1,office1),13).
-attempt(move(rob1,kitchen),14).
-attempt(move(rob1,library),15).
-activity_goal(1,my_goal).
-activity_goal(2,my_goal).
+obs(loc(book1,kitchen),false,7).
+obs(loc(book2,kitchen),true,7).
+attempt(stop(2),7).
 activity_goal(3,my_goal).
-activity_component(1,1,put_down(rob1,book2)).
-activity_component(2,8,put_down(rob1,book2)).
-activity_component(2,1,put_down(rob1,book1)).
-activity_component(2,2,unlock(rob1,library)).
-activity_component(2,3,move(rob1,kitchen)).
-activity_component(2,4,move(rob1,office1)).
-activity_component(2,5,pickup(rob1,book2)).
-activity_component(2,6,move(rob1,kitchen)).
-activity_component(2,7,move(rob1,library)).
-activity_component(3,2,pickup(rob1,book2)).
-activity_component(3,3,move(rob1,office1)).
-activity_component(3,4,move(rob1,kitchen)).
-activity_component(3,5,move(rob1,library)).
-activity_component(3,6,put_down(rob1,book2)).
-activity_component(3,1,move(rob1,office2)).
-futile_activity(1,3).
-futile_activity(2,9).
-activity_length(1,1).
-activity_length(2,8).
-activity_length(3,6).
-attempt(put_down(rob1,book2),16).
-obs(in_hand(rob1,book2),false,17).
-obs(loc(book2,library),true,17).
-obs(in_hand(rob1,book1),false,17).
-obs(loc(book1,library),true,17).
-planning(17).
+activity_component(3,1,pickup(rob1,book2)).
+activity_component(3,2,move(rob1,library)).
+activity_component(3,3,put_down(rob1,book2)).
+activity_length(3,3).
+attempt(start(3),8).
+attempt(pickup(rob1,book2),9).
+obs(in_hand(rob1,book2),true,10).
+obs(in_hand(rob1,book1),false,10).
+obs(loc(book2,kitchen),true,10).
+obs(loc(book1,kitchen),false,10).
+attempt(move(rob1,library),10).
+obs(loc(book2,library),true,11).
+obs(in_hand(rob1,book1),false,11).
+obs(loc(rob1,library),true,11).
+obs(loc(book1,library),true,11).
+obs(in_hand(rob1,book2),true,11).
+attempt(put_down(rob1,book2),11).
+obs(in_hand(rob1,book2),false,12).
+obs(loc(book2,library),true,12).
+obs(loc(book1,library),true,12).
+obs(in_hand(rob1,book1),false,12).
+planning(12).
 %% #_#_# end
 
 
@@ -714,14 +683,9 @@ planning(17).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-obs.
-hpd.
-attempt.
 activity_goal.
 activity_component.
 futile_activity.
 activity_length.
 intended_action.
 selected_goal_holds.
-assumed_initial_condition.
-unobserved.

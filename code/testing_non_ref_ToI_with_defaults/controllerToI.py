@@ -48,7 +48,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 	global goal_correction
 	global currentDiagnosis
 	global sparcPath
-	global currentInitialStateAssumptions #this conditions are created by the ASP, and include the initialKnowledge. The value of some fluents may have to be assumed by choice.
+	global currentAssumptions #this conditions are created by the ASP, and include the initialKnowledge. The value of some fluents may have to be assumed by choice.
 	global currentDefaults
 	sparcPath = thisPath
 	numberActivities = 1
@@ -59,7 +59,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 	goal_correction = 0
 	currentDiagnosis = Set()
 	currentDefaults = Set()
-	currentInitialStateAssumptions = Set()
+	currentAssumptions = Set()
 
 	print 'Initial knowledge: ' + str(initialKnowledge)
 	preparePreASP_string_lists()
@@ -71,7 +71,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 	while(finish == False):
 		defaultsOutput = checkingDefaults()
 		inputForPlanning = diagnose(defaultsOutput)
-		nextAction = runToIPlanning(inputForPlanning)
+		nextAction = planning(inputForPlanning)
 		print('\nNext action with ToI: ' +str(nextAction) +'  at step '+ str(currentStep))
 		actionObservations = []
 		if(nextAction == 'finish'):
@@ -86,7 +86,7 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 					print('wrong assumption - goal not reached !!!!! ')
 					defaultsOutput = checkingDefaults()
 					inputForPlanning = diagnose(defaultsOutput)
-					nextAction = runToIPlanning(inputForPlanning)
+					nextAction = planning(inputForPlanning)
 
 		if(nextAction == None):
 	    		toi_history.append("Goal is futile")
@@ -114,24 +114,19 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 def getIndexesRelevantToGoal():
 	return [World.LocationBook1_index, World.LocationBook2_index, World.In_handBook1_index, World.In_handBook2_index]
 
-def runToIPlanning(input):
+def planning(outputDefaultsAndDiagnosis):
 	global numberSteps
 	global preASP_toi_split
 	global toi_history
-	global maxPlanLength
-	global currentStep
 	global believes_goal_holds
 	nextAction = None
-	print('running ToI planning ')
-	input = input + toi_history
-
-	input.append('planning('+str(currentStep)+').')
+	input = outputDefaultsAndDiagnosis + toi_history +['planning('+str(currentStep)+').']
 	current_asp_split = preASP_toi_split[:toi_beginning_history_index +1] + input + preASP_toi_split[toi_beginning_history_index +1:]
 	asp = '\n'.join(current_asp_split)
-        f1 = open(asp_toi_file, 'w')
+	f1 = open(asp_toi_file, 'w')
 	f1.write(asp)
 	f1.close()
-
+	print 'ASP_ToI_Planning: '
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
 	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
@@ -140,7 +135,7 @@ def runToIPlanning(input):
         	f1 = open(asp_toi_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print('Looking for next action (ToI) - numberSteps ' + str(numberSteps))
+		print('Increasing - numberSteps. ASP_ToI_Planning with ' + str(numberSteps) +' number of steps.')
 		answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
 		numberSteps +=1
 
@@ -148,31 +143,25 @@ def runToIPlanning(input):
 
 	chosenAnswer = possibleAnswers[0]
 	split_answer = chosenAnswer.strip('}').strip('{').split(', ')
-	toi_history = []
-	believes_goal_holds = False
+	believes_goal_holds = 'selected_goal_holds' in chosenAnswer
 	new_activity_name = None
 	for line in split_answer:
 		if("intended_action" in line):
 			nextAction = line[16:line.rfind(',')]
 			if 'start' in nextAction:
 				new_activity_name = nextAction[nextAction.find('(')+1:nextAction.find(')')]
-		elif("selected_goal_holds" in line):
-			believes_goal_holds = True
-		else:
-			toi_history.append(line + '.')
 
 	if new_activity_name:
-		activity_info = []
-		for line in split_answer:
-			if("activity" in line and '('+new_activity_name+',' in line): activity_info.append(line)
-		print '\nNew Activity: '+' '.join(activity_info)
+		activity_info = [line+'.' for line in split_answer if 'activity' in line and '('+new_activity_name+',' in line]
+		toi_history = toi_history + activity_info
+
+	print '\n\ncheking output: '
+	print chosenAnswer
 	return nextAction
 
 
 def checkingDefaults():
 	global currentDefaults
-
-	print 'Cheking defaults: '
 	preASP_toi_split[toi_current_step_index +1] = 'current_step('+str(currentStep)+').'
 	preASP_toi_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 	preASP_toi_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
@@ -184,6 +173,7 @@ def checkingDefaults():
 	f1 = open(asp_toi_defaults_file, 'w')
 	f1.write('\n'.join(current_asp_split))
 	f1.close()
+	print('ASP_ToI_Defaults: ')
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_defaults_file +' -A ',shell=True)
 	if answerSet == '': return []
 
@@ -196,17 +186,16 @@ def checkingDefaults():
 	if not currentDefaults: currentDefaults = Set(answers[0].strip('}').strip('{').split(', '))
 	print '\nCurrent Defaults: ' + ', '.join(currentDefaults)
 
-	return [e+'.' for e in currentDefaults] + [e.replace('defined_by_default','holds')[:-1] + ',0).' for e in currentDefaults]
+	return [e+'.' for e in currentDefaults]
 
 def diagnose(defaultsOutput):
 	global currentDiagnosis
-	global currentInitialStateAssumptions
+	global currentAssumptions
 	lastDiagnosis = currentDiagnosis
-	lastInitialAssumptions = currentInitialStateAssumptions
+	lastInitialAssumptions = currentAssumptions
 
-
-	inputForPlanning = []
 	diagnosingFlag = "diagnosing("+str(currentStep)+")."
+
 	diagnosingDisplayLines = ['\n%%%%%%\ndisplay\n%%%%%%','unobserved.','assumed_initial_condition.']
 	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + defaultsOutput + toi_history +[diagnosingFlag] + diagnosingDisplayLines
 	asp = '\n'.join(current_asp_split)
@@ -215,39 +204,34 @@ def diagnose(defaultsOutput):
 	f1.close()
 
 	# running only diagnosis
+	print('ASP_ToI_Diagnosis: ')
 	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_diagnosing_file +' -A ',shell=True)
 	answers = answerSet.rstrip().split('\n\n')
 
 	chosenAnswer = None
 	for a in answers:
-		if all([v in a for v in currentInitialStateAssumptions]) and all([v in a for v in currentDiagnosis]):  chosenAnswer = a
+		if all([v in a for v in currentAssumptions]) and all([v in a for v in currentDiagnosis]):  chosenAnswer = a
 	if not chosenAnswer:
 		for a in answers:
-			if all([v in a for v in currentInitialStateAssumptions]): chosenAnswer = a
+			if all([v in a for v in currentAssumptions]): chosenAnswer = a
 	if not chosenAnswer:
 		for a in answers:
 			if all([v in a for v in currentDiagnosis]): chosenAnswer = a
 	if not chosenAnswer: chosenAnswer = answers[0]
 
 	currentDiagnosis = Set()
-	currentInitialStateAssumptions = Set()
+	currentAssumptions = Set()
  	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
-	for line in split_diagnosis:
-		if("unobserved" in line):
-			newLine = line.replace("unobserved", "occurs") + '.'
-			inputForPlanning.append(newLine)
-			currentDiagnosis.add(line)
-		elif("selected_goal_holds" in line): pass
-		elif(line == ""): pass
-		elif('assumed_initial_condition' in line):
-			currentInitialStateAssumptions.add(line)
-			inputForPlanning.append(line.replace('assumed_initial_condition','holds')[:-1] + ',0).')
-		else:
-			inputForPlanning.append(line + '.')
-	print 'Current diagnosis: ' + ', '.join(currentDiagnosis)
-	print 'Current assumptions: ' + ', '.join(currentInitialStateAssumptions)
 
-	return inputForPlanning
+	for line in split_diagnosis:
+		if("unobserved" in line): currentDiagnosis.add(line)
+		elif('assumed_initial_condition' in line): currentAssumptions.add(line)
+
+	print 'Current diagnosis: ' + ', '.join(currentDiagnosis)
+	print 'Current assumptions: ' + ', '.join(currentAssumptions)
+
+	diagnosisAndDefaultsOutput = defaultsOutput + [e + '.' for e in currentAssumptions|currentDiagnosis]
+	return diagnosisAndDefaultsOutput
 
 
 def preparePreASP_string_lists():

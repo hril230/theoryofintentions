@@ -264,6 +264,7 @@ impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent
 assumed_initial_condition(F) :- not defined_by_default(F), not obs(F,true,0), holds(F,0), diagnosing(I), current_step(I).
 holds(F,0) :- assumed_initial_condition(F), planning(I), current_step(I).
 holds(F,0) :- defined_by_default(F), not finding_defaults(I), current_step(I).
+occurs(A,I) :- unobserved(A,I).
 
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
@@ -616,14 +617,9 @@ defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-obs.
-hpd.
-attempt.
 activity_goal.
 activity_component.
 futile_activity.
 activity_length.
 intended_action.
 selected_goal_holds.
-assumed_initial_condition.
-unobserved.
