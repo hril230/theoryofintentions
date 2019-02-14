@@ -528,29 +528,31 @@ holds(my_goal,I) :- holds(loc(book3,kitchen),I).
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
-current_step(3).
+current_step(4).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-obs(loc(rob1,office1),true,3).
+obs(in_hand(rob1,book1),false,3).
+obs(loc(rob1,kitchen),true,4).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
-attempt(move(rob1,office1),2).
+attempt(put_down(rob1,book1),2).
+attempt(move(rob1,kitchen),3).
 activity_goal(1,my_goal).
-activity_component(1,1,move(rob1,office1)).
+activity_component(1,1,put_down(rob1,book1)).
 activity_component(1,2,move(rob1,kitchen)).
 activity_component(1,3,move(rob1,library)).
 activity_component(1,4,pickup(rob1,book3)).
 activity_component(1,5,move(rob1,kitchen)).
 activity_length(1,5).
-explanation(0,3).
-holds(loc(book1,office2),0).
-holds(loc(rob1,office2),0).
+explanation(0,4).
 holds(loc(book2,library),0).
+holds(loc(book1,office1),0).
+holds(loc(rob1,office1),0).
 holds(loc(book3,library),0).
--holds(in_hand(rob1,book1),0).
+holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book3),0).
 -holds(in_hand(rob1,book2),0).
 

@@ -18,7 +18,8 @@ class DomainInfo():
 		self.refined_sorts_lines = []
 		self.abstract_attributes_lines = []
 		self.refined_attributes_lines = []
- 
+
+		#using line flags when reading domain info file.
 		is_abstract_sorts_line = False
 		is_refined_sorts_line = False
 		is_abstract_attributes_line = False
@@ -96,18 +97,6 @@ class DomainInfo():
 		self.refined_constants_lines = [k + ' = ' + '{' + ', '.join(v) + '}.' for k,v in self.refined_constants_sorts_dic.items()]
 
 
-		self.physical_inertial_fluent_sort = [a.replace(' ','') for a in ['loc(#thing,#place)', 'in_hand(#robot,#object)']]
-		self.physical_defined_fluent_sort = [a.replace(' ','') for a in ['coarse_loc(#coarse_thing,#coarse_place)', 'coarse_in_hand(#robot,#coarse_object)']]
-		self.rob_action_sort = [a.replace(' ','') for a in ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']]
-
-		self.defined_things = ['#object', '#robot']
-		self.defined_coarse_things = ['#coarse_object', '#robot']
-		self.defined_refined_components =  ['#place', '#object']
-		self.defined_coarse_components = ['#coarse_place', '#coarse_object']
-		self.defined_robots = ['rob1']
-		self.defined_inertial_fluents = ['loc(#thing,#place)', 'in_hand(#robot,#object)']
-		self.defined_defined_fluents = ['coarse_loc(#coarse_thing,#coarse_place)', 'coarse_in_hand(#robot,#coarse_object)']
-		self.defined_actions = ['move(#robot,#place)', 'pickup(#robot,#object)', 'put_down(#robot,#object)']
 		self.abstract_executability_conditions = ['-occurs(move(R, L), I) :- holds(loc(R, L), I).',
 												'-occurs(move(R, L2), I) :- holds(loc(R, L), I), -next_to(L,L2).',
 												'-occurs(put_down(R, O), I) :-  -holds(in_hand(R, O), I).',
@@ -115,14 +104,11 @@ class DomainInfo():
 												'-occurs(pickup(R, O), I) :- holds(loc(R, L), I), not holds(loc(O, L), I).',
 												'-occurs(exo_move(O,L),I) :- holds(loc(O,L),I).',
 												'-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).']
-		# the next dictionary holds actions as a keys (without paramters) and as values a tuple consisting of
-		# 1. the variables used by this actions as paramteres, and
-		# 2. all fluents used in all the executability conditions relevant to that action as value.
-		self.actions_param_and_exec_conditions_dic = self.get_dic_action_parameters_conditions(self.abstract_executability_conditions)
 
+		self.actions_param_and_exec_conditions_dic = self.get_dic_action_parameters_conditions(self.abstract_executability_conditions)
 		self.refined_world_causal_law = '-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).'
 		self.inferring_indirect_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
-		self.refined_world_display_string = 'holds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'
+		self.refined_world_display_string = 'occurs.\nholds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'
 		self.new_refined_world_executability_condition = '-occurs(put_down(R,OP),I) :- comp(OP,B), -holds(coarse_in_hand(rob1,B),I).'
 		self.old_refined_world_executability_condition = '-occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).'
 
@@ -242,7 +228,7 @@ class DomainInfo():
 		return fluent[fluent.find('(')+1:fluent.find(')')].split(',')
 
 
-	def get_fluent(set,holds_string):
+	def get_fluent(self,holds_string):
 		return holds_string[holds_string.find('(')+1:holds_string.find(')')+1]
 
 	#this function takes a string 'fluent', a string 'value' and an integer 'index' as input.
@@ -290,14 +276,14 @@ class DomainInfo():
 				else: grounded_conditions_set.update(self.all_possible_groundings([new_condition]))
 		return grounded_conditions_set
 
-	def dic_answerToState(self,answer):
+	#this functions gets a list of 'holds' strings (not '-holds' strings) and retruns the dictionary state according
+	def dic_answerToState(self,answer_split):
+		answer_split = [entry for entry in answer_split if 'holds' in entry and '-' not in entry]
 		dic_coarse_state = {}
-		answer_split =  answer.rstrip().strip('{').strip('}').split(', ')
-		for holds_string in answer_split:
-			if '-' in holds_string: continue
-			fluent = holds_string[holds_string.find('(')+1:holds_string.rfind(',')]
+		for entry in answer_split:
+			fluent = entry[entry.find('(')+1:entry.rfind(',')]
 			fluent_split = (fluent[:-1]).split(',')
-			dic_coarse_state[fluent_split[0].encode('ascii', 'ignore')] = fluent_split[1].encode('ascii', 'ignore')
+			dic_coarse_state[fluent_split[0]] = fluent_split[1]
 		return dic_coarse_state
 
 

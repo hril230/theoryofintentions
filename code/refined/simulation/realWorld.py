@@ -1,13 +1,22 @@
-#from sets import Set
+## This class simulates a world at refined level and the interactions between the exectuer and the world. For the
+## representation of the states of the world and the changes in states we use an ASP called Real_World.sp
+## In this world there are exogeneous actions that happen randomly
+
+# The state of this world is held in a dictionary called dic_RefinedState were the elements of the dictionary
+# are of the form:
+#'coarse_loc(rob1': 'office2',
+#'coarse_loc(book2': 'office2',
+#'in_hand(rob1': 'ref3_book1',
+#'coarse_in_hand(rob1': 'book1',
+#'loc(ref3_book2': 'c14'
+
 import subprocess
 import random
 history_marker = '%% HISTORY GOES HERE'
 display_marker = 'display'
 asp_Refined_World_file = 'simulation/ASP_files/Real_World.sp'
 
-## This class simulates a world and the interactions between the exectuer and the world. For the
-## representation of the states of the world and the changes in states we use an ASP called Real_World.sp
-## In this world there are exogeneous actions that happen randomly
+
 class World(object):
 	def __init__(self,dic_initial_state, new_domain_info):
 		self.domain_info = new_domain_info
@@ -23,15 +32,14 @@ class World(object):
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
 		obs_list = list(self.domain_info.dic_refinedStateToRefinedHoldsSet(dic_initial_state,0))
-		answer = self.__runASPDomain(obs_list)
-		self.dic_RefinedState = self.domain_info.dic_answerToState(answer)
+		answer_list = self.__runASPDomain(obs_list)
+		self.dic_RefinedState = self.domain_info.dic_answerToState(answer_list)
 
 
 	def __getExecutionTimeUnits(self,action):
 		if 'move' in action: return 1
 		elif 'pickup' in action or 'put_down' in action: return 3
 		elif 'test' in action: return 1
-
 		return 0
 
 	def __getRandomExoAction(self,action):
@@ -51,18 +59,17 @@ class World(object):
 		input.append('hpd('+ action +',0).')
 		#input.append(self.__getRandomExoAction(action))
 		#print('refined action happening: ' + action)
-		answer = self.__runASPDomain(input)
+		answer_list = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getExecutionTimeUnits(action)
 		self.executedSteps += 1
-		if(answer == '\n'):
+		if(answer_list and 'occurs('+ action +',0)' in answer_list):
+			happened = True
+			self.dic_RefinedState = self.domain_info.dic_answerToState(answer_list)
+			self.history.append(action)
+		else:
 			print ('                nothing happned in real world ')
 			self.history.append(action + "realWorld -  (FAILED) ")
-		else:
-			happened = True
-			self.dic_RefinedState = self.domain_info.dic_answerToState(answer)
-			self.history.append(action)
-		direct_observation = self.__getDirectObservation(answer)
-		return direct_observation
+
 
 	def __getDirectObservation(self,answer):
 		answer = answer.rstrip().strip('{').strip('}')
@@ -71,7 +78,7 @@ class World(object):
 				return entry
 		return ''
 
-	# it takes a fluent_string as in put and returns a boolean that represents if this fluent has or not been directly observed.
+	# it takes a fluent_string as input and returns a boolean that represents if this fluent has or not been directly observed.
 	def directlyObserve(self,fluent_to_observe):
 		fluent_to_observe_split = fluent_to_observe[:-1].split(',')
 		# If robot is testing the location of something rather than itself, it will only return True if the object
@@ -93,15 +100,13 @@ class World(object):
 		f1.close()
 		print (asp_Refined_World_file)
 		answer = subprocess.check_output('java -jar '+ self.domain_info.sparc_path + ' ' +asp_Refined_World_file+' -A',shell=True)
-		answer = answer.decode().strip('{')
-		answer = answer.strip('}')
-		return answer
+		answer_split = ((answer.rstrip().split('\n\n'))[0]).strip('{}\n').split(', ')
+		return answer_split
 
 
 	def isGoalReached(self,abstract_goal):
 		abstract_goal_string_split = abstract_goal.replace(' ','').split(',holds')
 		coarse_fluents_list = ['coarse_'+entry[entry.find('(')+1:entry.find(')')+1] for entry in abstract_goal_string_split]
-		print coarse_fluents_list
 		for fluent in coarse_fluents_list:
 			fluent_split = fluent.replace(')','').split(',')
 			if fluent_split[0] not in self.dic_RefinedState or self.dic_RefinedState[fluent_split[0]] != fluent_split[1]:

@@ -1,4 +1,4 @@
-#const numSteps = 8.
+#const numSteps = 6.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -218,32 +218,26 @@ comp(ref3_book3, book3).
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-hpd(move(rob1,c11),0).
 holds(coarse_loc(rob1,office1),0).
-holds(loc(rob1,c12),0).
-hpd(test(rob1,loc(rob1,c11),true),1).
-obs(loc(rob1,c11),true,2).
-obs(loc(ref1_book3,c11),false,2).
-hpd(move(rob1,c10),2).
-hpd(test(rob1,loc(rob1,c10),true),3).
-hpd(move(rob1,c9),4).
-obs(loc(ref1_book3,c10),false,4).
-obs(loc(rob1,c10),true,4).
-hpd(test(rob1,loc(rob1,c9),true),5).
-obs(loc(ref1_book3,c9),false,6).
-obs(loc(rob1,c9),true,6).
-hpd(move(rob1,c8),6).
-hpd(test(rob1,loc(rob1,c8),true),7).
-obs(loc(ref1_book3,c8),false,8).
-obs(loc(rob1,c8),true,8).
-holds(directly_observed(rob1,loc(ref1_book3,c11),false),2).
-holds(directly_observed(rob1,loc(rob1,c11),true),2).
-holds(directly_observed(rob1,loc(rob1,c10),true),4).
-holds(directly_observed(rob1,loc(ref1_book3,c10),false),4).
-holds(directly_observed(rob1,loc(ref1_book3,c9),false),6).
-holds(directly_observed(rob1,loc(rob1,c9),true),6).
-holds(directly_observed(rob1,loc(rob1,c8),true),8).
-holds(directly_observed(rob1,loc(ref1_book3,c8),false),8).
+holds(loc(rob1,c11),0).
+hpd(move(rob1,c10),0).
+hpd(test(rob1,loc(rob1,c10),true),1).
+obs(loc(rob1,c10),true,2).
+obs(loc(ref1_book3,c10),false,2).
+hpd(move(rob1,c9),2).
+hpd(test(rob1,loc(rob1,c9),true),3).
+obs(loc(ref1_book3,c9),false,4).
+hpd(move(rob1,c8),4).
+obs(loc(rob1,c9),true,4).
+hpd(test(rob1,loc(rob1,c8),true),5).
+obs(loc(ref1_book3,c8),false,6).
+obs(loc(rob1,c8),true,6).
+holds(directly_observed(rob1,loc(rob1,c10),true),2).
+holds(directly_observed(rob1,loc(ref1_book3,c10),false),2).
+holds(directly_observed(rob1,loc(ref1_book3,c9),false),4).
+holds(directly_observed(rob1,loc(rob1,c9),true),4).
+holds(directly_observed(rob1,loc(ref1_book3,c8),false),6).
+holds(directly_observed(rob1,loc(rob1,c8),true),6).
 
 %%%%%%%%%
 display

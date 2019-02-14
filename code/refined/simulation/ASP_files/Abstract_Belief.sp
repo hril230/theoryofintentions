@@ -152,7 +152,7 @@ next_to(office1, office2).
 %% History:
 %%%%%%%%%%%%
 holds(loc(book2,library),0).
-holds(loc(book1,office2),0).
+holds(loc(book1,office1),0).
 -holds(in_hand(rob1,book1),0).
 holds(loc(rob1,office1),0).
 -holds(in_hand(rob1,book3),0).

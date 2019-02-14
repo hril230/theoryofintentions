@@ -1,4 +1,4 @@
-#const numSteps = 7.
+#const numSteps = 6.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
@@ -202,8 +202,8 @@ goal(I) :- holds(coarse_loc(rob1,kitchen),I).
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c12),0).
 holds(coarse_loc(rob1,office1),0).
+holds(loc(rob1,c11),0).
 
 %%%%%%%%%
 display

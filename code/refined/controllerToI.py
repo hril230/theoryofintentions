@@ -140,7 +140,7 @@ class ControllerToI():
 							goal_direct_observations = self.getObservationsRelevantGoal()
 							if len(goal_direct_observations) > 0: direct_observations_refined_step.update(goal_direct_observations)
 							if len(other_direct_observations) > 0: direct_observations_refined_step.update(other_direct_observations)
-							direct_observations_history.update(self.observationsToHistoryFormat(direct_observations_refined_step,refined_plan_step))
+							direct_observations_history.update(self.fluentToHoldsStrings(direct_observations_refined_step,refined_plan_step))
 							obs_refined_step = Set()
 							for direct_observations in direct_observations_refined_step:
 								obs_refined_step.add(self.domain_info.directObservationToRefinedObs(direct_observations, refined_plan_step))
@@ -202,12 +202,16 @@ class ControllerToI():
 		myStep = map(int, re.findall('\d+', partOfString))[0]
 		return int(myStep)
 
-	def observationsToHistoryFormat(self,observations,step):
-		if observations == Set(['']) or not observations: return observations
-		observations_in_history_format = Set()
-		for observation in observations:
-			observations_in_history_format.add('holds(' + observation + ',' + str(step) + ').')
-		return observations_in_history_format
+	#this functions gets a set of fluents and a step as parameters and returns
+	# a set of 'holds' string for those fluents at that given step.
+	# example: fluentsToHoldsStrings({loc(rob1,kitchen), directly_observed(in_hand(rob1,book1),true)}, 3)
+	# it will return {holds(loc(rob1,kitchen),3), holds(directly_observed(in_hand(rob1,book1),true),3)}
+	def fluentToHoldsStrings(self,fluents,step):
+		if fluents == Set(['']) or not fluents: return fluents
+		fluents_in_history_format = Set()
+		for fluent in fluents:
+			fluents_in_history_format.add('holds(' + fluent + ',' + str(step) + ').')
+		return fluents_in_history_format
 
 	def getObservationsRelevantGoal(self):
 		startTime = datetime.now()
@@ -226,7 +230,7 @@ class ControllerToI():
 					observations.add(observation)
 		self.testing_time += datetime.now() - startTime
 		return observations
- 
+
 	#This function calls an refined ASP to infer the abstract 'obs' from the refined_history and other
 	#direct observations that has been collected during the execution of the refined plan.
 	#If this controller is using zooming, then the sorts and attributes included in the ASP file will
@@ -544,8 +548,8 @@ class ControllerToI():
 			self.completeRun.value = global_variables.character_code_inconsistency
 			self.recordData()
 			self.error.set()
-		answer_set = answer_set.rstrip().strip('{').strip('}')
-		return self.domain_info.dic_answerToState(answer_set)
+		answer_split = ((answer_set.rstrip().split('\n\n'))[0]).strip('{}\n').split(', ')
+		return self.domain_info.dic_answerToState(answer_split)
 
 	def update_abstract_belief(self,new_state):
 		if len(new_state) > 0: self.dic_belief = new_state
@@ -574,8 +578,8 @@ class ControllerToI():
 			elif answer_set == '\n': self.completeRun.value = global_variables.character_code_inconsistency
 			self.recordData()
 			self.error.set()
-		answer_set = answer_set.rstrip().strip('{').strip('}')
-		self.dic_belief = self.domain_info.dic_answerToState(answer_set)
+		answer_split = ((answer_set.rstrip().split('\n\n'))[0]).strip('{}\n').split(', ')
+		self.dic_belief = self.domain_info.dic_answerToState(answer_split)
 
 
 

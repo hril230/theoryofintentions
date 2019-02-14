@@ -246,6 +246,7 @@ comp(ref3_book3, book3).
 display
 %%%%%%%%%
 
+occurs.
 holds(loc(A,B),numSteps).
 holds(in_hand(A,B),numSteps).
 holds(coarse_loc(A,B),numSteps).

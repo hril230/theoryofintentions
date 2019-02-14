@@ -241,29 +241,30 @@ comp(ref3_book3, book3).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref1_book2,c1),0).
-holds(loc(ref2_book3,c4),0).
-holds(loc(ref1_book3,c4),0).
-holds(loc(ref2_book2,c1),0).
-holds(loc(ref2_book1,c14),0).
+holds(coarse_loc(book1,office1),0).
+holds(loc(ref1_book2,c2),0).
+holds(loc(ref1_book1,c11),0).
+holds(loc(ref2_book3,c2),0).
+holds(loc(ref3_book3,c2),0).
 holds(coarse_loc(book2,library),0).
+holds(loc(ref2_book1,c11),0).
 holds(coarse_loc(rob1,office1),0).
--holds(coarse_in_hand(rob1,book3),0).
--holds(coarse_in_hand(rob1,book2),0).
-holds(loc(ref1_book1,c14),0).
-holds(loc(ref3_book1,c14),0).
+holds(loc(ref3_book1,c11),0).
+holds(loc(ref3_book2,c2),0).
+holds(loc(ref1_book3,c2),0).
+holds(loc(ref2_book2,c2),0).
 holds(loc(rob1,c9),0).
-holds(loc(ref3_book2,c1),0).
+-holds(coarse_in_hand(rob1,book2),0).
+-holds(coarse_in_hand(rob1,book3),0).
 holds(coarse_loc(book3,library),0).
 -holds(coarse_in_hand(rob1,book1),0).
-holds(loc(ref3_book3,c4),0).
-holds(coarse_loc(book1,office2),0).
 hpd(move(rob1,c8),0).
 
 %%%%%%%%%
 display
 %%%%%%%%%
 
+occurs.
 holds(loc(A,B),numSteps).
 holds(in_hand(A,B),numSteps).
 holds(coarse_loc(A,B),numSteps).
