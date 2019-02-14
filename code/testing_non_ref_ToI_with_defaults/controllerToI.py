@@ -8,35 +8,7 @@ import re
 import numpy
 import random
 
-goal = None  # given when initialised
-maxPlanLength = None  #given when initialised
-numberSteps = None
-toi_history = None  #starting with initial conditions taken from world and adding occurrence
-currentStep = None
-numberActivities = None
-inputForPlanning = None
-believes_goal_holds = False
-
-
-toi_goal_marker = '%% @_@_@'
-toi_beginning_history_marker = '%% #_#_# beginning'
-toi_end_history_marker = '%% #_#_# end'
-toi_current_step_marker = '%% *_*_*'
-preASP_toi_file = 'pre_ASP_files/preASP_ToI.txt'
-
-asp_toi_file = 'ASP_files/ASP_ToI_Planning.sp'
-preASP_toi_split = None
-toi_beginning_history_index = None
-toi_current_step_index = None
-
-asp_toi_diagnosing_file = 'ASP_files/ASP_ToI_Diagnosis.sp'
-asp_toi_defaults_file = 'ASP_files/ASP_ToI_Defaults.sp'
-
-executer = None
-goal_correction = None
-
-
-def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
+def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer, initialKnowledge):
 	global executer
 	global maxPlanLength
 	global numberSteps
@@ -47,10 +19,10 @@ def controllerToI(thisPath,newGoal, maxPlanLen, new_executer, initialKnowledge):
 	global inputForPlanning
 	global goal_correction
 	global currentDiagnosis
-	global sparcPath
 	global currentAssumptions #this conditions are created by the ASP, and include the initialKnowledge. The value of some fluents may have to be assumed by choice.
 	global currentDefaults
-	sparcPath = thisPath
+	global domain_info_formatting
+	domain_info_formatting = new_domain_info_formatting
 	numberActivities = 1
 	numberSteps = 4
 	maxPlanLength = maxPlanLen
@@ -123,20 +95,20 @@ def planning(outputDefaultsAndDiagnosis):
 	input = outputDefaultsAndDiagnosis + toi_history +['planning('+str(currentStep)+').']
 	current_asp_split = preASP_toi_split[:toi_beginning_history_index +1] + input + preASP_toi_split[toi_beginning_history_index +1:]
 	asp = '\n'.join(current_asp_split)
-	f1 = open(asp_toi_file, 'w')
+	f1 = open(domain_info_formatting.asp_ToI_planning_file, 'w')
 	f1.write(asp)
 	f1.close()
-	print 'ASP_ToI_Planning: '
-	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
+	print domain_info_formatting.asp_ToI_planning_file
+	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_planning_file +' -A ',shell=True)
 	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
 		current_asp_split[1] = "#const max_len = "+str(numberSteps)+". % maximum activity_length of an activity."
 		asp = '\n'.join(current_asp_split)
-        	f1 = open(asp_toi_file, 'w')
+        	f1 = open(domain_info_formatting.asp_ToI_planning_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print('Increasing - numberSteps. ASP_ToI_Planning with ' + str(numberSteps) +' number of steps.')
-		answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_file +' -A ',shell=True)
+		print(domain_info_formatting.asp_ToI_planning_file +'Increasing - numberSteps. ASP_ToI_Planning with ' + str(numberSteps) +' number of steps.')
+		answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_planning_file +' -A ',shell=True)
 		numberSteps +=1
 
         possibleAnswers = answerSet.rstrip().split('\n\n')
@@ -155,8 +127,6 @@ def planning(outputDefaultsAndDiagnosis):
 		activity_info = [line+'.' for line in split_answer if 'activity' in line and '('+new_activity_name+',' in line]
 		toi_history = toi_history + activity_info
 
-	print '\n\ncheking output: '
-	print chosenAnswer
 	return nextAction
 
 
@@ -170,22 +140,24 @@ def checkingDefaults():
 	checkingDefaultsFlag = "finding_defaults("+str(currentStep)+")."
 	checkingDefaultsDisplayLines = ['%%%%%%\ndisplay\n%%%%%%','defined_by_default.']
 	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + toi_history + [checkingDefaultsFlag] + checkingDefaultsDisplayLines
-	f1 = open(asp_toi_defaults_file, 'w')
+	f1 = open(domain_info_formatting.asp_ToI_diagnosing_file, 'w')
 	f1.write('\n'.join(current_asp_split))
 	f1.close()
-	print('ASP_ToI_Defaults: ')
-	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_defaults_file +' -A ',shell=True)
+	print(domain_info_formatting.asp_ToI_diagnosing_file)
+	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_diagnosing_file +' -A ',shell=True)
 	if answerSet == '': return []
 
 	answers = answerSet.rstrip().split('\n\n')
+	previousDefaults = currentDefaults
 	currentDefaults = Set()
-	for a in answers:
-		answer_defaults = Set(a.strip('}').strip('{').split(', '))
-		if currentDefaults.issubset(answer_defaults): currentDefaults = answer_defaults
+	for a in [answer for answer in answers if answer]:
+		answer_defaults = Set(a.strip('{}\n').split(', '))
+		if previousDefaults.issubset(answer_defaults):
+			currentDefaults = answer_defaults
+			break
 
-	if not currentDefaults: currentDefaults = Set(answers[0].strip('}').strip('{').split(', '))
-	print '\nCurrent Defaults: ' + ', '.join(currentDefaults)
-
+	if not currentDefaults and answers[0]:
+		currentDefaults = Set(answers[0].strip('{}\n').split(', '))
 	return [e+'.' for e in currentDefaults]
 
 def diagnose(defaultsOutput):
@@ -193,19 +165,18 @@ def diagnose(defaultsOutput):
 	global currentAssumptions
 	lastDiagnosis = currentDiagnosis
 	lastInitialAssumptions = currentAssumptions
-
 	diagnosingFlag = "diagnosing("+str(currentStep)+")."
-
 	diagnosingDisplayLines = ['\n%%%%%%\ndisplay\n%%%%%%','unobserved.','assumed_initial_condition.']
+
 	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + defaultsOutput + toi_history +[diagnosingFlag] + diagnosingDisplayLines
 	asp = '\n'.join(current_asp_split)
-        f1 = open(asp_toi_diagnosing_file, 'w')
+        f1 = open(domain_info_formatting.asp_ToI_diagnosing_file, 'w')
 	f1.write(asp)
 	f1.close()
 
 	# running only diagnosis
-	print('ASP_ToI_Diagnosis: ')
-	answerSet = subprocess.check_output('java -jar '+sparcPath + ' ' + asp_toi_diagnosing_file +' -A ',shell=True)
+	print(domain_info_formatting.asp_ToI_diagnosing_file)
+	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_diagnosing_file +' -A ',shell=True)
 	answers = answerSet.rstrip().split('\n\n')
 
 	chosenAnswer = None
@@ -235,26 +206,17 @@ def diagnose(defaultsOutput):
 
 
 def preparePreASP_string_lists():
-	global toi_goal_marker
-	global toi_beginning_history_marker
-	global toi_current_step_marker
-	global preASP_toi_file
-	global goal
 	global preASP_toi_split
 	global toi_beginning_history_index
 	global toi_current_step_index
-
-
-	#preparing preASP_toi_split and toi_beginning_history_index
-    	reader = open(preASP_toi_file, 'r')
-    	preASP_toi = reader.read()
-    	reader.close()
+	reader = open(domain_info_formatting.preASP_ToI_file, 'r')
+	preASP_toi = reader.read()
+	reader.close()
 	preASP_toi_split = preASP_toi.split('\n')
-
-   	index_goal = preASP_toi_split.index(toi_goal_marker)
-    	preASP_toi_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ goal)
-    	toi_beginning_history_index = preASP_toi_split.index(toi_beginning_history_marker)
-	toi_current_step_index = preASP_toi_split.index(toi_current_step_marker)
+	index_goal = preASP_toi_split.index(domain_info_formatting.goal_marker)
+	preASP_toi_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ goal)
+	toi_beginning_history_index = preASP_toi_split.index(domain_info_formatting.history_marker)
+	toi_current_step_index = preASP_toi_split.index(domain_info_formatting.current_step_marker)
 
 
 def observations_to_obsList(observations, step):

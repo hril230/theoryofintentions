@@ -8,14 +8,14 @@ fluents are as follows:
 	In_handBook1_index = 4
 	In_handBook2_index = 5
 '''
-
+''' This is a simulation of the real world would be, with observations as return and action as input
+The real values are going to be kept in a dictionary with key of the form 'loc(rob1,' and value of the form 'library'
+If the dictionary holds the key 'locked(library' the value for this key is None. This system to keep
+the state of the world works only if our ASP's are working with fluents that have two parameters at most.
+'''
 from sets import Set
 import subprocess
 import random
-preASP_domain_file = 'pre_ASP_files/preASP_Domain.txt'
-asp_World_file = 'ASP_files/ASP_World.sp'
-history_marker = '%% *_*_*'
-display_marker = 'display'
 
 
 class World(object):
@@ -26,31 +26,53 @@ class World(object):
 	In_handBook1_index = 4
 	In_handBook2_index = 5
 	DomainLocations = ['office1', 'office2' ,'kitchen','library']
-
-	def __init__(self,thisPath,initialConditionsWorld, scenario, this_seed):
-
+	def __init__(self,new_domain_info_formatting,initialConditionsWorld, this_seed):
+		self.domain_info_formatting = new_domain_info_formatting
+		self.dic_WorldState = self._listToDictionary(initialConditionsWorld)
 		self.RealValues = list(initialConditionsWorld)
-		reader = open(preASP_domain_file, 'r')
+		reader = open(self.domain_info_formatting.preASP_domain_file, 'r')
     		pre_asp = reader.read()
     		reader.close()
     		self.pre_asp_split = pre_asp.split('\n')
-		self.history_marker_index = self.pre_asp_split.index(history_marker) + 1
-		self.display_marker_index = self.pre_asp_split.index(display_marker) + 2
+		self.history_marker_index = self.pre_asp_split.index(self.domain_info_formatting.history_marker) + 1
 		self.exo_action_happened = True
-                self.scenario = scenario
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
-		self.sparcPath = thisPath
 		random.seed(this_seed)
 
-	def __updateRealValues(self,answerSet):
+	def _listToDictionary(self, stateList):
+		dictionary = {}
+		for a in stateList:
+			if stateList.index(a)==self.LibraryLocked_index: dictionary['locked(library'] = None
+			if stateList.index(a)==self.LocationRobot_index: dictionary['loc(rob'] = a
+			if stateList.index(a)==self.LocationBook1_index: dictionary['loc(book1'] = a
+			if stateList.index(a)==self.LocationBook2_index: dictionary['loc(book2'] = a
+			if stateList.index(a)==self.In_handBook1_index and a=='true': dictionary['in_hand(rob1'] = 'book1'
+			if stateList.index(a)==self.In_handBook2_index and a=='true': dictionary['in_hand(rob1'] = 'book2'
+		#print [','.join([v for v in [a,b] if v])+')' for a,b in dictionary.items()]
+		return dictionary
+
+	def __updateDicWorldState(self,answer_split):
+		self.dic_WorldState = {}
+		my_fluents = [entry[entry.find('(')+1:entry.find(')')+1] for entry in answer_split if 'holds' in entry]
+		my_fluents_splitted = [v.replace(')','').split(',') for v in my_fluents]
+		for split_fluent in my_fluents_splitted:
+			## if my fluent had a comma in it, for example 'loc(rob1,kitchen)', then the splitted version is a list with two elements,
+			## and  the dictionary will have a key that corresponds to the first element of the list 'loc(rob1', with value
+			## that corresponds to the second part of the fluent, i.e. 'kitchen' (the brackets are removed for formatting )
+			if len(split_fluent)>1:
+				print 'this is my v '+ str(split_fluent)
+				self.dic_WorldState[split_fluent[0]] = split_fluent[1]
+			## if my fluent did not have a comma, for example 'locked(library)', then the splitted version is a list wit only one element,
+			## so the dictionary will have a key 'locked(library' with corresonding value None.
+			else: self.dic_WorldState[split_fluent[0]] = None
+
+	def __updateRealValues(self,answer_split):
 		self.RealValues[0] = 'false'
 		self.RealValues[4] = 'false'
 		self.RealValues[5] = 'false'
-		newRealValues = answerSet.strip('\n')
-		newRealValues_split = newRealValues.strip('}').strip('{').split(', ')
-		for fluent in newRealValues_split:
+		for fluent in answer_split:
 			fluent = fluent[6:fluent.rfind(',')]
 			if(fluent[0:7] == 'locked('):
 				self.RealValues[0] = 'true'
@@ -65,7 +87,7 @@ class World(object):
 				split_fluent = fluent.split(',')
 				if(split_fluent[1] == 'book1'): self.RealValues[4] = 'true'
 				if(split_fluent[1] == 'book2'): self.RealValues[5] = 'true'
-
+		print self.RealValues
 
 
 	def __getActionObservations(self,action,happened):
@@ -112,139 +134,71 @@ class World(object):
 		if(action[0:6] == 'unlock'):
 			return 1
 
-	def __get_scenario_exo_action(self,action):
-		scenario = self.scenario
+	def __get_exo_action(self,action):
 		exo_action = ''
-
- 		#case scenario 1 - just planning, everything goes fine, no unexpected changes in the world.
-
-
-		# case scenario 2 Unexpected achievement of the goal
-		if(scenario == 2):
-			if(action[0:8] == 'put_down' and self.RealValues[World.LibraryLocked_index] == 'false'):
-				if(self.RealValues[World.LocationBook1_index] != 'library'):
-					exo_action = 'exo_move(book1,library)'
-				elif(self.RealValues[World.LocationBook2_index] != 'library'):
-					exo_action = 'exo_move(book2,library)'
-
-		if(scenario == 3):
-			robotDestination = ""
-			if(action[0:4] == 'move'): robotDestination = action[10:-1]
-			elif(action[0] == 'p'): robotDestination = self.RealValues[World.LocationRobot_index]
-			else:  return exo_action
-
-			choice = random.choice(['book1','book2'])
-			if(choice == 'book1'  and (self.RealValues[World.In_handBook1_index] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
-			elif(choice == 'book2'  and (self.RealValues[World.In_handBook2_index] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
-
-			if(choice == 'book1'):
-				currentBookLocation = self.RealValues[World.LocationBook1_index]
-				if(currentBookLocation == robotDestination and currentBookLocation != 'library'):
-					allLocations = list(self.DomainLocations)
-					allLocations.remove(currentBookLocation)
-					newLocation = random.choice(allLocations)
-					if(self.RealValues[World.LibraryLocked_index] == 'false' or newLocation != 'library'):
-						return( 'exo_move(book1,' +newLocation+ ')')
-
-			elif(choice == 'book2'):
-				currentBookLocation = self.RealValues[World.LocationBook2_index]
-				if(currentBookLocation == robotDestination and currentBookLocation != 'library'):
-					allLocations = list(self.DomainLocations)
-					allLocations.remove(currentBookLocation)
-					newLocation = random.choice(allLocations)
-					if(self.RealValues[World.LibraryLocked_index] == 'false' or newLocation != 'library'):
-						return( 'exo_move(book2,' +newLocation+ ')')
-
-		if(scenario == 4):
-			destination = ""
-			if(action[0:4] == 'move'): destination = action[10:-1]
-			elif(action[0] == 'p'): destination = self.RealValues[World.LocationRobot_index]
-			else:  return exo_action
-
-			choice = random.choice(['book1','book2'])
-			if(choice == 'book1'  and self.RealValues[World.In_handBook1_index] == 'true'): choice = 'book2'
-			elif(choice == 'book2'  and self.RealValues[World.In_handBook2_index] == 'true'): choice = 'book1'
-
-			if(choice == 'book1'):
-				if(self.RealValues[World.LocationBook1_index] != destination and destination != 'library'):
-					if(self.RealValues[World.LibraryLocked_index] == 'false' or self.RealValues[World.LocationBook1_index] != 'library'):
-						exo_action =  'exo_move(book1,' +destination+ ')'
-
-			elif(choice == 'book2'):
-				if(self.RealValues[World.LocationBook2_index] != destination and destination != 'library'):
-					if(self.RealValues[World.LibraryLocked_index] == 'false' or self.RealValues[World.LocationBook2_index] != 'library'):
-						exo_action =  'exo_move(book2,' +destination+ ')'
-
-
-		# case scenario 5 - Failure to achieve goal, diagnosis, and re-planning
-		if(scenario == 5):
-			if (self.RealValues[World.LocationBook1_index] == 'library'  and self.RealValues[World.LocationBook2_index] == 'library' and self.RealValues[World.LibraryLocked_index] == 'false'):
-				if(self.RealValues[World.In_handBook1_index] == 'true'):
-					exo_action = 'exo_move(book2,kitchen)'
-				elif(self.RealValues[World.In_handBook2_index] == 'true'):
-					exo_action = 'exo_move(book1,kitchen)'
-
-
-		# case scenario 6 - unexpected failure to execute
-		if(scenario == 6):
-			if self.RealValues[World.LibraryLocked_index] == 'false':
-			    	exo_action = 'exo_lock(library)'
-
-
-		if(scenario == 'random_exo_actions'):
-			if(random.random()<0.08): return exo_action
-			choice = random.choice(['library','book1','book2'])
-			if(choice == 'library' and self.RealValues[World.LibraryLocked_index] == 'false'): return 'exo_lock(library)'
-			elif(choice == 'book1'  and (self.RealValues[World.In_handBook1_index] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
-			elif(choice == 'book2'  and (self.RealValues[World.In_handBook2_index] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
-			if(choice == 'book1'):
-				allLocations = list(self.DomainLocations)
-				currentLocation = self.RealValues[World.LocationBook1_index]
-				allLocations.remove(currentLocation)
-				newLocation = random.choice(allLocations)
-				if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
-					exo_action =  'exo_move(book1,' +newLocation+ ')'
-			elif(choice == 'book2'):
-				allLocations = list(self.DomainLocations)
-				currentLocation = self.RealValues[World.LocationBook2_index]
-				allLocations.remove(currentLocation)
-				newLocation = random.choice(allLocations)
-				if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
-					exo_action =  'exo_move(book2,' +newLocation+ ')'
+		if(random.random()<0.08): return exo_action
+		choice = random.choice(['library','book1','book2'])
+		if(choice == 'library' and self.RealValues[World.LibraryLocked_index] == 'false'): return 'exo_lock(library)'
+		elif(choice == 'book1'  and (self.RealValues[World.In_handBook1_index] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
+		elif(choice == 'book2'  and (self.RealValues[World.In_handBook2_index] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
+		if(choice == 'book1'):
+			allLocations = list(self.DomainLocations)
+			currentLocation = self.RealValues[World.LocationBook1_index]
+			allLocations.remove(currentLocation)
+			newLocation = random.choice(allLocations)
+			if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
+				exo_action =  'exo_move(book1,' +newLocation+ ')'
+		elif(choice == 'book2'):
+			allLocations = list(self.DomainLocations)
+			currentLocation = self.RealValues[World.LocationBook2_index]
+			allLocations.remove(currentLocation)
+			newLocation = random.choice(allLocations)
+			if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
+				exo_action =  'exo_move(book2,' +newLocation+ ')'
 		return exo_action
 
 
 	def __del__(self):
         	print('deleting world ')
 
+	def __runASPDomain(self,input):
+		asp_split = self.pre_asp_split[:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
+		asp = '\n'.join(asp_split)
+		f1 = open(self.domain_info_formatting.asp_World_file, 'w')
+		f1.write(asp)
+		f1.close()
+		print (self.domain_info_formatting.asp_World_file)
+		answer = subprocess.check_output('java -jar '+ self.domain_info_formatting.sparc_path + ' ' +self.domain_info_formatting.asp_World_file+' -A',shell=True)
+		answer_split = answer.strip('{}\n').split(', ')
+		return answer_split
+
 	def executeAction(self,action):
 		happened = False
 		exo_action = ''
 		input = self.__getRealValues_as_obsList(0) + ['hpd('+ action +',0).']
 		if(self.exo_action_happened == False):
-			exo_action = self.__get_scenario_exo_action(action)
+			exo_action = self.__get_exo_action(action)
 			if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
 		asp_split = self.pre_asp_split[0:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
 		asp = '\n'.join(asp_split)
-		f1 = open(asp_World_file, 'w')
+		f1 = open(self.domain_info_formatting.asp_World_file, 'w')
 		f1.write(asp)
 		f1.close()
-		answer = subprocess.check_output('java -jar '+ self.sparcPath + ' ' +asp_World_file+' -A',shell=True)
+		answer_split = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getexecutionTimeUnits(action)
 		self.executedSteps += 1
-
-		if(answer == '\n'):
-			happened = False
-			self.history.append(action + " (FAILED) ")
-		else:
+		if(answer_split and 'occurs('+ action +',0)' in answer_split):
 			happened = True
-			self.__updateRealValues(answer)
+			self.__updateRealValues(answer_split)
+			self.__updateDicWorldState(answer_split)
 			self.history.append(action)
 			if(exo_action != ''):
 				self.history.append(exo_action)
 				self.exo_action_happened = True
  				print('%%%%%%%%%     exo_action happened in realWorld.py :  '+exo_action)
-
+		else:
+			happened = False
+			self.history.append(action + " (FAILED) ")
 		return (self.__getActionObservations(action, happened))
 
 	def getRealValues(self):

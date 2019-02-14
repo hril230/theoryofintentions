@@ -593,22 +593,21 @@ defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-%% @_@_@
+%% GOAL GOES HERE
 
 
 
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
-%% *_*_*
+%% CURRENT STEP GOES HERE
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% #_#_# beginning
-%% #_#_# end
+%% HISTORY GOES HERE
 
 
 

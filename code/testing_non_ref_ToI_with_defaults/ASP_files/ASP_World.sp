@@ -164,18 +164,17 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-%% *_*_*
+%% HISTORY GOES HERE
 obs(locked(library),false,0).
 obs(loc(rob1,library),true,0).
 obs(loc(book1,library),true,0).
-obs(loc(book2,library),true,0).
+obs(loc(book2,kitchen),true,0).
 obs(in_hand(rob1,book1),false,0).
-obs(in_hand(rob1,book2),true,0).
-hpd(put_down(rob1,book2),0).
+obs(in_hand(rob1,book2),false,0).
+hpd(move(rob1,kitchen),0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(F,numSteps).
--holds(in_hand(rob1,B), numSteps).
--holds(locked(library), numSteps).
+holds(F,1).
+occurs(A,0).

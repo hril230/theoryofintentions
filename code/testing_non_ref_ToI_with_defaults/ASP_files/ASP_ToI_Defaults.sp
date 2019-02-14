@@ -593,7 +593,7 @@ defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-%% @_@_@
+%% GOAL GOES HERE
 holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) .
 
 
@@ -601,14 +601,14 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
-%% *_*_*
+%% CURRENT STEP GOES HERE
 current_step(12).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% #_#_# beginning
+%% HISTORY GOES HERE
 obs(loc(rob1,library),true,0).
 hpd(select(my_goal), true,0).
 obs(my_goal,false,1).

@@ -17,18 +17,14 @@ How I classify trial results according to different scenarios in realWorld.py:
 from datetime import datetime
 from realWorld import World
 import controllerToI
+from domain_info_formatting import DomainInfoFormatting
 from executer import Executer
 import subprocess
 import random
 
 global goal
-results_folder = 'results/'
-sparcPath = "$HOME/work/solverfiles/sparc.jar"
-
 
 maxPlanLength = 17
-scenario = None
-
 textfile = None
 locations = ['office1', 'office2', 'kitchen', 'library']
 boolean = ['true', 'false']
@@ -36,7 +32,7 @@ boolean = ['true', 'false']
 
 runCount = 0
 
-def run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge):
+def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
 	global runCount
 	runCount +=1
 
@@ -52,9 +48,9 @@ def run_and_write(scenario, initial_conditions_index, initial_state, initial_kno
 
 	randomSeed = runCount
 	start_time_toi = datetime.now()
-	world_toi = World(sparcPath,initial_state,scenario,randomSeed)
+	world_toi = World(domain_info_formatting ,initial_state,randomSeed)
 	executer = Executer(world_toi)
-	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(sparcPath,goal, maxPlanLength, executer,initial_knowledge)
+	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(domain_info_formatting,goal, maxPlanLength, executer,initial_knowledge)
 	end_time_toi = datetime.now()
 	time_planning_toi = (end_time_toi - start_time_toi).total_seconds()
 	historyWorld_toi = world_toi.getHistory()
@@ -146,7 +142,7 @@ def run_and_write(scenario, initial_conditions_index, initial_state, initial_kno
 
 
 
-def createConditionsAndRunAll(scenario):
+def createConditionsAndRunAll():
 	initial_conditions_index = 0
 
 	## lines below is to flag that we only get one run, with condition index held by controlledRunConditions variable.
@@ -165,7 +161,7 @@ def createConditionsAndRunAll(scenario):
 				in_handBook2 = 'false'
 				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 				initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
-				run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge)
+				run_and_write(initial_conditions_index, initial_state, initial_knowledge)
 
 	#Cases when rob1 is holding book2
 	for locked in boolean:
@@ -178,7 +174,7 @@ def createConditionsAndRunAll(scenario):
 				in_handBook2 = 'true'
 				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 				initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
-				run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge)
+				run_and_write(initial_conditions_index, initial_state, initial_knowledge)
 
 	#Cases when rob1 is not holding any book
 	for locked in boolean:
@@ -191,12 +187,12 @@ def createConditionsAndRunAll(scenario):
 					in_handBook2 = 'false'
 					initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
 					initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
-					run_and_write(scenario, initial_conditions_index, initial_state, initial_knowledge)
+					run_and_write(initial_conditions_index, initial_state, initial_knowledge)
 
 if __name__ == "__main__":
 	global goal
-	textfile = open(results_folder +'results_ToI_test.txt', 'w')
-
+	textfile = open('results/results_ToI_test.txt', 'w')
+	domain_info_formatting = DomainInfoFormatting()
 	LibraryLocked_index = 0
 	LocationRobot_index = 1
 	LocationBook1_index = 2
@@ -206,9 +202,9 @@ if __name__ == "__main__":
 
 	goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
 	#initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-	initial_state = ['false', 'library', 'library', 'kitchen', 'true', 'false']
+	initial_state = ['true', 'library', 'library', 'kitchen', 'true', 'false']
 	initial_knowledge = [[LocationRobot_index,'library']]
 
-	run_and_write('random_exo_actions',0,initial_state,initial_knowledge)
+	run_and_write(0,initial_state,initial_knowledge)
 
 	#createConditionsAndRunAll('random_exo_actions')

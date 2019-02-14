@@ -1,6 +1,6 @@
-#const n = 16. % maximum number of steps.
-#const max_len = 15. % maximum activity_length of an activity.
-#const max_name = 3.
+#const n = 15. % maximum number of steps.
+#const max_len = 14. % maximum activity_length of an activity.
+#const max_name = 2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -593,7 +593,7 @@ defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-%% @_@_@
+%% GOAL GOES HERE
 holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) .
 
 
@@ -601,14 +601,14 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
-%% *_*_*
-current_step(12).
+%% CURRENT STEP GOES HERE
+current_step(7).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% #_#_# beginning
+%% HISTORY GOES HERE
 defined_by_default(loc(book1,library)).
 obs(loc(rob1,library),true,0).
 hpd(select(my_goal), true,0).
@@ -647,30 +647,7 @@ obs(in_hand(rob1,book1),false,7).
 obs(in_hand(rob1,book2),false,7).
 obs(loc(book1,kitchen),false,7).
 obs(loc(book2,kitchen),true,7).
-attempt(stop(2),7).
-activity_goal(3,my_goal).
-activity_component(3,1,pickup(rob1,book2)).
-activity_component(3,2,move(rob1,library)).
-activity_component(3,3,put_down(rob1,book2)).
-activity_length(3,3).
-attempt(start(3),8).
-attempt(pickup(rob1,book2),9).
-obs(in_hand(rob1,book2),true,10).
-obs(in_hand(rob1,book1),false,10).
-obs(loc(book2,kitchen),true,10).
-obs(loc(book1,kitchen),false,10).
-attempt(move(rob1,library),10).
-obs(loc(book2,library),true,11).
-obs(in_hand(rob1,book1),false,11).
-obs(loc(rob1,library),true,11).
-obs(loc(book1,library),true,11).
-obs(in_hand(rob1,book2),true,11).
-attempt(put_down(rob1,book2),11).
-obs(in_hand(rob1,book2),false,12).
-obs(loc(book2,library),true,12).
-obs(loc(book1,library),true,12).
-obs(in_hand(rob1,book1),false,12).
-diagnosing(12).
+diagnosing(7).
 
 %%%%%%
 display

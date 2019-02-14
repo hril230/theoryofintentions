@@ -164,11 +164,10 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-%% *_*_*
+%% HISTORY GOES HERE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(F,numSteps).
--holds(in_hand(rob1,B), numSteps).
--holds(locked(library), numSteps).
+holds(F,1).
+occurs(A,0).
