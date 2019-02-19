@@ -32,13 +32,10 @@ boolean = ['true', 'false']
 
 runCount = 0
 
-def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
+def run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge):
 	global runCount
 	runCount +=1
 
-	print 'World conditions: [locked, rob_loc, book1_loc, book2_loc, in_handBook1, in_handBook2]'
-	print 'World conditions: ' + str(initial_state)
-	#print("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"    $$$$$$$$$$$$$$$$$$$")
 	history_toi = [""]
 	time_planning_toi = 0
 	time_executing_toi = 0
@@ -48,7 +45,7 @@ def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
 
 	randomSeed = runCount
 	start_time_toi = datetime.now()
-	world_toi = World(domain_info_formatting ,initial_state,randomSeed)
+	world_toi = World(domain_info_formatting ,dic_initial_condition,randomSeed)
 	executer = Executer(world_toi)
 	history_toi, numberPlans_toi, goal_correction_toi = controllerToI.controllerToI(domain_info_formatting,goal, maxPlanLength, executer,initial_knowledge)
 	end_time_toi = datetime.now()
@@ -57,7 +54,7 @@ def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
 	time_executing_toi = world_toi.getExecutionTimeUnits()
 	steps_executed_toi = world_toi.getExecutedSteps()
 	exo_action = str(world_toi.get_exo_action_happened())[0]
-	achieved_goal_toi = (world_toi.achievedGoal()[0]).capitalize()
+	achieved_goal_toi = str(controllerToI.check_goal_feedback())[0].capitalize()
 
 
 	toi_exo_action = ''
@@ -100,19 +97,17 @@ def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
 	elif(steps_executed_toi == firstActivityLength and secondActivity == False): scenarioRecreated_toi = 1
 
 	elif(firstStop > 0 and firstStop < firstActivityLength + 2 and secondActivity == True):
-		#print('it has stopped before end of plan, and started a second activity')
 		if(toi_exo_lock == 'true'):
 			scenarioRecreated_toi = 6
 		elif(toi_exo_move_book != ''):
-			#print('the exo actio is a move of this book: ' + toi_exo_move_book +  ' to this room: '+ toi_exo_move_room)
-			#print('looking for observation: ' + str(['obs(loc('+toi_exo_move_book+','+toi_exo_move_room+'),true' , str(firstStop)]))
 			if(['obs(loc('+toi_exo_move_book+','+toi_exo_move_room+'),true' , str(firstStop)] in historyInfo):
 				scenarioRecreated_toi = 4
 			else:
 				scenarioRecreated_toi = 3
 
-	print historyInfo
-	print activityInfo
+
+	print '\n'+str(historyInfo)
+	print '\n'+str(activityInfo)
 	historyInfo.sort(key=lambda x:x[0],reverse=True)
 	historyInfo.sort(key=lambda x:int(x[1]))
 
@@ -124,7 +119,7 @@ def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
 	textfile.write("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"   $$$$$$$$$$$$$$$$$$$\n")
 	textfile.write("Running Scenario "+str(scenarioRecreated_toi)+"\n")
 	textfile.write("Goal: "+goal+"\n")
-	textfile.write("Initial Conditions: "+str(initial_state)+"\n")
+	textfile.write("Initial World State: "+str(dic_initial_condition)+"\n")
 	textfile.write("Initial Conditions Index: "+str(initial_conditions_index)+"\n")
 	textfile.write("Achieved goal ToI: "+ str(achieved_goal_toi)+"\n")
 	textfile.write("\nHistory World: \n" + '\n'.join(historyWorld_toi) +"\n")
@@ -140,15 +135,14 @@ def run_and_write(initial_conditions_index, initial_state, initial_knowledge):
 	textfile.write('\n--------------------------------------------------------------\n\n')
 
 
-
-
 def createConditionsAndRunAll():
 	initial_conditions_index = 0
 
 	## lines below is to flag that we only get one run, with condition index held by controlledRunConditions variable.
 	controlledRun = True
+	controlledRun = False
 	controlledRunConditions = random.randrange(1,193,1)
-	controlledRunConditions = 2
+	#controlledRunConditions = 2
 
 	#Cases when rob1 is holding book1
 	for locked in boolean:
@@ -159,9 +153,15 @@ def createConditionsAndRunAll():
 				book1_location = robot_location
 				in_handBook1 = 'true'
 				in_handBook2 = 'false'
-				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
-				run_and_write(initial_conditions_index, initial_state, initial_knowledge)
+				dic_initial_condition = {}
+				if locked: dic_initial_condition['locked(library'] = None
+				dic_initial_condition['loc(rob1'] = robot_location
+				dic_initial_condition['loc(book1'] = book1_location
+				dic_initial_condition['loc(book2'] = book2_location
+				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book1'
+				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book2'
+				initial_knowledge =  domain_info_formatting.dic_state_to_obs_list(dic_initial_condition,0)
+				run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge)
 
 	#Cases when rob1 is holding book2
 	for locked in boolean:
@@ -172,9 +172,15 @@ def createConditionsAndRunAll():
 				book2_location = robot_location
 				in_handBook1 = 'false'
 				in_handBook2 = 'true'
-				initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-				initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
-				run_and_write(initial_conditions_index, initial_state, initial_knowledge)
+				dic_initial_condition = {}
+				if locked: dic_initial_condition['locked(library'] = None
+				dic_initial_condition['loc(rob1'] = robot_location
+				dic_initial_condition['loc(book1'] = book1_location
+				dic_initial_condition['loc(book2'] = book2_location
+				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book1'
+				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book2'
+				initial_knowledge =  domain_info_formatting.dic_state_to_obs_list(dic_initial_condition,0)
+				run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge)
 
 	#Cases when rob1 is not holding any book
 	for locked in boolean:
@@ -185,26 +191,32 @@ def createConditionsAndRunAll():
 					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
 					in_handBook1 = 'false'
 					in_handBook2 = 'false'
-					initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-					initial_knowledge =  [[initial_state.index(v),v] for v in initial_state]
-					run_and_write(initial_conditions_index, initial_state, initial_knowledge)
+					dic_initial_condition = {}
+					if locked: dic_initial_condition['locked(library'] = None
+					dic_initial_condition['loc(rob1'] = robot_location
+					dic_initial_condition['loc(book1'] = book1_location
+					dic_initial_condition['loc(book2'] = book2_location
+					if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book1'
+					if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book2'
+					initial_knowledge =  domain_info_formatting.dic_state_to_obs_list(dic_initial_condition,0)
+					run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge)
 
 if __name__ == "__main__":
 	global goal
 	textfile = open('results/results_ToI_test.txt', 'w')
 	domain_info_formatting = DomainInfoFormatting()
-	LibraryLocked_index = 0
-	LocationRobot_index = 1
-	LocationBook1_index = 2
-	LocationBook2_index = 3
-	In_handBook1_index = 4
-	In_handBook2_index = 5
+
 
 	goal = "holds(loc(book1,library),I), holds(loc(book2,library),I), -holds(in_hand(rob1,book1),I), -holds(in_hand(rob1,book2),I) ."
-	#initial_state = [locked, robot_location , book1_location , book2_location, in_handBook1, in_handBook2]
-	initial_state = ['true', 'library', 'library', 'kitchen', 'true', 'false']
-	initial_knowledge = [[LocationRobot_index,'library']]
+	dic_initial_condition = {}
+	locked = True
+	if locked: dic_initial_condition['locked(library'] = None
+	dic_initial_condition['loc(rob1'] = 'library'
+	dic_initial_condition['loc(book1'] = 'library'
+	dic_initial_condition['loc(book2'] = 'kitchen'
+	dic_initial_condition['in_hand(rob1'] = 'book1'
 
-	run_and_write(0,initial_state,initial_knowledge)
+	initial_knowledge = ['obs(loc(rob1,library),true,0).']
+	run_and_write(0,dic_initial_condition,initial_knowledge)
 
-	#createConditionsAndRunAll('random_exo_actions')
+	createConditionsAndRunAll()

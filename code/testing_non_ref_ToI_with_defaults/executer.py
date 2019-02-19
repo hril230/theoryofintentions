@@ -1,26 +1,31 @@
+from sets import Set
 class Executer(object):
 
 	def __init__(self,thisWorld):
 		self.world = thisWorld
-	
+
 	def executeAction(self, action):
-		return self.world.executeAction(action)
+		self.world.executeAction(action)
 
-	def getTheseObservations(self,indexes):
-		return self.world.getTheseObservations(indexes)
-
-	def getRealValues(self):
-		
-		return self.world.getRealValues()
-	
 	def getRobotLocation(self):
 		return self.world.getRobotLocation()
 
-	def getGoalFeedback(self):
-		return self.world.getGoalFeedback()
+	def get_goal_feedback(self, fluents, step):
+		feedback = world.goal_feedback(fluetns)
+		return
 
-	def getExecutedSteps(self):
-		return self.world.getExecutedSteps()
+	def get_goal_feedback(self,fluents, step):
+		obs_set = Set()
+		if not fluents: return obs_set
+		for fluent in fluents:
+			new_fluent, boolean = self.world.getRealValue(fluent)
+			if new_fluent: obs_set.add('obs('+new_fluent+','+boolean+','+ str(step) +')')
+		return obs_set
 
-	def __del__(self):
-        	print('deleting executer ')
+	def observe(self,fluents, step):
+		obs_set = Set()
+		if not fluents: return obs_set
+		for fluent in fluents:
+			new_fluent, boolean = self.world.robotObserves(fluent)
+			if new_fluent: obs_set.add('obs('+new_fluent+','+boolean+','+ str(step) +')')
+		return obs_set

@@ -9,6 +9,42 @@ class DomainInfoFormatting():
 
 		self.init_file_names()
 		self.init_files_markers()
+
+		self.sorts_hierarchy_dic = OrderedDict()
+		self.abstract_1_sorts_lines = []
+		is_abstract_1_sorts_line = False
+		with open(self.domain_info_file) as f:
+			for line in f:
+				line = line.strip()
+				if line == '%% Abstraction_1 Sorts':
+					is_abstract_1_sorts_line = True
+					continue
+				elif line == '%% End of Abstraction_1 Sorts':
+					is_abstract_1_sorts_line = False
+					continue
+				if is_abstract_1_sorts_line:
+					self.abstract_1_sorts_lines.append(line)
+					if '#' not in line: continue
+					line_split = line.replace(' ','').strip('.').split('=')
+					sort_name = line_split[0]
+					sort_composition_string = line_split[1]
+					sort_composition_list = sort_composition_string.split('+')
+					if '{' in sort_composition_list[0] or sort_composition_list[0] in self.sorts_hierarchy_dic.keys():
+						sort_composition_set = Set([v for v in sort_composition_list if v in self.sorts_hierarchy_dic.keys()])
+						for v in sort_composition_list:
+							 if '{' in v: sort_composition_set.update(Set(v.strip('{}').split(',')))
+						self.sorts_hierarchy_dic[sort_name] = sort_composition_set
+					elif '(' in sort_composition_list[0] or sort_composition_list[0] in self.sorts_hierarchy_dic.keys():
+						sort_composition_set = Set([v for v in sort_composition_list if v in self.sorts_hierarchy_dic.keys()])
+						for v in sort_composition_list:
+							if '(' in v:
+								v = v.strip(')').split('(')
+								self.sorts_hierarchy_dic[v[0]] = v[1].split(',')
+								sort_composition_set.add(v[0])
+						self.sorts_hierarchy_dic[sort_name] = sort_composition_set
+		self.constants = Set()
+		for values in self.sorts_hierarchy_dic.values(): self.constants.update(Set([v for v in values if v not in self.sorts_hierarchy_dic.keys()]))
+
 		'''
 		self.init_extra_ASP_strings()
 		self.reg_exp_sorts = r'#*\w*_*\w*' #regular expression that helps find the sorts in the asp text. The regular expression represents words composed with letters and numbers, possibley with # at the beginning, and possible with a _ in between its letters.
@@ -120,6 +156,30 @@ class DomainInfoFormatting():
 		self.create_pre_ASP_inferring_indirect_observations()
 		self.create_pre_ASP_refined_planning()
 		'''
+
+	'''
+	this fuctions gets a sort as string as a paramter, for example '#thing', and returns
+	all basic sorts that belong to the set of #thing which are, in this case, 'rob1', 'book1' and 'book2'.
+	'''
+	def get_all_basic_subsorts(self,sort):
+		if sort in self.constants: return sort
+		my_subsorts = self.sorts_hierarchy_dic[sort]
+		my_basicSubsorts = my_subsorts & self.constants
+		not_basic_sorts = my_subsorts - my_basicSubsorts
+		for s in not_basic_sorts: my_basicSubsorts.update(self.get_all_basic_subsorts(s))
+
+		return my_basicSubsorts
+
+	'''
+	this function gets a dictionary that represents a state, and returns a list of obs strings that
+	hold all the information about this state.
+	'''
+	def dic_state_to_obs_list(self,dic_state,step):
+		obsList = ['obs('+','.join([v for v in [a,b] if v])+'),true,'+str(step)+').' for a,b in dic_state.items()]
+		if [v for v in dic_state.keys() if 'in_hand' in v] == []:
+			obsList = obsList + ['obs(in_hand(rob1,'+ object +'),false,'+ str(step) +').' for object in self.get_all_basic_subsorts('#object')]
+		if 'locked(library' not in dic_state.keys(): obsList.append('obs(locked(library),false,' +str(step) + ').')
+		return obsList
 
 	'''
 	def create_relevant_sorts_lines(self,relevant_sorts_hierarchy_dic):
@@ -306,22 +366,24 @@ class DomainInfoFormatting():
 		return dic_coarse_state
 
 
+	'''
 	def dic_abstractStateToAbstractHoldsSet(self,dic_state,step):
 		holds_set = Set()
 		for key,value in dic_state.iteritems():
 			abstract_fluent = key+','+value+')'
 			holds_set.add('holds('+abstract_fluent+','+str(step)+').')
+
 		# if we have an object in hand, we return the set of statements.
 		object_in_hand = ''
 		if 'in_hand(rob1' in dic_state: object_in_hand = dic_state['in_hand(rob1']
 
-		'''
 		# if we do not have an object in hand, we include the coarse -holds statements.
 		for object in self.sorts_hierarchy_dic['#coarse_object']:
 			if object != object_in_hand: holds_set.add('-holds(in_hand(rob1,'+ object+'),'+str(step)+').')
-		'''
+
 
 		return holds_set
+	'''
 
 	'''
 	def dic_abstractStateToCoarseHoldsSet(self,dic_state,step):
@@ -473,7 +535,7 @@ class DomainInfoFormatting():
 		pre_ASP_folder = 'pre_ASP_files/'
 		ASP_folder = 'ASP_files/'
 
-		#self.domain_info_file = pre_ASP_folder + 'domain_info_'+str(global_variables.complexity_level)+'.txt'
+		self.domain_info_file = pre_ASP_folder + 'domain_info.txt'
 
 		#self.file_name_preASP_abstract_domain = pre_pre_ASP_folder + 'pre_pre_ASP_abstract_domain.txt'
 		#self.file_name_preASP_ToI_domain = pre_pre_ASP_folder + 'pre_pre_ASP_ToI_domain.txt'

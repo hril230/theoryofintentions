@@ -58,6 +58,8 @@ holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 
 %% State Constraints %%
+-next_to(L1,L2) :- not next_to(L1,L2).
+
 %% Reflexive property of next_to relation.
 next_to(L1,L2) :- next_to(L2,L1).
 
@@ -156,7 +158,6 @@ holds(F, 0) | -holds(F, 0) :- #inertial_fluent(F).
 next_to(office2,office1).
 next_to(office1,kitchen).
 next_to(kitchen,library).
--next_to(L1,L2) :- not next_to(L1,L2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -165,13 +166,13 @@ next_to(kitchen,library).
 %% History:
 %%%%%%%%%%%%
 %% HISTORY GOES HERE
-obs(locked(library),false,0).
-obs(loc(rob1,library),true,0).
-obs(loc(book1,library),true,0).
-obs(loc(book2,kitchen),true,0).
+obs(loc(book2,library),true,0).
+obs(loc(rob1,kitchen),true,0).
+obs(loc(book1,office1),true,0).
 obs(in_hand(rob1,book1),false,0).
 obs(in_hand(rob1,book2),false,0).
-hpd(move(rob1,kitchen),0).
+obs(locked(library),false,0).
+hpd(move(rob1,office1),0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display

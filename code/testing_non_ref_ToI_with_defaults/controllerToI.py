@@ -35,7 +35,7 @@ def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer,
 
 	print 'Initial knowledge: ' + str(initialKnowledge)
 	preparePreASP_string_lists()
-	toi_history = observations_to_obsList(initialKnowledge,0)
+	toi_history = initialKnowledge
 	toi_history.append("hpd(select(my_goal), true,0).")
 
    	currentStep = 1
@@ -47,7 +47,7 @@ def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer,
 		print('\nNext action with ToI: ' +str(nextAction) +'  at step '+ str(currentStep))
 		actionObservations = []
 		if(nextAction == 'finish'):
-			if(executer.getGoalFeedback() == True):
+			if check_goal_feedback():
 				toi_history.append('finish')
 				finish = True
 				break
@@ -73,18 +73,20 @@ def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer,
 			numberSteps += 1
 		elif(nextAction[0:5] == 'start'): pass
 		else:
-			actionObservations = executer.executeAction(nextAction)
-			relevantObservations = actionObservations + executer.getTheseObservations(getIndexesRelevantToGoal())
-			latest_observations = list(set(observations_to_obsList(relevantObservations,currentStep)))
-			print 'Latest_observations: ' + ' '.join(latest_observations)
-			toi_history = toi_history + latest_observations
+			executer.executeAction(nextAction)
+			step_obs = executer.observe(get_fluents_relevant_to_action(nextAction),currentStep)
+			step_obs.update(executer.observe(get_fluents_relevant_to_goal(),currentStep))
+			print '\nLatest_observations: ' + ' '.join(step_obs)
+			toi_history = toi_history + [obs+'.' for obs in list(step_obs)]
 
 	if(currentDiagnosis): toi_history + list(currentDiagnosis)
 	return (toi_history, numberActivities, goal_correction)
 
+def check_goal_feedback():
+	return executer.get_goal_feedback(get_fluents_relevant_to_goal(),currentStep) == goal_as_current_obs_set()
 
-def getIndexesRelevantToGoal():
-	return [World.LocationBook1_index, World.LocationBook2_index, World.In_handBook1_index, World.In_handBook2_index]
+def goal_as_current_obs_set():
+	return Set([entry.replace('holds','obs').replace('I',str('-' not in entry).lower()+','+str(currentStep)).replace('-','') for entry in goal.rstrip(' .').split(', ')])
 
 def planning(outputDefaultsAndDiagnosis):
 	global numberSteps
@@ -130,6 +132,17 @@ def planning(outputDefaultsAndDiagnosis):
 	return nextAction
 
 
+
+def get_fluents_relevant_to_action(action):
+	if 'move' in action: return {action.replace('move','loc')}
+	if 'pickup' in action: return {action.replace('pickup','in_hand')}
+	if 'put_down' in action: return {action.replace('put_down','in_hand')}
+	if 'unlock' in action: return {action.replace('unlock(rob1,','locked(')}
+
+
+def get_fluents_relevant_to_goal():
+	return Set([domain_info_formatting.get_fluent(entry) for entry in goal.split(', ') ])
+
 def checkingDefaults():
 	global currentDefaults
 	preASP_toi_split[toi_current_step_index +1] = 'current_step('+str(currentStep)+').'
@@ -140,22 +153,23 @@ def checkingDefaults():
 	checkingDefaultsFlag = "finding_defaults("+str(currentStep)+")."
 	checkingDefaultsDisplayLines = ['%%%%%%\ndisplay\n%%%%%%','defined_by_default.']
 	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + toi_history + [checkingDefaultsFlag] + checkingDefaultsDisplayLines
-	f1 = open(domain_info_formatting.asp_ToI_diagnosing_file, 'w')
+	f1 = open(domain_info_formatting.asp_ToI_defaults_file, 'w')
 	f1.write('\n'.join(current_asp_split))
 	f1.close()
-	print(domain_info_formatting.asp_ToI_diagnosing_file)
-	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_diagnosing_file +' -A ',shell=True)
-	if answerSet == '': return []
+	print(domain_info_formatting.asp_ToI_defaults_file)
+	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_defaults_file +' -A ',shell=True)
+	if answerSet == '' or '{}' in answerSet: return []
 
 	answers = answerSet.rstrip().split('\n\n')
 	previousDefaults = currentDefaults
 	currentDefaults = Set()
+
+
 	for a in [answer for answer in answers if answer]:
 		answer_defaults = Set(a.strip('{}\n').split(', '))
 		if previousDefaults.issubset(answer_defaults):
 			currentDefaults = answer_defaults
 			break
-
 	if not currentDefaults and answers[0]:
 		currentDefaults = Set(answers[0].strip('{}\n').split(', '))
 	return [e+'.' for e in currentDefaults]
@@ -217,27 +231,3 @@ def preparePreASP_string_lists():
 	preASP_toi_split.insert(index_goal+1,  "holds(my_goal,I) :- "+ goal)
 	toi_beginning_history_index = preASP_toi_split.index(domain_info_formatting.history_marker)
 	toi_current_step_index = preASP_toi_split.index(domain_info_formatting.current_step_marker)
-
-
-def observations_to_obsList(observations, step):
-	obsList = []
-	for observation in observations:
-		if (observation[0] == World.LibraryLocked_index and observation[1] != 'unknown'):
-			obsList.append('obs(locked(library),'+ observation[1] + ',' + str(step) +').')
-		if (observation[0] == World.LocationRobot_index and observation[1] != 'unknown'):
-			obsList.append('obs(loc(rob1,'+str(observation[1])+ '),true,'+ str(step) +').')
-		if (observation[0] == World.LocationBook1_index):
-			if(observation[1] != 'unknown'):
-				obsList.append('obs(loc(book1,' +str(observation[1])+ '),true,'+ str(step) +').')
-			else:
-				obsList.append('obs(loc(book1,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.LocationBook2_index):
-			if(observation[1] != 'unknown'):
-				obsList.append('obs(loc(book2,' +str(observation[1])+ '),true,'+ str(step) +').')
-			else:
-				obsList.append('obs(loc(book2,' +str(executer.getRobotLocation())+ '),false,'+ str(step) +').')
-		if (observation[0] == World.In_handBook1_index and observation[1] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,book1),' + observation[1]+ ','+ str(step) +').')
-		if (observation[0] == World.In_handBook2_index and observation[1] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,book2),' + observation[1]+ ','+ str(step) +').')
-	return obsList

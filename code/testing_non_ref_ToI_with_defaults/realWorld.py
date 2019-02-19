@@ -25,11 +25,11 @@ class World(object):
 	LocationBook2_index = 3
 	In_handBook1_index = 4
 	In_handBook2_index = 5
-	DomainLocations = ['office1', 'office2' ,'kitchen','library']
-	def __init__(self,new_domain_info_formatting,initialConditionsWorld, this_seed):
+	def __init__(self,new_domain_info_formatting,dic_initial_conditions, this_seed):
+		print '\n-------------------------------------------------------------------------------------------------\n'
+		print 'World initial conditions: ' + str(dic_initial_conditions)
 		self.domain_info_formatting = new_domain_info_formatting
-		self.dic_WorldState = self._listToDictionary(initialConditionsWorld)
-		self.RealValues = list(initialConditionsWorld)
+		self.dic_WorldState = dic_initial_conditions
 		reader = open(self.domain_info_formatting.preASP_domain_file, 'r')
     		pre_asp = reader.read()
     		reader.close()
@@ -39,21 +39,11 @@ class World(object):
 		self.history = []
 		self.executionTimeUnits = 0
 		self.executedSteps = 0
+		self.domain_locations = self.domain_info_formatting.get_all_basic_subsorts('#room')
 		random.seed(this_seed)
 
-	def _listToDictionary(self, stateList):
-		dictionary = {}
-		for a in stateList:
-			if stateList.index(a)==self.LibraryLocked_index: dictionary['locked(library'] = None
-			if stateList.index(a)==self.LocationRobot_index: dictionary['loc(rob'] = a
-			if stateList.index(a)==self.LocationBook1_index: dictionary['loc(book1'] = a
-			if stateList.index(a)==self.LocationBook2_index: dictionary['loc(book2'] = a
-			if stateList.index(a)==self.In_handBook1_index and a=='true': dictionary['in_hand(rob1'] = 'book1'
-			if stateList.index(a)==self.In_handBook2_index and a=='true': dictionary['in_hand(rob1'] = 'book2'
-		#print [','.join([v for v in [a,b] if v])+')' for a,b in dictionary.items()]
-		return dictionary
 
-	def __updateDicWorldState(self,answer_split):
+	def __answer_to_dicWorldState(self,answer_split):
 		self.dic_WorldState = {}
 		my_fluents = [entry[entry.find('(')+1:entry.find(')')+1] for entry in answer_split if 'holds' in entry]
 		my_fluents_splitted = [v.replace(')','').split(',') for v in my_fluents]
@@ -62,32 +52,11 @@ class World(object):
 			## and  the dictionary will have a key that corresponds to the first element of the list 'loc(rob1', with value
 			## that corresponds to the second part of the fluent, i.e. 'kitchen' (the brackets are removed for formatting )
 			if len(split_fluent)>1:
-				print 'this is my v '+ str(split_fluent)
 				self.dic_WorldState[split_fluent[0]] = split_fluent[1]
 			## if my fluent did not have a comma, for example 'locked(library)', then the splitted version is a list wit only one element,
 			## so the dictionary will have a key 'locked(library' with corresonding value None.
 			else: self.dic_WorldState[split_fluent[0]] = None
 
-	def __updateRealValues(self,answer_split):
-		self.RealValues[0] = 'false'
-		self.RealValues[4] = 'false'
-		self.RealValues[5] = 'false'
-		for fluent in answer_split:
-			fluent = fluent[6:fluent.rfind(',')]
-			if(fluent[0:7] == 'locked('):
-				self.RealValues[0] = 'true'
-			elif(fluent[0:4] == 'loc('):
-				fluent = fluent[4:-1]
-				split_fluent = fluent.split(',')
-				if(split_fluent[0] == 'rob1'): self.RealValues[1] = split_fluent[1]
-				elif(split_fluent[0] == 'book1'): self.RealValues[2] = split_fluent[1]
-				elif(split_fluent[0] == 'book2'): self.RealValues[3] = split_fluent[1]
-			elif(fluent[0:8] == 'in_hand('):
-				fluent = fluent[8:-1]
-				split_fluent = fluent.split(',')
-				if(split_fluent[1] == 'book1'): self.RealValues[4] = 'true'
-				if(split_fluent[1] == 'book2'): self.RealValues[5] = 'true'
-		print self.RealValues
 
 
 	def __getActionObservations(self,action,happened):
@@ -101,30 +70,15 @@ class World(object):
 			relevant_indexes.add(World.LibraryLocked_index)
 
 		if(action == 'pickup(rob1,book1)' or action == '+put_down(rob1,book1)'):
-			relevant_indexes.add(World.In_handBook1_index)
-			relevant_indexes.add(World.LocationBook1_index)
+			relevant_indexes.add('in_hand(rob1')
+			relevant_indexes.add('loc(book1')
 
 		if(action == 'pickup(rob1,book2)' or action == '+put_down(rob1,book2)'):
-			relevant_indexes.add(World.In_handBook2_index)
-			relevant_indexes.add(World.LocationBook2_index)
+			relevant_indexes.add('in_hand(rob1')
+			relevant_indexes.add('loc(book2')
 
 		return self.getTheseObservations(relevant_indexes)
 
-	def __getRealValues_as_obsList(self,step):
-		obsList = []
-		if(self.RealValues[World.LibraryLocked_index] != 'unknown'):
-			obsList.append('obs(locked(library),'+self.RealValues[World.LibraryLocked_index]+','+str(step)+').')
-		if(self.RealValues[World.LocationRobot_index] != 'unknown'):
-			obsList.append('obs(loc(rob1,'+str(self.RealValues[World.LocationRobot_index])+'),true,'+str(step)+').')
-		if(self.RealValues[World.LocationBook1_index] != 'unknown'):
-			obsList.append('obs(loc(book1,'+str(self.RealValues[World.LocationBook1_index])+'),true,'+str(step)+').')
-		if(self.RealValues[World.LocationBook2_index] != 'unknown'):
-			obsList.append('obs(loc(book2,'+str(self.RealValues[World.LocationBook2_index])+'),true,'+str(step)+').')
-		if(self.RealValues[World.In_handBook1_index] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,book1),'+self.RealValues[World.In_handBook1_index]+','+str(step)+').')
-		if(self.RealValues[World.In_handBook2_index] != 'unknown'):
-			obsList.append('obs(in_hand(rob1,book2),'+self.RealValues[World.In_handBook2_index]+','+str(step)+').')
-		return obsList
 
 	def __getexecutionTimeUnits(self,action):
 		if(action[0:4] == 'move'):
@@ -136,30 +90,30 @@ class World(object):
 
 	def __get_exo_action(self,action):
 		exo_action = ''
+		'''
 		if(random.random()<0.08): return exo_action
 		choice = random.choice(['library','book1','book2'])
-		if(choice == 'library' and self.RealValues[World.LibraryLocked_index] == 'false'): return 'exo_lock(library)'
-		elif(choice == 'book1'  and (self.RealValues[World.In_handBook1_index] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
-		elif(choice == 'book2'  and (self.RealValues[World.In_handBook2_index] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
+		if(choice == 'library' and self.dic_WorldState['locked(library'] == 'false'): return 'exo_lock(library)'
+		elif(choice == 'book1'  and (self.dic_WorldState['in_hand(book1'] == 'true' or action == 'pickup(rob1,book1)')): choice = 'book2'
+		elif(choice == 'book2'  and (self.dic_WorldState['in_hand(book2'] == 'true' or action == 'pickup(rob1,book2)')): choice = 'book1'
 		if(choice == 'book1'):
-			allLocations = list(self.DomainLocations)
-			currentLocation = self.RealValues[World.LocationBook1_index]
+			allLocations = list(self.domain_locations)
+			currentLocation = self.dic_WorldState['loc(book1']
 			allLocations.remove(currentLocation)
 			newLocation = random.choice(allLocations)
-			if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
+			if((newLocation != 'library' and currentLocation != 'library') or self.dic_WorldState['locked(library'] == 'false'):
 				exo_action =  'exo_move(book1,' +newLocation+ ')'
 		elif(choice == 'book2'):
-			allLocations = list(self.DomainLocations)
-			currentLocation = self.RealValues[World.LocationBook2_index]
+			allLocations = list(self.domain_locations)
+			currentLocation = self.dic_WorldState['loc(book2']
 			allLocations.remove(currentLocation)
 			newLocation = random.choice(allLocations)
-			if((newLocation != 'library' and currentLocation != 'library') or self.RealValues[World.LibraryLocked_index] == 'false'):
+			if((newLocation != 'library' and currentLocation != 'library') or self.dic_WorldState['locked(library'] == 'false'):
 				exo_action =  'exo_move(book2,' +newLocation+ ')'
+		'''
 		return exo_action
 
 
-	def __del__(self):
-        	print('deleting world ')
 
 	def __runASPDomain(self,input):
 		asp_split = self.pre_asp_split[:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
@@ -175,22 +129,17 @@ class World(object):
 	def executeAction(self,action):
 		happened = False
 		exo_action = ''
-		input = self.__getRealValues_as_obsList(0) + ['hpd('+ action +',0).']
+		input = self.domain_info_formatting.dic_state_to_obs_list(self.dic_WorldState,0) + ['hpd('+ action +',0).']
+
 		if(self.exo_action_happened == False):
 			exo_action = self.__get_exo_action(action)
 			if(exo_action != ''): input = input + ['hpd('+ exo_action +',0).']
-		asp_split = self.pre_asp_split[0:self.history_marker_index] + input + self.pre_asp_split[self.history_marker_index:]
-		asp = '\n'.join(asp_split)
-		f1 = open(self.domain_info_formatting.asp_World_file, 'w')
-		f1.write(asp)
-		f1.close()
 		answer_split = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getexecutionTimeUnits(action)
 		self.executedSteps += 1
 		if(answer_split and 'occurs('+ action +',0)' in answer_split):
 			happened = True
-			self.__updateRealValues(answer_split)
-			self.__updateDicWorldState(answer_split)
+			self.__answer_to_dicWorldState(answer_split)
 			self.history.append(action)
 			if(exo_action != ''):
 				self.history.append(exo_action)
@@ -199,41 +148,7 @@ class World(object):
 		else:
 			happened = False
 			self.history.append(action + " (FAILED) ")
-		return (self.__getActionObservations(action, happened))
 
-	def getRealValues(self):
-		observations =[]
-		for index, val in enumerate(self.RealValues):
-			observations.append([index,val])
-		return observations
-
-	def getTheseObservations(self,indexes):
-		observableValues = list(self.RealValues)
-		robotLocation = self.RealValues[World.LocationRobot_index]
-		observations = []
-		if(robotLocation != 'library' and robotLocation != 'kitchen'):
-			observableValues[World.LibraryLocked_index] = 'unknown'
-		if(self.RealValues[World.LocationBook1_index] != robotLocation):
-			observableValues[World.LocationBook1_index] = 'unknown'
-		if(self.RealValues[World.LocationBook2_index] != robotLocation):
-			observableValues[World.LocationBook2_index] = 'unknown'
-		for index in indexes:
-			observations.append([index,observableValues[index]])
-		return observations
-
-	def getRobotLocation(self):
-		return self.RealValues[World.LocationRobot_index]
-
-	def achievedGoal(self):
-		if(self.RealValues[World.LocationBook1_index] != 'library'): return 'false'
-		elif(self.RealValues[World.LocationBook2_index] != 'library'): return 'false'
-		elif(self.RealValues[World.In_handBook1_index] == 'true'): return 'false'
-		elif(self.RealValues[World.In_handBook2_index] == 'true'): return 'false'
-		else: return 'true'
-
-	def getGoalFeedback(self):
-		if(self.achievedGoal() == 'true'): return True
-		return False
 
 	def get_exo_action_happened(self):
 		return self.exo_action_happened
@@ -246,3 +161,45 @@ class World(object):
 
 	def getExecutedSteps(self):
 		return self.executedSteps
+
+	def robotObserves(self,fluent_to_observe):
+		fluent_to_observe = fluent_to_observe.strip(')').split(',')
+		new_fluent = [fluent_to_observe[0]]
+		fluent_boolean = None
+		if 'in_hand(' in fluent_to_observe[0]:
+			if 'in_hand(rob1' in self.dic_WorldState:
+				new_fluent.append(self.dic_WorldState['in_hand(rob1'])
+				fluent_boolean = True
+		 	else:
+				new_fluent.append(fluent_to_observe[1])
+			 	fluent_boolean = False
+		if 'loc(rob1' == fluent_to_observe[0]:
+			new_fluent.append(self.dic_WorldState['loc(rob1'])
+			fluent_boolean = True
+		if 'loc(' in fluent_to_observe[0] and 'rob' not in fluent_to_observe[0]:
+			new_fluent.append(self.dic_WorldState['loc(rob1'])
+			fluent_boolean = self.dic_WorldState[fluent_to_observe[0]] == self.dic_WorldState['loc(rob1']
+		if 'locked(' in fluent_to_observe[0] and (self.dic_WorldState['loc(rob1']=='library' or self.dic_WorldState['loc(rob1']=='kitchen'):
+			'locked is in the fluent, yes'
+			fluent_boolean = fluent_to_observe[0] in self.dic_WorldState
+		if fluent_boolean!=None:
+			return ','.join(new_fluent)+')', str(fluent_boolean).lower()
+
+	def getRealValue(self,fluent_to_observe):
+		fluent_to_observe = fluent_to_observe.strip(')').split(',')
+		new_fluent = [fluent_to_observe[0]]
+		fluent_boolean = None
+		if 'in_hand(' in fluent_to_observe[0]:
+			if 'in_hand(rob1' in self.dic_WorldState:
+				new_fluent.append(self.dic_WorldState['in_hand(rob1'])
+				fluent_boolean = True
+		 	else:
+				new_fluent.append(fluent_to_observe[1])
+			 	fluent_boolean = False
+		if 'loc(' in fluent_to_observe[0]:
+			new_fluent.append(self.dic_WorldState['loc(rob1'])
+			fluent_boolean = True
+		if 'locked(' in fluent_to_observe[0]:
+			fluent_boolean = fluent_to_observe[0] in self.dic_WorldState
+		if fluent_boolean!=None:
+			return ','.join(new_fluent)+')', str(fluent_boolean).lower()

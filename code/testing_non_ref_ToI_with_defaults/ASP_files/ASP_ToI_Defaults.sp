@@ -1,6 +1,6 @@
-#const n = 16. % maximum number of steps.
-#const max_len = 15. % maximum activity_length of an activity.
-#const max_name = 3.
+#const n = 13. % maximum number of steps.
+#const max_len = 12. % maximum activity_length of an activity.
+#const max_name = 1.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -602,74 +602,65 @@ holds(my_goal,I) :- holds(loc(book1,library),I), holds(loc(book2,library),I), -h
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(12).
+current_step(8).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-obs(loc(rob1,library),true,0).
+obs(locked(library),true,0).
+obs(loc(book2,office1),true,0).
+obs(loc(rob1,office1),true,0).
+obs(in_hand(rob1,book2),true,0).
+obs(loc(book1,office1),true,0).
 hpd(select(my_goal), true,0).
-obs(my_goal,false,1).
 activity_goal(1,my_goal).
-activity_component(1,1,put_down(rob1,book1)).
-activity_length(1,1).
+activity_component(1,1,move(rob1,kitchen)).
+activity_component(1,3,move(rob1,library)).
+activity_component(1,9,move(rob1,library)).
+activity_component(1,6,move(rob1,office1)).
+activity_component(1,4,put_down(rob1,book2)).
+activity_component(1,10,put_down(rob1,book1)).
+activity_component(1,2,unlock(rob1,library)).
+activity_component(1,5,move(rob1,kitchen)).
+activity_component(1,8,move(rob1,kitchen)).
+activity_component(1,7,pickup(rob1,book1)).
+activity_length(1,10).
 attempt(start(1),1).
-attempt(put_down(rob1,book1),2).
-obs(loc(book2,library),false,3).
-obs(in_hand(rob1,book1),false,3).
-obs(in_hand(rob1,book2),false,3).
-obs(loc(book1,library),true,3).
-attempt(stop(1),3).
-activity_goal(2,my_goal).
-activity_component(2,1,unlock(rob1,library)).
-activity_component(2,2,move(rob1,kitchen)).
-activity_component(2,3,move(rob1,office1)).
-activity_component(2,4,move(rob1,office2)).
-activity_component(2,5,pickup(rob1,book2)).
-activity_component(2,6,move(rob1,office1)).
-activity_component(2,7,move(rob1,kitchen)).
-activity_component(2,8,move(rob1,library)).
-activity_component(2,9,put_down(rob1,book2)).
-activity_length(2,9).
-attempt(start(2),4).
-attempt(unlock(rob1,library),5).
+attempt(move(rob1,kitchen),2).
+obs(loc(rob1,kitchen),true,3).
+obs(loc(book1,kitchen),false,3).
+obs(in_hand(rob1,book2),true,3).
+obs(loc(book2,kitchen),true,3).
+attempt(unlock(rob1,library),3).
+obs(locked(library),false,4).
+obs(in_hand(rob1,book2),true,4).
+obs(loc(book1,kitchen),false,4).
+obs(loc(book2,kitchen),true,4).
+attempt(move(rob1,library),4).
+obs(loc(rob1,library),true,5).
+obs(loc(book1,library),false,5).
+obs(in_hand(rob1,book2),true,5).
+obs(loc(book2,library),true,5).
+attempt(put_down(rob1,book2),5).
 obs(in_hand(rob1,book2),false,6).
-obs(locked(library),false,6).
 obs(in_hand(rob1,book1),false,6).
-obs(loc(book1,library),true,6).
-obs(loc(book2,library),false,6).
+obs(loc(book2,library),true,6).
+obs(loc(book1,library),false,6).
 attempt(move(rob1,kitchen),6).
-obs(loc(rob1,kitchen),true,7).
+obs(loc(book2,kitchen),false,7).
 obs(in_hand(rob1,book1),false,7).
 obs(in_hand(rob1,book2),false,7).
+obs(loc(rob1,kitchen),true,7).
 obs(loc(book1,kitchen),false,7).
-obs(loc(book2,kitchen),true,7).
-attempt(stop(2),7).
-activity_goal(3,my_goal).
-activity_component(3,1,pickup(rob1,book2)).
-activity_component(3,2,move(rob1,library)).
-activity_component(3,3,put_down(rob1,book2)).
-activity_length(3,3).
-attempt(start(3),8).
-attempt(pickup(rob1,book2),9).
-obs(in_hand(rob1,book2),true,10).
-obs(in_hand(rob1,book1),false,10).
-obs(loc(book2,kitchen),true,10).
-obs(loc(book1,kitchen),false,10).
-attempt(move(rob1,library),10).
-obs(loc(book2,library),true,11).
-obs(in_hand(rob1,book1),false,11).
-obs(loc(rob1,library),true,11).
-obs(loc(book1,library),true,11).
-obs(in_hand(rob1,book2),true,11).
-attempt(put_down(rob1,book2),11).
-obs(in_hand(rob1,book2),false,12).
-obs(loc(book2,library),true,12).
-obs(loc(book1,library),true,12).
-obs(in_hand(rob1,book1),false,12).
-finding_defaults(12).
+attempt(move(rob1,office1),7).
+obs(loc(rob1,office1),true,8).
+obs(loc(book1,office1),true,8).
+obs(in_hand(rob1,book2),false,8).
+obs(loc(book2,office1),false,8).
+obs(in_hand(rob1,book1),false,8).
+finding_defaults(8).
 %%%%%%
 display
 %%%%%%
