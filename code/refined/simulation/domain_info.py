@@ -106,6 +106,11 @@ class DomainInfo():
 												'-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).']
 
 		self.actions_param_and_exec_conditions_dic = self.get_dic_action_parameters_conditions(self.abstract_executability_conditions)
+
+		print '\n\n\n\nthis is my abstract executability conditions dictionary: '
+		print self.abstract_executability_conditions
+		print '\n\n\n\nthis is my action paramterrs conditions dictionary: '
+		print self.actions_param_and_exec_conditions_dic
 		self.refined_world_causal_law = '-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).'
 		self.inferring_indirect_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
 		self.refined_world_display_string = 'occurs.\nholds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'

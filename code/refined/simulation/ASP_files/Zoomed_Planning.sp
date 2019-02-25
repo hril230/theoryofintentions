@@ -1,28 +1,31 @@
-#const numSteps = 6.
+#const numSteps = 2.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#coarse_place = {office1,kitchen}.
-#place = {c9,c8,c7,c6,c5,c12,c11,c10}.
+#coarse_place = {office1}.
+#coarse_object = {book2}.
+#object = {ref3_book2,ref2_book2,ref1_book2}.
+#place = {c9,c12,c11,c10}.
 #robot = {rob1}.
-#coarse_thing = #robot.
-#thing = #robot.
+#coarse_thing = #coarse_object + #robot.
+#thing = #object + #robot.
 #boolean = {true,false}.
 #outcome = {true,false,undet}.
-#physical_inertial_fluent = loc(#thing,#place).
-#physical_defined_fluent = coarse_loc(#coarse_thing,#coarse_place).
+#physical_inertial_fluent = loc(#thing,#place) + in_hand(#robot,#object).
+#physical_defined_fluent = coarse_loc(#coarse_thing,#coarse_place) + coarse_in_hand(#robot,#coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 #knowledge_inertial_fluent = directly_observed(#robot,#physical_inertial_fluent,#outcome) + can_be_tested(#robot,#physical_inertial_fluent,#boolean).
 #knowledge_defined_fluent = observed(#robot,#physical_fluent,#outcome) + may_discover(#robot,#physical_defined_fluent,#boolean) + indirectly_observed(#robot,#physical_defined_fluent,#outcome).
 #inertial_fluent = #knowledge_inertial_fluent + #physical_inertial_fluent.
 #defined_fluent = #knowledge_defined_fluent + #physical_defined_fluent.
 #fluent = #inertial_fluent + #defined_fluent.
-#rob_action = test(#robot,#physical_inertial_fluent,#boolean) + move(#robot,#place).
-#action = #rob_action.
-#refined_component = #place.
-#coarse_component = #coarse_place.
+#rob_action = test(#robot,#physical_inertial_fluent,#boolean) + pickup(#robot,#object) + move(#robot,#place) + put_down(#robot,#object).
+#exo_action = exo_move(#object,#place).
+#action = #exo_action + #rob_action.
+#refined_component = #object + #place.
+#coarse_component = #coarse_object + #coarse_place.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
@@ -50,8 +53,10 @@ comp(#refined_component, #coarse_component).
 holds(loc(R, C), I+1) :- occurs(move(R, C), I).
 
 % Grasping an object causes object to be in hand.
+holds(in_hand(R, OP), I+1) :- occurs(pickup(R, OP), I).
 
 % Putting an object down causes it to no longer be in hand.
+-holds(in_hand(R, OP), I+1) :- occurs(put_down(R, OP), I).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -65,8 +70,11 @@ next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 -holds(loc(T, C2), I) :- holds(loc(T, C1), I), C1!=C2.
 
 % If a robot is holding an object, they have the same location.
+holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 
 % Only one object can be held at any time.
+-holds(in_hand(R, OP2), I) :- holds(in_hand(R, OP1), I), OP1!=OP2.
+-holds(coarse_in_hand(R, OP2), I) :- holds(coarse_in_hand(R, OP1), I), OP1!=OP2.
 
 % A place/coarse_place is not next to another unless specified.
 -next_to(L1,L2) :- not next_to(L1,L2), #place(L1), #place(L2).
@@ -80,6 +88,7 @@ next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
 holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
+holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
 holds(loc(RB2, C) ,I) :- holds(loc(RB1, C), I), comp(RB1, B), comp(RB2,B).
 coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #place(C1), #place(C2).
 
@@ -93,10 +102,13 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 -occurs(move(R, C2), I) :- holds(loc(R, C1), I), -next_to(C1,C2).
 
 % Cannot put down an object unless it is in hand.
+-occurs(put_down(R, OP), I) :-  -holds(in_hand(R, OP), I).
 
 % Cannot pick up an object if it has something in hand.
+-occurs(pickup(R, O), I) :- holds(in_hand(R, CO), I).
 
 % Cannot pick up an object if you are not in the same room.
+-occurs(pickup(R, OP), I) :- holds(loc(R, C), I), not holds(loc(OP, C), I).
 
 % Cannot execute two actions at the same time.
 :- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
@@ -107,13 +119,17 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 %% Axioms for observing the environment %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 holds(can_be_tested(rob1, loc(T, C), V), I) :- holds(loc(rob1, C), I).
+holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
 holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R), holds(loc(T,C),I).
 holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T), holds(loc(Z,C),I).
+holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O), holds(in_hand(rob1, OP), I).
 holds(indirectly_observed(rob1, coarse_loc(T, R), false), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), -holds(may_discover(rob1, coarse_loc(T, R), true), I).
+holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), false), I) :- -holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I), -holds(may_discover(R, coarse_in_hand(rob1, O), true), I).
 holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), holds(directly_observed(rob1, loc(T, C), undet), I).
+holds(may_discover(rob1, coarse_in_hand(rob1, O), true), I) :- -holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I), comp(OP, O), holds(directly_observed(rob1, in_hand(rob1, OP), undet), I).
 holds(directly_observed(rob1, F, undet), I) :- not holds(directly_observed(rob1, F, true), I), not holds(directly_observed(rob1, F, false), I).
 holds(observed(rob1, F, O), I) :- holds(directly_observed(rob1, F, O), I).
 holds(observed(rob1, F, O), I) :- holds(indirectly_observed(rob1, F, O), I).
@@ -130,6 +146,10 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %%%%%%%%%%%%%%%%%%%
 % Make sure the outcome of any concrete action is tested
 occurs(test(R, loc(R, C), true), I+1) :- occurs(move(R, C), I).
+occurs(test(R, in_hand(R, O), true), I+1) :- occurs(pickup(R, O), I).
+occurs(test(R, in_hand(R, O), false), I+1) :- occurs(put_down(R, O), I).
+-occurs(pickup(rob1, OP), I) :- holds(loc(rob1, C), I), not occurs(test(rob1, loc(OP, C), true), I-1).
+-occurs(pickup(rob1, OP), I) :- I = 0.
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -175,35 +195,35 @@ something_happened(I) :- occurs(A, I).
 %%%%%%%%%%%%%%%
 %% Attributes:
 %%%%%%%%%%%%%%%
-next_to(c5, c6).
-next_to(c6, c7).
-next_to(c7, c8).
-next_to(c8, c9).
 next_to(c9, c10).
 next_to(c10, c11).
 next_to(c11, c12).
 
-comp(c5, kitchen).
-comp(c6, kitchen).
-comp(c7, kitchen).
-comp(c8, kitchen).
 comp(c9, office1).
 comp(c10, office1).
 comp(c11, office1).
 comp(c12, office1).
 
+comp(ref1_book2, book2).
+comp(ref2_book2, book2).
+comp(ref3_book2, book2).
 
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(rob1,kitchen),I).
+goal(I) :- holds(coarse_loc(rob1,office1),I), holds(coarse_in_hand(rob1,book2),I), holds(coarse_loc(book2,office1),I).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
+obs(loc(ref1_book2,c12),false,1).
+holds(coarse_loc(book2,office1),0).
+obs(loc(ref3_book2,c12),false,1).
+-holds(coarse_in_hand(rob1,book2),0).
+holds(loc(rob1,c12),0).
+hpd(test(rob1,loc(ref3_book2,c12),true),0).
 holds(coarse_loc(rob1,office1),0).
-holds(loc(rob1,c11),0).
 
 %%%%%%%%%
 display
