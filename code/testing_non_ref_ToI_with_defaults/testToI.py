@@ -137,7 +137,6 @@ def run_and_write(initial_conditions_index, dic_initial_condition, initial_knowl
 
 def createConditionsAndRunAll():
 	initial_conditions_index = 0
-
 	## lines below is to flag that we only get one run, with condition index held by controlledRunConditions variable.
 	controlledRun = True
 	controlledRun = False
@@ -151,15 +150,14 @@ def createConditionsAndRunAll():
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
 				book1_location = robot_location
-				in_handBook1 = 'true'
-				in_handBook2 = 'false'
+				in_handBook1 = True
+				in_handBook2 = False
 				dic_initial_condition = {}
 				if locked: dic_initial_condition['locked(library'] = None
 				dic_initial_condition['loc(rob1'] = robot_location
 				dic_initial_condition['loc(book1'] = book1_location
 				dic_initial_condition['loc(book2'] = book2_location
-				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book1'
-				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book2'
+				dic_initial_condition['in_hand(rob1'] = 'book1'
 				initial_knowledge =  domain_info_formatting.dic_state_to_obs_list(dic_initial_condition,0)
 				run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge)
 
@@ -170,15 +168,12 @@ def createConditionsAndRunAll():
 				initial_conditions_index +=1
 				if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
 				book2_location = robot_location
-				in_handBook1 = 'false'
-				in_handBook2 = 'true'
 				dic_initial_condition = {}
 				if locked: dic_initial_condition['locked(library'] = None
 				dic_initial_condition['loc(rob1'] = robot_location
 				dic_initial_condition['loc(book1'] = book1_location
 				dic_initial_condition['loc(book2'] = book2_location
-				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book1'
-				if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book2'
+				dic_initial_condition['in_hand(rob1'] = 'book2'
 				initial_knowledge =  domain_info_formatting.dic_state_to_obs_list(dic_initial_condition,0)
 				run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge)
 
@@ -189,15 +184,11 @@ def createConditionsAndRunAll():
 				for book2_location in locations:
 					initial_conditions_index +=1
 					if(controlledRun == True and initial_conditions_index != controlledRunConditions): continue
-					in_handBook1 = 'false'
-					in_handBook2 = 'false'
 					dic_initial_condition = {}
 					if locked: dic_initial_condition['locked(library'] = None
 					dic_initial_condition['loc(rob1'] = robot_location
 					dic_initial_condition['loc(book1'] = book1_location
 					dic_initial_condition['loc(book2'] = book2_location
-					if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book1'
-					if in_handBook1: dic_initial_condition['in_hand(rob1'] = 'book2'
 					initial_knowledge =  domain_info_formatting.dic_state_to_obs_list(dic_initial_condition,0)
 					run_and_write(initial_conditions_index, dic_initial_condition, initial_knowledge)
 
@@ -211,12 +202,12 @@ if __name__ == "__main__":
 	dic_initial_condition = {}
 	locked = True
 	if locked: dic_initial_condition['locked(library'] = None
-	dic_initial_condition['loc(rob1'] = 'library'
-	dic_initial_condition['loc(book1'] = 'library'
-	dic_initial_condition['loc(book2'] = 'kitchen'
-	dic_initial_condition['in_hand(rob1'] = 'book1'
+	dic_initial_condition['loc(rob1'] = 'kitchen'
+	dic_initial_condition['loc(book1'] = 'kitchen'
+	dic_initial_condition['loc(book2'] = 'library'
+	#dic_initial_condition['in_hand(rob1'] = 'book1'
 
-	initial_knowledge = ['obs(loc(rob1,library),true,0).']
+	initial_knowledge = ['obs(loc(rob1,kitchen),true,0).','obs(loc(book1,kitchen),true,0).','obs(in_hand(rob1,book1),false,0).']
 	run_and_write(0,dic_initial_condition,initial_knowledge)
 
 	createConditionsAndRunAll()

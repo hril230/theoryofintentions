@@ -10,11 +10,7 @@ class Executer(object):
 	def getRobotLocation(self):
 		return self.world.getRobotLocation()
 
-	def get_goal_feedback(self, fluents, step):
-		feedback = world.goal_feedback(fluetns)
-		return
-
-	def get_goal_feedback(self,fluents, step):
+	def get_real_values(self,fluents, step):
 		obs_set = Set()
 		if not fluents: return obs_set
 		for fluent in fluents:
@@ -26,6 +22,6 @@ class Executer(object):
 		obs_set = Set()
 		if not fluents: return obs_set
 		for fluent in fluents:
-			new_fluent, boolean = self.world.robotObserves(fluent)
-			if new_fluent: obs_set.add('obs('+new_fluent+','+boolean+','+ str(step) +')')
+			for observed in self.world.robotObserves(fluent):
+				obs_set.add(observed[:observed.rfind(',')+1].replace('observed(rob1,','obs(') + str(step) +')')
 		return obs_set

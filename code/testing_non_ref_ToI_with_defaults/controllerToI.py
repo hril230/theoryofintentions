@@ -44,10 +44,11 @@ def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer,
 		defaultsOutput = checkingDefaults()
 		inputForPlanning = diagnose(defaultsOutput)
 		nextAction = planning(inputForPlanning)
-		print('\nNext action with ToI: ' +str(nextAction) +'  at step '+ str(currentStep))
+
 		actionObservations = []
 		if(nextAction == 'finish'):
 			if check_goal_feedback():
+				print '\nCheck goal feedback ' + str(check_goal_feedback())
 				toi_history.append('finish')
 				finish = True
 				break
@@ -55,7 +56,7 @@ def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer,
 				goal_correction += 1
 				while(nextAction == 'finish'):
 					toi_history.append('obs(my_goal,false,'+str(currentStep)+').')
-					print('wrong assumption - goal not reached !!!!! ')
+					print('Wrong assumption - goal not reached !!!!! ')
 					defaultsOutput = checkingDefaults()
 					inputForPlanning = diagnose(defaultsOutput)
 					nextAction = planning(inputForPlanning)
@@ -67,23 +68,26 @@ def controllerToI(new_domain_info_formatting, newGoal, maxPlanLen, new_executer,
 
 
 		toi_history.append('attempt('+nextAction+','+str(currentStep)+').')
-		currentStep += 1
 		if(nextAction[0:4] == 'stop'):
 			numberActivities += 1
 			numberSteps += 1
 		elif(nextAction[0:5] == 'start'): pass
 		else:
+			step_obs = executer.observe(get_fluents_relevant_before_action(nextAction),currentStep)
 			executer.executeAction(nextAction)
-			step_obs = executer.observe(get_fluents_relevant_to_action(nextAction),currentStep)
-			step_obs.update(executer.observe(get_fluents_relevant_to_goal(),currentStep))
-			print '\nLatest_observations: ' + ' '.join(step_obs)
+			step_obs.update(executer.observe(get_fluents_relevant_after_action(nextAction),currentStep+1))
+			print '\nAction related observations: ' + ' '.join(step_obs)
+			goal_obs = executer.observe(get_fluents_relevant_to_goal(),currentStep+1)
+			print 'Goal related observations: ' + ' '.join(goal_obs)
+			step_obs.update(goal_obs)
 			toi_history = toi_history + [obs+'.' for obs in list(step_obs)]
+		currentStep += 1
 
 	if(currentDiagnosis): toi_history + list(currentDiagnosis)
 	return (toi_history, numberActivities, goal_correction)
 
 def check_goal_feedback():
-	return executer.get_goal_feedback(get_fluents_relevant_to_goal(),currentStep) == goal_as_current_obs_set()
+	return executer.get_real_values(get_fluents_relevant_to_goal(),currentStep) == goal_as_current_obs_set()
 
 def goal_as_current_obs_set():
 	return Set([entry.replace('holds','obs').replace('I',str('-' not in entry).lower()+','+str(currentStep)).replace('-','') for entry in goal.rstrip(' .').split(', ')])
@@ -100,7 +104,7 @@ def planning(outputDefaultsAndDiagnosis):
 	f1 = open(domain_info_formatting.asp_ToI_planning_file, 'w')
 	f1.write(asp)
 	f1.close()
-	print domain_info_formatting.asp_ToI_planning_file
+	print '\n' + domain_info_formatting.asp_ToI_planning_file
 	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_planning_file +' -A ',shell=True)
 	while( "intended_action" not in answerSet and "selected_goal_holds" not in answerSet and numberSteps < currentStep + maxPlanLength+3):
 		current_asp_split[0] = "#const n = "+str(numberSteps+1)+". % maximum number of steps."
@@ -109,7 +113,7 @@ def planning(outputDefaultsAndDiagnosis):
         	f1 = open(domain_info_formatting.asp_ToI_planning_file, 'w')
 		f1.write(asp)
 		f1.close()
-		print(domain_info_formatting.asp_ToI_planning_file +'Increasing - numberSteps. ASP_ToI_Planning with ' + str(numberSteps) +' number of steps.')
+		('\n' + domain_info_formatting.asp_ToI_planning_file +'Increasing - numberSteps. ASP_ToI_Planning with ' + str(numberSteps) +' number of steps.')
 		answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_planning_file +' -A ',shell=True)
 		numberSteps +=1
 
@@ -125,20 +129,25 @@ def planning(outputDefaultsAndDiagnosis):
 			if 'start' in nextAction:
 				new_activity_name = nextAction[nextAction.find('(')+1:nextAction.find(')')]
 
+	print('Next action with ToI: ' +str(nextAction) +'  at step '+ str(currentStep))
 	if new_activity_name:
 		activity_info = [line+'.' for line in split_answer if 'activity' in line and '('+new_activity_name+',' in line]
 		toi_history = toi_history + activity_info
-
+		print activity_info
 	return nextAction
 
 
 
-def get_fluents_relevant_to_action(action):
+def get_fluents_relevant_after_action(action):
 	if 'move' in action: return {action.replace('move','loc')}
 	if 'pickup' in action: return {action.replace('pickup','in_hand')}
 	if 'put_down' in action: return {action.replace('put_down','in_hand')}
 	if 'unlock' in action: return {action.replace('unlock(rob1,','locked(')}
 
+
+def get_fluents_relevant_before_action(action):
+	if 'put_down' in action: return {action.replace('put_down','in_hand')}
+	if 'unlock' in action: return {action.replace('unlock(rob1,','locked(')}
 
 def get_fluents_relevant_to_goal():
 	return Set([domain_info_formatting.get_fluent(entry) for entry in goal.split(', ') ])
@@ -156,22 +165,27 @@ def checkingDefaults():
 	f1 = open(domain_info_formatting.asp_ToI_defaults_file, 'w')
 	f1.write('\n'.join(current_asp_split))
 	f1.close()
-	print(domain_info_formatting.asp_ToI_defaults_file)
+	print ('\n' + domain_info_formatting.asp_ToI_defaults_file)
 	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_defaults_file +' -A ',shell=True)
-	if answerSet == '' or '{}' in answerSet: return []
+	if answerSet == '' or '{}' in answerSet:
+		print 'Current Defaults: '
+		return []
 
 	answers = answerSet.rstrip().split('\n\n')
 	previousDefaults = currentDefaults
 	currentDefaults = Set()
 
-
 	for a in [answer for answer in answers if answer]:
 		answer_defaults = Set(a.strip('{}\n').split(', '))
-		if previousDefaults.issubset(answer_defaults):
+		if previousDefaults==answer_defaults:
+			currentDefaults = answer_defaults
+			break
+		elif previousDefaults.issubset(answer_defaults):
 			currentDefaults = answer_defaults
 			break
 	if not currentDefaults and answers[0]:
 		currentDefaults = Set(answers[0].strip('{}\n').split(', '))
+	print 'Current Defaults: ' + '. '.join(currentDefaults)
 	return [e+'.' for e in currentDefaults]
 
 def diagnose(defaultsOutput):
@@ -189,31 +203,43 @@ def diagnose(defaultsOutput):
 	f1.close()
 
 	# running only diagnosis
-	print(domain_info_formatting.asp_ToI_diagnosing_file)
+	print ('\n' + domain_info_formatting.asp_ToI_diagnosing_file)
 	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + domain_info_formatting.asp_ToI_diagnosing_file +' -A ',shell=True)
 	answers = answerSet.rstrip().split('\n\n')
 
-	chosenAnswer = None
+	sorted_answers = []
+
 	for a in answers:
-		if all([v in a for v in currentAssumptions]) and all([v in a for v in currentDiagnosis]):  chosenAnswer = a
+		a = a.strip('{}').split(', ')
+		sorted_tuple_a = (Set([v for v in a if 'assumed_initial_condition' in v]) , Set([v for v in a if 'unobserved' in v]))
+		sorted_answers.append(sorted_tuple_a)
+
+	chosenAnswer = None
+
+	for sorted_a in sorted_answers:
+		if currentAssumptions == sorted_a[0] and currentDiagnosis == sorted_a[1]: chosenAnswer = sorted_a
+	if not chosenAnswer:
+		for sorted_a in sorted_answers:
+			if currentAssumptions == sorted_a[0] and currentDiagnosis.issubset(sorted_a[1]): chosenAnswer = sorted_a
 	if not chosenAnswer:
 		for a in answers:
-			if all([v in a for v in currentAssumptions]): chosenAnswer = a
+			if currentAssumptions.issubset(sorted_a[0]) and currentDiagnosis == sorted_a[1]: chosenAnswer = sorted_a
 	if not chosenAnswer:
 		for a in answers:
-			if all([v in a for v in currentDiagnosis]): chosenAnswer = a
-	if not chosenAnswer: chosenAnswer = answers[0]
+			if currentAssumptions.issubset(sorted_a[0]) and currentDiagnosis.issubset(sorted_a[1]): chosenAnswer = sorted_a
+	if not chosenAnswer:
+		for a in answers:
+			if currentAssumptions.issubset(sorted_a[0]): chosenAnswer = sorted_a
+	if not chosenAnswer:
+		for a in answers:
+			if currentDiagnosis.issubset(sorted_a[1]): chosenAnswer = sorted_a
+	if not chosenAnswer: chosenAnswer = sorted_answers[0]
 
-	currentDiagnosis = Set()
-	currentAssumptions = Set()
- 	split_diagnosis = chosenAnswer.strip('}').strip('{').split(', ')
+	currentAssumptions = chosenAnswer[0]
+	currentDiagnosis = chosenAnswer[1]
 
-	for line in split_diagnosis:
-		if("unobserved" in line): currentDiagnosis.add(line)
-		elif('assumed_initial_condition' in line): currentAssumptions.add(line)
-
-	print 'Current diagnosis: ' + ', '.join(currentDiagnosis)
 	print 'Current assumptions: ' + ', '.join(currentAssumptions)
+	print 'Current diagnosis: ' + ', '.join(currentDiagnosis)
 
 	diagnosisAndDefaultsOutput = defaultsOutput + [e + '.' for e in currentAssumptions|currentDiagnosis]
 	return diagnosisAndDefaultsOutput
