@@ -1,0 +1,15 @@
+Modifications needed to use this with different domains:
+
+In Controller:
+  get_fluents_relevant_before_action
+  get_fluents_relevant_after_action
+
+In domain_info_formatting:
+  dic_state_to_obs_list
+
+
+In realWorld:
+  __getexecutionTimeUnits
+  __get_exo_action
+  
+The name of the robot in all programs
