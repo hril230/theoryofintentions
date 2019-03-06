@@ -89,6 +89,8 @@ class DomainInfo():
 		self.constants = Set()
 		for values in self.sorts_hierarchy_dic.values(): self.constants.update(Set([v for v in values if v not in self.sorts_hierarchy_dic.keys()]))
 
+		self.functions = Set([v for v in self.sorts_hierarchy_dic.keys() if '#' not in v  and v not in self.constants])
+
 
 		self.constants_sorts_dic = {k:v for k,v in self.sorts_hierarchy_dic.items() if Set(v).issubset(self.constants)}
 		self.abstract_constants_sorts_dic = {k.replace('coarse_',''):v for k,v in self.constants_sorts_dic.items() if 'coarse_' in k}
@@ -105,7 +107,7 @@ class DomainInfo():
 												'-occurs(exo_move(O,L),I) :- holds(loc(O,L),I).',
 												'-occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).']
 
-		self.actions_param_and_exec_conditions_dic = self.get_dic_action_parameters_conditions(self.abstract_executability_conditions)
+		self.actions_param_and_exec_conditions_dic = self.get_dic_action_variables_conditions(self.abstract_executability_conditions)
 
 		print '\n\n\n\nthis is my abstract executability conditions dictionary: '
 		print self.abstract_executability_conditions
@@ -153,7 +155,7 @@ class DomainInfo():
 	# and 2. the timless (without the last time step variable) conditions corresponding to the action, using the updated variable names e.g: 'holds(loc(T,K)'
 	# It is important to note that in the input, the same action may be using different variables in different conditions.
 	# This functions choses variable names not used in the given list and changes the variable names to make sure they are the same.
-	def get_dic_action_parameters_conditions(self,myListOfConditions):
+	def get_dic_action_variables_conditions(self,myListOfConditions):
 		#find used uppercase letters:
 		usedVariableLetters = Set()
 		for s in myListOfConditions:
