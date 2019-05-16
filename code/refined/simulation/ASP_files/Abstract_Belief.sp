@@ -10,8 +10,8 @@ sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
 
-#object = {book1, book2, book3}.
-#place = {library, office2, office1, kitchen}.
+#object = {book1, book2, book3, book4}.
+#place = {kitchen, library, office2, office1, storage_room}.
 #robot = {rob1}.
 #thing = #object + #robot.
 #boolean = {true, false}.
@@ -147,18 +147,21 @@ diag(A,I) :- occurs(A,I),
 next_to(library, kitchen).
 next_to(kitchen, office1).
 next_to(office1, office2).
+next_to(office2, storage_room).
 
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
+holds(in_hand(rob1,book3),0).
+holds(loc(book1,kitchen),0).
 -holds(in_hand(rob1,book1),0).
+-holds(in_hand(rob1,book4),0).
 holds(loc(book3,office1),0).
 holds(loc(rob1,office1),0).
--holds(in_hand(rob1,book3),0).
-holds(loc(book1,library),0).
 holds(loc(book2,office1),0).
+holds(loc(book4,kitchen),0).
 -holds(in_hand(rob1,book2),0).
-hpd(pickup(rob1,book2), 0).
+hpd(move(rob1,office2), 0).
 
 %%%%%%%%%%
 display

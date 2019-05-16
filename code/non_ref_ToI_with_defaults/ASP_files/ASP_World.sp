@@ -113,13 +113,13 @@ impossible(pickup(R, O), I) :- holds(loc(R, L1), I),
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
 
 %% An exogenous move of an object cannot be done to a locked room.
-impossible(exo_move(O,L),I) :- holds(locked(L),I).
+%impossible(exo_move(O,L),I) :- holds(locked(L),I).
 
 %% An exogenous move of an object cannot happen if it is being in hand
 impossible(exo_move(O,L),I) :- holds(in_hand(R,O),I).
 
 %% An exogenous move of an object cannot be done from a locked room.
-impossible(exo_move(O,L1),I) :- holds(loc(O,L),I), holds(locked(L),I).
+%impossible(exo_move(O,L1),I) :- holds(loc(O,L),I), holds(locked(L),I).
 
 %% An exogenous lock cannot be done to a locked room.
 impossible(exo_lock(L),I) :- holds(locked(L),I).
@@ -194,8 +194,8 @@ next_to(kitchen,library).
 %%%%%%%%%%%%
 %% HISTORY GOES HERE
 holds(locked(library),0).
-holds(loc(book2,library),0).
 holds(loc(rob1,library),0).
+holds(loc(book2,kitchen),0).
 holds(loc(book1,library),0).
 -holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book2),0).

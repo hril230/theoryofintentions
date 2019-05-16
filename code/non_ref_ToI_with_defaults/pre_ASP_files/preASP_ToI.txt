@@ -1,6 +1,18 @@
 #const n = 15. % maximum number of steps.
 #const max_len = 14. % maximum activity_length of an activity.
 #const max_name = 1.
+
+% this is the original version of ToI that uses flags for diagnosing, finding defaults and planning,
+% with two added lines:
+% :- defined_by_default(F), -holds(F,I1), not observed_by(F,true,I1), not holds(F,0), I1<=I, finding_defaults(I).
+% observed_by(F,B,I) :- obs(F,B,I1), I1<=I.
+%
+% These lines maes sure that a defined_by_default is not triggered if a fluent is known to be
+% diffrent from the default value at time I, and it has not been known to be the default value before time I.
+% This will avoid the cases of defining a fluent by default and diagnosing an exogeneous action that
+% changes the value of the default, uless it is necessary (i.e unless it is known that the fluent value
+% was different some time before it was seen.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -54,10 +66,13 @@ activity_length(#activity_name,#index).
 
 holds(#fluent,#step).
 occurs(#action,#step).
-
+causes(#physical_exogenous_action,#physical_fluent,#boolean).
+constrains(#physical_fluent,#boolean,#physical_fluent,#boolean).
 %% used in history
 obs(#fluent, #boolean, #step).
 hpd(#action, #boolean, #step).
+observed_by(#fluent,#boolean,#step).
+holds_by(#fluent,#step).
 attempt(#action,#step).
 impossible(#action, #step).
 current_step(#step).
@@ -89,12 +104,12 @@ different_component(#activity_name,#activity_name).
 futile_activity(#activity_name,#step).
 
 selected_goal_holds(#possible_goal,#step).
-assumed_initial_condition(#physical_inertial_fluent).
-
 %% defaults:
-ab_d1(#book). % default d1 is: books are in the library.
-ab_d2(#book). % default d2 is: cups are in office1.
+ab_d1(#book). % default d1 is: books are in the office1.
+ab_d2(#book). % default d2 is: cups are in office2.
+ab_dL(#book). % default dL is: books are in the library.
 defined_by_default(#inertial_fluent).
+defined_by_default_and_diagnosed(#inertial_fluent).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rules
@@ -130,6 +145,10 @@ holds(in_hand(R,O),I+1) :- occurs(pickup(R,O), I).
 holds(locked(L),I+1) :- occurs(exo_lock(L),I).
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
+
+causes(exo_lock(L),locked(L),true).
+causes(exo_move(O,L),loc(O,L),true).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical State Constraints %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,8 +156,17 @@ next_to(L1,L2) :- next_to(L2,L1).
 -next_to(L1,L2) :- not next_to(L1,L2).
 
 -holds(loc(T, L2), I) :- holds(loc(T, L1), I), L1!=L2.
+
 holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
+
 -holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1!=O2.
+
+constrains(loc(T, L1),true,loc(T, L2),false) :- L1!=L2.
+%constrains(loc(R,L),true,loc(O,L),true) :- holds(in_hand(R,O),I).
+%constrains(in_hand(R,O),true,loc(O,L),true) :- holds(loc(R,L),I).
+%constrains(in_hand(R,O1),true,in_hand(R,O2),false) :- O1!=O2.
+
+causes(A,F2,B2):-causes(A,F1,B1), constrains(F1,B1,F2,B2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Executability Condition %%
@@ -154,8 +182,8 @@ impossible(put_down(R,O), I) :- -holds(in_hand(R,O), I).
 impossible(pickup(R,O1), I) :- holds(in_hand(R,O2), I).
 impossible(pickup(R,O), I) :- holds(loc(R,L1), I), holds(loc(O,L2), I) , L1 != L2.
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
-impossible(exo_move(O,L),I) :- holds(locked(L),I).
-impossible(exo_move(O,L2),I) :- holds(loc(O,L1),I), holds(locked(L1),I).
+%impossible(exo_move(O,L),I) :- holds(locked(L),I).
+%impossible(exo_move(O,L2),I) :- holds(loc(O,L1),I), holds(locked(L1),I).
 impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
 impossible(exo_lock(L),I) :- holds(locked(L),I).
 
@@ -246,10 +274,22 @@ impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent
 %% History records and initial state rules %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% new rules
-assumed_initial_condition(F) :- not defined_by_default(F), not obs(F,true,0), holds(F,0), diagnosing(I), current_step(I).
-holds(F,0) :- assumed_initial_condition(F), planning(I), current_step(I).
 holds(F,0) :- defined_by_default(F), not finding_defaults(I), current_step(I).
-occurs(A,I) :- unobserved(A,I).
+
+%:- defined_by_default(F), -holds(F,I1), not holds(F,0), not observed_by(F,true,I1), I1<=I, finding_defaults(I).
+%:- defined_by_default(F), -holds(F,I1),  not observed_by(F,true,I1), I1<=I, finding_defaults(I).
+%:- defined_by_default(F), -holds(F,I1), not holds(F,0), I1<=I, finding_defaults(I).
+%:- defined_by_default(F), -holds(F,I1), not holds_by(F,I1), I1<=I, finding_defaults(I).
+
+observed_by(F,B,I) :- obs(F,B,I1), I1<=I.
+holds_by(F,I) :- holds(F,I1), I1<=I.
+
+% new possible rule
+% :- defined_by_default(F),  -holds(F,I1), unobserved(PEA,I0), causes(PEA,F,false), I0<I1, I1<=I, diagnosing(I), not defined_by_default_and_diagnosed(F).
+% defined_by_default_and_diagnosed(F) :+ defined_by_default(F),  -holds(F,I1), unobserved(PEA,I0), causes(PEA,F,false), I0<I1, I1<=I, diagnosing(I).
+
+%- defined_by_default(F), -holds(F,I1),  not observed_by(F,true,I1), I1<=I, finding_defaults(I), not defined_by_default_and_diagnosed(F).
+%defined_by_default_and_diagnosed(F)  :+ defined_by_default(F), -holds(F,I1),  not observed_by(F,true,I1), I1<=I, finding_defaults(I).
 
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
@@ -311,11 +351,26 @@ holds(next_available_name(1),0).
 occurs(PEA,I) :- unobserved(PEA,I).
 
 %%(26)
-unobserved(PEA,I1) :+ current_step(I),
-		diagnosing(I),
-		I1<I,
-		not hpd(PEA,true,I1),
-		#physical_exogenous_action(PEA).
+%%(26)
+
+%unobserved(PEA,I1) :+ diagnosing(I),
+%    obs(F0,B0,I0),
+%    obs(F2,B2,I2),
+%    constrains(F0,B0,F2,B2),
+%    B00 != B0,
+%    causes(PEA,F0,B0),
+%    not hpd(PEA,true,I1),
+%    I0<=I1,
+%    I1<I2,
+%    I2<=I.
+
+%%(26)
+unobserved(PEA,I1) :+ diagnosing(I),
+    not hpd(PEA,true,I1),
+    I1<I.
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rules for determining intended action %%
@@ -492,7 +547,7 @@ activity_component(AN,I1-I,PAA) :- current_step(I),
 % (50)
 has_component(AN,K) :- current_step(I),
 		planning(I),
-                no_activity_for_goal(G,I),
+    no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
 		activity_component(AN,K,C).
@@ -527,6 +582,9 @@ has_intention(I) :- intended_action(A,I).
 %% Flags %%
 %%%%%%%%%%%
 finding_defaults(I) | planning(I) | diagnosing(I) :- current_step(I).
+current_step(I) :- finding_defaults(I).
+current_step(I) :- planning(I).
+current_step(I) :- diagnosing(I).
 
 %%%%%%%%%%%%%%%%%
 %%Attributes:
@@ -538,9 +596,19 @@ next_to(kitchen, library).
 %%%%%%%%%%%%
 %% Defaults:
 %%%%%%%%%%%%
-holds(loc(B,library),0):- #book(B), not ab_d1(B), finding_defaults(I), current_step(I).
-ab_d1(B) :+ #book(B), -holds(loc(B,library),0), finding_defaults(I), current_step(I).
-defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_d1(B), finding_defaults(I), current_step(I).
+holds(loc(B,office2),0):- #book(B), not ab_d2(B), finding_defaults(I), current_step(I).
+ab_d2(B) :+ #book(B), -holds(loc(B,office2),0), finding_defaults(I), current_step(I).
+defined_by_default(loc(B,office2)) :- holds(loc(B,office2),0), #book(B), not ab_d2(B), finding_defaults(I), current_step(I).
+
+holds(loc(B,office1),0):- #book(B), not ab_d1(B), finding_defaults(I), current_step(I).
+ab_d1(B) :+ #book(B), -holds(loc(B,office1),0), finding_defaults(I), current_step(I).
+defined_by_default(loc(B,office1)) :- holds(loc(B,office1),0), #book(B), not ab_d1(B), finding_defaults(I), current_step(I).
+
+%holds(loc(B,library),0):- #book(B), not ab_dL(B), finding_defaults(I), current_step(I).
+%ab_dL(B) :+ #book(B), -holds(loc(B,library),0), finding_defaults(I), current_step(I).
+%defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_dL(B), finding_defaults(I), current_step(I).
+
+ab_d1(B) :- not ab_d2(B), #book(B).
 
 %% Initial choices of undetermined fluents.
 holds(loc(B,library),0) | holds(loc(B,kitchen),0) | holds(loc(B,office1),0) | holds(loc(B,office2),0) :- #book(B).

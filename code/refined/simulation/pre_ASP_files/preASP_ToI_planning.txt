@@ -1,5 +1,5 @@
-#const numSteps = 8.
-#const max_len = 9.
+#const numSteps = 10.
+#const max_len = 11.
 #const max_name = 1.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -10,8 +10,8 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#object = {book1, book2, book3}.
-#place = {library, office2, office1, kitchen}.
+#object = {book1, book2, book3, book4}.
+#place = {kitchen, library, office2, office1, storage_room}.
 #robot = {rob1}.
 #thing = #object + #robot.
 
@@ -517,6 +517,7 @@ has_intention(I) :- intended_action(A,I).
 next_to(library, kitchen).
 next_to(kitchen, office1).
 next_to(office1, office2).
+next_to(office2, storage_room).
 
 
 %%%%%%%%%

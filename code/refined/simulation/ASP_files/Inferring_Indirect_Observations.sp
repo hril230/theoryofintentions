@@ -1,18 +1,18 @@
-#const numSteps = 6.
- 
+#const numSteps = 2.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#coarse_place = {office1,kitchen}.
-#coarse_object = {book3}.
-#object = {ref2_book3,ref3_book3,ref1_book3}.
-#place = {c9,c8,c7,c6,c5,c12,c11,c10}.
+#coarse_place = {kitchen,library,office1,office2,storage_room}.
+#coarse_object = {book1,book2,book3,book4}.
+#object = {ref1_book1,ref1_book2,ref1_book3,ref1_book4,ref2_book1,ref2_book2,ref2_book3,ref2_book4,ref3_book1,ref3_book2,ref3_book3,ref3_book4,ref4_book1,ref4_book2,ref4_book3,ref4_book4}.
+#place = {c1,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c2,c20,c21,c22,c23,c24,c25,c26,c27,c28,c29,c3,c30,c4,c5,c6,c7,c8,c9}.
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
-#boolean = {true,false}.
-#outcome = {true,false,undet}.
+#boolean = {false,true}.
+#outcome = {false,true,undet}.
 #physical_inertial_fluent = loc(#thing,#place) + in_hand(#robot,#object).
 #physical_defined_fluent = coarse_loc(#coarse_thing,#coarse_place) + coarse_in_hand(#robot,#coarse_object).
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
@@ -115,12 +115,6 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 % Cannot execute two actions at the same time.
 :- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
-%% An exogenous move of an object cannot be done to the same location.
--occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
-
-%% An exogenous move of an object cannot happen if it is being in hand
--occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,9 +123,11 @@ holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R), holds(loc(T,C),I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T), holds(loc(Z,C),I).
-holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O), holds(in_hand(rob1, OP), I).
+
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
+holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O).
+
 holds(indirectly_observed(rob1, coarse_loc(T, R), false), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), -holds(may_discover(rob1, coarse_loc(T, R), true), I).
 holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), false), I) :- -holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I), -holds(may_discover(R, coarse_in_hand(rob1, O), true), I).
 holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), holds(directly_observed(rob1, loc(T, C), undet), I).
@@ -151,6 +147,10 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %% Testing Actions
 %%%%%%%%%%%%%%%%%%%
 %% TESTING RULES GO HERE
+
+%%%%%%%%%%%%%%%%%%%
+%% Awareness axiom.
+%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -174,11 +174,6 @@ occurs(A,I) :- hpd(A,I).
 :- obs(F, true, I), -holds(F, I).
 :- obs(F, false, I), holds(F, I).
 
-%%%%%%%%%%%%%%%%%%%%
-%% Awareness axiom.
-%%%%%%%%%%%%%%%%%%%%
-holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
-
 
 %%%%%%%%%%%%%%%%%%%%
 %% Planning Module
@@ -188,26 +183,103 @@ holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
 %%%%%%%%%%%%%%%
 %% Attributes:
 %%%%%%%%%%%%%%%
+next_to(c1, c2).
+next_to(c2, c3).
+next_to(c4, c5).
 next_to(c5, c6).
-next_to(c6, c7).
+next_to(c1, c4).
+next_to(c2, c5).
+next_to(c3, c6).
+
+next_to(c6, c10).
+
 next_to(c7, c8).
 next_to(c8, c9).
-next_to(c9, c10).
 next_to(c10, c11).
 next_to(c11, c12).
+next_to(c7, c10).
+next_to(c8, c11).
+next_to(c9, c12).
 
-comp(c5, kitchen).
-comp(c6, kitchen).
+next_to(c12, c16).
+
+next_to(c13, c14).
+next_to(c14, c15).
+next_to(c16, c17).
+next_to(c17, c18).
+next_to(c13, c16).
+next_to(c14, c17).
+next_to(c15, c18).
+
+next_to(c18, c22).
+
+next_to(c19, c20).
+next_to(c20, c21).
+next_to(c22, c23).
+next_to(c23, c24).
+next_to(c19, c22).
+next_to(c20, c23).
+next_to(c21, c24).
+
+next_to(c24, c28).
+
+next_to(c25, c26).
+next_to(c2, c27).
+next_to(c28, c28).
+next_to(c29, c30).
+next_to(c25, c28).
+next_to(c26, c29).
+next_to(c27, c30).
+
+
+
+comp(c1, library).
+comp(c2, library).
+comp(c3, library).
+comp(c4, library).
+comp(c5, library).
+comp(c6, library).
 comp(c7, kitchen).
 comp(c8, kitchen).
-comp(c9, office1).
-comp(c10, office1).
-comp(c11, office1).
-comp(c12, office1).
+comp(c9, kitchen).
+comp(c10, kitchen).
+comp(c11, kitchen).
+comp(c12, kitchen).
+comp(c13, office1).
+comp(c14, office1).
+comp(c15, office1).
+comp(c16, office1).
+comp(c17, office1).
+comp(c18, office1).
+comp(c19, office2).
+comp(c20, office2).
+comp(c21, office2).
+comp(c22, office2).
+comp(c23, office2).
+comp(c24, office2).
+comp(c25, storage_room).
+comp(c26, storage_room).
+comp(c27, storage_room).
+comp(c28, storage_room).
+comp(c29, storage_room).
+comp(c30, storage_room).
 
+comp(ref1_book1, book1).
+comp(ref2_book1, book1).
+comp(ref3_book1, book1).
+comp(ref4_book1, book1).
+comp(ref1_book2, book2).
+comp(ref2_book2, book2).
+comp(ref3_book2, book2).
+comp(ref4_book2, book2).
 comp(ref1_book3, book3).
 comp(ref2_book3, book3).
 comp(ref3_book3, book3).
+comp(ref4_book3, book3).
+comp(ref1_book4, book4).
+comp(ref2_book4, book4).
+comp(ref3_book4, book4).
+comp(ref4_book4, book4).
 
 
 %%%%%%%%%
@@ -218,26 +290,15 @@ comp(ref3_book3, book3).
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(coarse_loc(rob1,office1),0).
-holds(loc(rob1,c11),0).
-hpd(move(rob1,c10),0).
-hpd(test(rob1,loc(rob1,c10),true),1).
-obs(loc(rob1,c10),true,2).
-obs(loc(ref1_book3,c10),false,2).
-hpd(move(rob1,c9),2).
-hpd(test(rob1,loc(rob1,c9),true),3).
-obs(loc(ref1_book3,c9),false,4).
-hpd(move(rob1,c8),4).
-obs(loc(rob1,c9),true,4).
-hpd(test(rob1,loc(rob1,c8),true),5).
-obs(loc(ref1_book3,c8),false,6).
-obs(loc(rob1,c8),true,6).
-holds(directly_observed(rob1,loc(rob1,c10),true),2).
-holds(directly_observed(rob1,loc(ref1_book3,c10),false),2).
-holds(directly_observed(rob1,loc(ref1_book3,c9),false),4).
-holds(directly_observed(rob1,loc(rob1,c9),true),4).
-holds(directly_observed(rob1,loc(ref1_book3,c8),false),6).
-holds(directly_observed(rob1,loc(rob1,c8),true),6).
+holds(directly_observed(rob1,loc(ref2_book3,c18),true),0).
+holds(directly_observed(rob1,loc(ref4_book3,c22),true),2).
+holds(directly_observed(rob1,loc(ref3_book3,c22),true),2).
+holds(directly_observed(rob1,loc(ref3_book3,c18),true),0).
+holds(directly_observed(rob1,loc(ref2_book3,c22),true),2).
+holds(directly_observed(rob1,loc(ref1_book3,c22),true),2).
+holds(directly_observed(rob1,loc(ref1_book3,c18),true),0).
+holds(directly_observed(rob1,loc(ref4_book3,c18),true),0).
+holds(directly_observed(rob1,loc(rob1,c22),true),1).
 
 %%%%%%%%%
 display

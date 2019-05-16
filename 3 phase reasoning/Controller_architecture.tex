@@ -1,0 +1,87 @@
+\documentclass[11pt, oneside]{article}   
+\usepackage{geometry}
+\usepackage{amssymb, amsmath,mathtools}   
+\geometry{a4paper}                   		
+
+\title{Architecture of a Controller that reasons with initial defaults, diagnosis of exogeneous actions, and planning with intention.}
+\author{Rocio Gomez}
+
+\begin{document}
+\maketitle
+
+\section{The Controller.}
+
+Our robot only deals with reasoning at one abstract level. At this point we assume that exectuer can act and observe in the world at this level of abstraction too. We will add refinement later. The robot will reason with defaults, diganosis of exogeneous actions and planning with intention each time it has an interaction with the world execution of actions and the relevan observatinos have happened. 
+
+This controller is going to use the same ASP file for defaults, diagnosis and planning by running it three consecutive times using three different flags: \emph{finding\_defaults(#step)}, \emph{diagnosing(#step)} and \emph{planning(#step)}. These flags, given as input to the ASP, allow different rules in the ASP to be triggered.
+
+\subsection{The physical domain}
+We will explain the architecture of the controller using the following domain as example:
+
+The domain has four rooms located side by side \emph{office1}, \emph{office2}, \emph{kitchen} and
+\emph{library}) and connected. The robot, which we call \emph{rob}, can move from one room to the next. A room that is \emph{secure} can
+be \emph{locked} or \emph{unlocked}. The robot cannot move to or from a locked room; it can \emph{unlock} a locked room. The domain objects
+can be located in any of the rooms. The robot can \emph{pickup} an object if the robot and the object are in the same room, and it can
+\emph{put down} an object that it is holding; the robot can only hold one object at a time. The domain includes two exogenous actions 
+\emph{exo\_move} and \emph{exo\_lock}, one that can change the location of any object, and the other that can lock a secure room. The agent may or may not be aware of these exogenous action when they happen. 
+
+Through out this text we assume that the goal of the robot will be to put both books in the \emph{library}. The goal will be reached when the location of both books are in the \emph{library} and the robot is not holding any of them. 
+
+In our domain, by default, books are going to be located in \emph{office1} or in \emph{office2}, with preference of them being in \emph{office1}. So by default a book will be in \emph{office1}, and if not it will be in \emph{office2}. If it is known that a book is not in either one of these default locations, then they can be in the \emph{library} or \emph{kitchen} with equal probability.
+
+At the initial state of the planning, the robot may or may not know the location of the books, or if the door of the \emph{library} is locked. The first thing our robot does is to observe the value of those fluents that can be observed from its location, such is the location of the robot itslef, what it is holidng in its hand, what objects are or are not in its same location and, in the case of being in the \emph{library} or in the \emph{kitchen}, if the door to the \emph{library} is locked or unlocked. Once it has observed the room, it will need to reason about defaults, diagnose observations and create a plan.
+
+\subsection{Example of the three phase resoning}
+
+Let us assume that our robot is in \emph{office1}, with \emph{book1} in its hand. Let us assume that the robot has not been given any information about the state of the domain and all it knows is its goal. After its initial observation the robot knows that it is located in \emph{office1}, that \emph{book1} is in its hand, and that \emph{book2} is not in \emph{office1}. With this information the controller goes through three stages of reasoning. 
+
+\begin{enumerate}
+\item Finding defaults:
+To reason about fluents, the controller will run the ASP together with the history (so far only we have the initial obserations) and the flag \emph{finding\_defaults(0).} In or example domain, during this phase the ASP concludes that \emph{book2} is by default, in \emph{office2}, since it is not in \emph{office1}. The output of running this ASP will be of the form \emph{defined\_by\_default(loc(book2,office2))}. This information will be given as input to the second phase of the reasoing together with the flag \emph{diganosing(0)}.
+
+The following rule was included in the section of history rules in the AL description:
+\begin{align}\begin{split}
+holds(F, 0)  \quad \leftarrow \quad\ &defined\_by\_default(F). \\
+&not\ finding\_defaults(I).
+\end{split}\end{align}
+So the ASP in the \emph{diagnosing} or \emph{planning} phase will consider that a fluent defined by default hold at 0. 
+
+\item Diagnosis: 
+Now the robot, using its history and the fluents that have been defined by default, will enter in the second phase of its reasoning, which consists on diagnosing unexpected current observations that are not consistent with past observations. 
+ 
+
+Let us see the second task that is performed in this phase. At the moment the robot knows that it is located in \emph{office1}, that \emph{book1} is in its hand, and that \emph{book2} is not in emph{office1}. He concluded that \emph{book2} should be in \emph{office2} as defined by default. He does not know anything about the \emph{library} door being \emph{locked} or it will not be \emph{locked}. The ASP will give different answers in some of them the \emph{library} is \emph{locked} and in other it will not be \emph{locked}. The Controller will choose one of this answers, keep hold of those assumptions, and give them as input to the ASP for its planning stage. The output of ASP will be of the form \emph{unobserved(A,I)} and \emph{assumed\_or\_inferred\_initial\_condition(F, B)}.
+
+The relation \emmph{assumed\_or\_inferred\_initial\_condition(F, B)} is defined as follows in the AL:
+\begin{align}\begin{split}
+assumed\_or\_inferred\_initial\_condition(F, true) \quad \leftarrow \quad\ &not\ defined\_by\_default(F),\\
+&not\ obs(F,true,0),\\
+&holds(F,0),\\
+&diagnosing(I).\\
+assumed\_or\_inferred\_initial\_condition(F, false) \quad \leftarrow \quad\ &not\ obs(F,false,0),\\
+&-holds(F,0),\\
+&diagnosing(I).
+\end{split}\end{align}
+\begin{align}\begin{split}
+holds(F,0) \quad \leftarrow \quad\ &assumed\_or\_inferred\_initial\_condition(F, true),\ planning(I).\\
+-holds(F,0) \quad \leftarrow \quad\ &assumed\_or\_inferred\_initial\_condition(F, false),\ planning(I).
+\end{split}\end{align}
+
+The fluents that have not been observed or defined by default but still hold, will be given in the output as \emph{assumed\_or\_inferred\_initial\_condition(F, B).}
+The controller will understand that those fluents which entry \emph{assumed\_or\_inferred\_initial\_condition(F, B)} is common to all answers in the set, then those fluents will have been inferred by the reasoner, and not chosen. Those fluents which entry \emph{assumed\_or\_inferred\_initial\_condition(F, B) appears only in some answers, then they have been chosen by the reasoner, and we consider them initial assumptions.
+
+
+\item Planning with intention:
+The controller goes through the third phase of the reasoner that consists on obtaining the next intended action and creating a plan, if there is not an existing plan that can reach the goal. In our case the robot creates a plan that consists on moving all the way to the \emph{library}, putting \emph{book2} down, going back to \emph{office1}, getting \emph{book1}, moving to the \emph{library} and putting \emph{book1} down. The intended action will be to \emph{start} this plan.
+
+
+
+
+Need to look at this:
+
+Let us assume that by default books are in office 1, and if not, in office 2. In our domain we start with the robot being in the library, book1 being in the library (not in hand) and book 2 being in the kitchen. Let us assume that the robot does not have any knowledge, so as he observes his environment he can see that book one is with him in the library, the door is not locked, and it assumes that book 2 is in office 1, by default. It makes a plan to go to office 1, get the book and bring it to library 1. When the robot moves to the kitchen it sees that book 2 is there. If we have the prererence rule of the default being in office 1 over the default being in office 2, then all the answers in the set assume that the default holds, (it was in office 1 in initial state), and that there has been an exogenous action moving the book from the pefered default location to the kitchen. If there is not preference rule, then there is one answer that says the book was in the kitchen in the first place and the default of being in office 1 was abnormal. Look at file "ASP_ToI_Defaults_example_of_preference_not_working_well.sp"
+
+\end{enumerate}
+
+
+\end{document}

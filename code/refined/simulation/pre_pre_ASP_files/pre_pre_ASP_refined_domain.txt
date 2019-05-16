@@ -1,5 +1,5 @@
 #const numSteps = 1. % maximum number of steps.
- 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,12 +94,6 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 % Cannot execute two actions at the same time.
 :- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
-%% An exogenous move of an object cannot be done to the same location.
--occurs(exo_move(O,L),I) :- holds(loc(O,L),I).
-
-%% An exogenous move of an object cannot happen if it is being in hand
--occurs(exo_move(O,L),I) :- holds(in_hand(R,O),I).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Axioms for observing the environment %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,9 +102,11 @@ holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R), holds(loc(T,C),I).
-holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T), holds(loc(Z,C),I).
-holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O), holds(in_hand(rob1, OP), I).
+
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R).
+holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
+holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O).
+
 holds(indirectly_observed(rob1, coarse_loc(T, R), false), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), -holds(may_discover(rob1, coarse_loc(T, R), true), I).
 holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), false), I) :- -holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I), -holds(may_discover(R, coarse_in_hand(rob1, O), true), I).
 holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observed(rob1, coarse_loc(T, R), true), I), comp(C, R), holds(directly_observed(rob1, loc(T, C), undet), I).
@@ -130,6 +126,11 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 %% Testing Actions
 %%%%%%%%%%%%%%%%%%%
 %% TESTING RULES GO HERE
+
+%%%%%%%%%%%%%%%%%%%
+%% Awareness axiom.
+%%%%%%%%%%%%%%%%%%%
+holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
 
 %%%%%%%%%%%%%%%%%%%
 %% Inertia Axioms.
@@ -152,11 +153,6 @@ occurs(A,I) :- hpd(A,I).
 %% Reality check axioms.
 :- obs(F, true, I), -holds(F, I).
 :- obs(F, false, I), holds(F, I).
-
-%%%%%%%%%%%%%%%%%%%%
-%% Awareness axiom.
-%%%%%%%%%%%%%%%%%%%%
-holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
 
 
 %%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,128 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Abstract Sorts
+#place = {library, kitchen, office1, office2, storage_room}.
+#object = {book1, book2, book3, book4}.
+#robot = {rob1}.
+#object = #book.
+#thing = #object + #robot.
+#boolean = {true, false}.
+#inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#fluent = #inertial_fluent.
+#rob_action = move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
+%% End of Abstract Sorts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Abstract Attributes
+next_to(library, kitchen).
+next_to(kitchen, office1).
+next_to(office1, office2).
+next_to(office2, storage_room).
+%% End of Abstract Attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Refined Sorts
+#coarse_place = {library,kitchen,office1,office2,storage_room}.
+#coarse_object = {book1,book2,book3,book4}.
+#object = {ref1_book1,ref2_book1,ref3_book1,ref4_book1, ref1_book2,ref2_book2,ref3_book2,ref4_book2, ref1_book3,ref2_book3,ref3_book3,ref4_book3, ref1_book4,ref2_book4,ref3_book4,ref4_book4}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25}.
+#robot = {rob1}.
+#coarse_thing = #coarse_object + #robot.
+#thing = #object + #robot.
+#boolean = {true, false}.
+#outcome = {true, false, undet}.
+#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
+#physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
+#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
+#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
+#inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
+#defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
+#fluent = #inertial_fluent + #defined_fluent.
+#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
+#refined_component = #place + #object.
+#coarse_component = #coarse_place + #coarse_object.
+%% End of Refined Sorts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Refined Attributes
+next_to(c1, c2).
+next_to(c2, c3).
+next_to(c3, c4).
+next_to(c4, c5).
+next_to(c5, c6).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c8, c9).
+next_to(c9, c10).
+next_to(c10, c11).
+next_to(c11, c12).
+next_to(c12, c13).
+next_to(c13, c14).
+next_to(c14, c15).
+next_to(c15, c16).
+next_to(c16, c17).
+next_to(c17, c18).
+next_to(c18, c19).
+next_to(c19, c20).
+next_to(c20, c21).
+next_to(c21, c22).
+next_to(c22, c23).
+next_to(c23, c24).
+next_to(c24, c25).
+
+comp(c1, library).
+comp(c2, library).
+comp(c3, library).
+comp(c4, library).
+comp(c5, library).
+comp(c6, kitchen).
+comp(c7, kitchen).
+comp(c8, kitchen).
+comp(c9, kitchen).
+comp(c10, kitchen).
+comp(c11, office1).
+comp(c12, office1).
+comp(c13, office1).
+comp(c14, office1).
+comp(c15, office1).
+comp(c16, office2).
+comp(c17, office2).
+comp(c18, office2).
+comp(c19, office2).
+comp(c20, office2).
+comp(c21, storage_room).
+comp(c22, storage_room).
+comp(c23, storage_room).
+comp(c24, storage_room).
+comp(c25, storage_room).
+
+comp(ref1_book1, book1).
+comp(ref2_book1, book1).
+comp(ref3_book1, book1).
+comp(ref4_book1, book1).
+comp(ref1_book2, book2).
+comp(ref2_book2, book2).
+comp(ref3_book2, book2).
+comp(ref4_book2, book2).
+comp(ref1_book3, book3).
+comp(ref2_book3, book3).
+comp(ref3_book3, book3).
+comp(ref4_book3, book3).
+comp(ref1_book4, book4).
+comp(ref2_book4, book4).
+comp(ref3_book4, book4).
+comp(ref4_book4, book4).
+
+%% End of Refined Attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 5*n-4 where n is number of cells
+% 2*m where m is number of rooms. This number only works if the goal includes only one fluent. If it includes x fluents we need to multiply this number by x.
+max_number_steps_refined_planning = 21
+max_number_steps_ToI_planning = 10

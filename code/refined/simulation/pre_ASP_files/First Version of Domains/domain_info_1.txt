@@ -1,0 +1,65 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Abstract Sorts
+#place = {library, kitchen}.
+#book = {book1}.
+#robot = {rob1}.
+#object = #book.
+#thing = #object + #robot.
+#boolean = {true, false}.
+#inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#fluent = #inertial_fluent.
+#rob_action = move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
+%% End of Abstract Sorts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Abstract Attributes
+next_to(library, kitchen).
+%% End of Abstract Attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Refined Sorts
+#coarse_place = {library,kitchen}.
+#coarse_object = {book1}.
+#object = {ref1_book1}.
+#place = {c1, c2, c3, c4}.
+#robot = {rob1}.
+#coarse_thing = #coarse_object + #robot.
+#thing = #object + #robot.
+#boolean = {true, false}.
+#outcome = {true, false, undet}.
+#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#physical_defined_fluent = coarse_loc(#coarse_thing, #coarse_place) + coarse_in_hand(#robot, #coarse_object).
+#physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
+#knowledge_inertial_fluent = can_be_tested(#robot, #physical_inertial_fluent, #boolean) + directly_observed(#robot, #physical_inertial_fluent, #outcome).
+#knowledge_defined_fluent = may_discover(#robot, #physical_defined_fluent,#boolean) + observed(#robot, #physical_fluent, #outcome) + indirectly_observed(#robot, #physical_defined_fluent, #outcome).
+#inertial_fluent = #physical_inertial_fluent + #knowledge_inertial_fluent.
+#defined_fluent = #physical_defined_fluent + #knowledge_defined_fluent.
+#fluent = #inertial_fluent + #defined_fluent.
+#rob_action = test(#robot, #physical_inertial_fluent, #boolean) + move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
+#action = #rob_action + #exo_action.
+#refined_component = #place + #object.
+#coarse_component = #coarse_place + #coarse_object.
+%% End of Refined Sorts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Refined Attributes
+next_to(c1, c2).
+next_to(c2, c3).
+next_to(c3, c4).
+comp(c1, library).
+comp(c2, library).
+comp(c3, kitchen).
+comp(c4, kitchen).
+comp(ref1_book1, book1).
+%% End of Refined Attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 5*n-4 where n is number of cells
+% 2*m where m is number of rooms. This number only works if the goal includes only one fluent. If it includes x fluents we need to multiply this number by x.
+max_number_steps_refined_planning = 6
+max_number_steps_ToI_planning = 3

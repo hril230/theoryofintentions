@@ -21,4 +21,4 @@ next_to(office1,kitchen).
 next_to(kitchen,library).
 %% End of Abstract Attributes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-max_number_steps_ToI_planning = 10
+max_number_steps_ToI_planning = 17

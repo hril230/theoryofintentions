@@ -71,8 +71,8 @@ class World(object):
 
 	def __get_exo_action(self,action):
 		exo_action = ''
-		my_exo_action = random.choice(list(self.domain_info_formatting.sorts_hierarchy_dic['#exo_action']))
-		exo_action_parameters = self.domain_info_formatting.sorts_hierarchy_dic[my_exo_action]
+		my_exo_action = random.choice(list(self.domain_info_formatting.refined_sorts_hierarchy_dic['#exo_action']))
+		exo_action_parameters = self.domain_info_formatting.refined_sorts_hierarchy_dic[my_exo_action]
 		chosen_values = [random.choice(list(self.domain_info_formatting.get_all_constant_subsorts(p))) for p in exo_action_parameters]
 		exo_action = my_exo_action + '(' + ','.join(chosen_values) + ')'
 		return exo_action
@@ -97,10 +97,13 @@ class World(object):
 		input = self.domain_info_formatting.dic_state_to_holds_list(self.dic_WorldState,0) + ['attempt('+ action +',0).']
 		print '\nAttempt: ' + action
 		if(self.exo_action_happened == False):
+			#if 'move(rob1,office1)' in action: exo_action = 'exo_move(book1,kitchen)'
+			#TODO remove comment out next line.
 			exo_action = self.__get_exo_action(action)
 			if(exo_action != ''):
 				input = input + ['attempt('+ exo_action +',0).']
 				print 'Attempt: ' + exo_action
+
 
 		answer_split = self.__runASPDomain(input)
 		self.executionTimeUnits += self.__getexecutionTimeUnits(action)

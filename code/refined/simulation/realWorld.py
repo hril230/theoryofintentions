@@ -46,10 +46,10 @@ class World(object):
 		print ('EXO ACTION HAPPENING!!')
 		exo_action = ''
 		if(random.random()<0): return ''
-		object_choice = random.choice(self.domain_info.sorts_hierarchy_dic['#coarse_object'])
+		object_choice = random.choice(self.domain_info.refined_sorts_hierarchy_dic['#coarse_object'])
 		if(object_choice in action and 'pickup' in action): return ''
 		if 'coarse_in_hand(rob1' + object_choice in self.dic_RefinedState: return ''
-		location_choice = random.chocie(self.domain_info.sorts_hierarchy_dic['#coarse_object'])
+		location_choice = random.chocie(self.domain_info.refined_sorts_hierarchy_dic['#coarse_object'])
 		if self.dic_RefinedState['loc(ref1_'+object_choice] == location_choice: return ''
 		return 'hpd(exo_move(ref1_'+object_choice+','+location_choice+'),0).'
 

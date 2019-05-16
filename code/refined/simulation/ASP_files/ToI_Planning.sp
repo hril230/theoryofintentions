@@ -10,8 +10,8 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#object = {book1, book2, book3}.
-#place = {library, office2, office1, kitchen}.
+#object = {book1, book2, book3, book4}.
+#place = {kitchen, library, office2, office1, storage_room}.
 #robot = {rob1}.
 #thing = #object + #robot.
 
@@ -517,12 +517,13 @@ has_intention(I) :- intended_action(A,I).
 next_to(library, kitchen).
 next_to(kitchen, office1).
 next_to(office1, office2).
+next_to(office2, storage_room).
 
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-holds(my_goal,I) :- holds(loc(book2,kitchen),I).
+holds(my_goal,I) :- holds(loc(book3,office2),I).
 
 
 %%%%%%%%%%%%%%%%%
@@ -537,16 +538,17 @@ current_step(2).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
 activity_goal(1,my_goal).
-activity_component(1,1,pickup(rob1,book2)).
-activity_component(1,2,move(rob1,kitchen)).
-activity_length(1,2).
+activity_component(1,1,move(rob1,office2)).
+activity_length(1,1).
 explanation(0,2).
+holds(loc(book1,kitchen),0).
 holds(loc(book3,office1),0).
 holds(loc(rob1,office1),0).
-holds(loc(book1,library),0).
 holds(loc(book2,office1),0).
+holds(loc(book4,kitchen),0).
+holds(in_hand(rob1,book3),0).
 -holds(in_hand(rob1,book1),0).
--holds(in_hand(rob1,book3),0).
+-holds(in_hand(rob1,book4),0).
 -holds(in_hand(rob1,book2),0).
 
 

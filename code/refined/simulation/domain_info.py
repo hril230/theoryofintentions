@@ -11,8 +11,11 @@ class DomainInfo():
 		self.init_files_markers()
 		self.reg_exp_sorts = r'#*\w*_*\w*' #regular expression that helps find the sorts in the asp text. The regular expression represents words composed with letters and numbers, possibley with # at the beginning, and possible with a _ in between its letters.
 
-		self.sorts_hierarchy_dic = OrderedDict()
+		self.refined_sorts_hierarchy_dic = OrderedDict()
 		self.components_dic = OrderedDict()
+
+		self.abstract_sorts_hierarchy_dic = OrderedDict()
+
 
 		self.abstract_sorts_lines = []
 		self.refined_sorts_lines = []
@@ -47,7 +50,7 @@ class DomainInfo():
 					is_abstract_attributes_line = False
 					continue
 				elif line == '%% Abstract Sorts':
-					is_is_abstract_sorts_line = True
+					is_abstract_sorts_line = True
 					continue
 				elif line == '%% Abstract Attributes':
 					is_abstract_attributes_line = True
@@ -64,19 +67,42 @@ class DomainInfo():
 					sort_name = line_split[0]
 					sort_composition_string = line_split[1]
 					sort_composition_list = sort_composition_string.split('+')
-					if '{' in sort_composition_list[0] or sort_composition_list[0] in self.sorts_hierarchy_dic.keys():
-						sort_composition_set = Set([v for v in sort_composition_list if v in self.sorts_hierarchy_dic.keys()])
+					if '{' in sort_composition_list[0] or sort_composition_list[0] in self.refined_sorts_hierarchy_dic.keys():
+						sort_composition_set = Set([v for v in sort_composition_list if v in self.refined_sorts_hierarchy_dic.keys()])
 						for v in sort_composition_list:
 							 if '{' in v: sort_composition_set.update(Set(v.strip('{}').split(',')))
-						self.sorts_hierarchy_dic[sort_name] = sort_composition_set
-					elif '(' in sort_composition_list[0] or sort_composition_list[0] in self.sorts_hierarchy_dic.keys():
-						sort_composition_set = Set([v for v in sort_composition_list if v in self.sorts_hierarchy_dic.keys()])
+						self.refined_sorts_hierarchy_dic[sort_name] = sort_composition_set
+					elif '(' in sort_composition_list[0] or sort_composition_list[0] in self.refined_sorts_hierarchy_dic.keys():
+						sort_composition_set = Set([v for v in sort_composition_list if v in self.refined_sorts_hierarchy_dic.keys()])
 						for v in sort_composition_list:
 							if '(' in v:
 								v = v.strip(')').split('(')
-								self.sorts_hierarchy_dic[v[0]] = v[1].split(',')
+								self.refined_sorts_hierarchy_dic[v[0]] = v[1].split(',')
 								sort_composition_set.add(v[0])
-						self.sorts_hierarchy_dic[sort_name] = sort_composition_set
+						self.refined_sorts_hierarchy_dic[sort_name] = sort_composition_set
+
+
+				if is_abstract_sorts_line:
+					self.abstract_sorts_lines.append(line)
+					if '#' not in line: continue
+					line_split = line.replace(' ','').strip('.').split('=')
+					sort_name = line_split[0]
+					sort_composition_string = line_split[1]
+					sort_composition_list = sort_composition_string.split('+')
+					if '{' in sort_composition_list[0] or sort_composition_list[0] in self.abstract_sorts_hierarchy_dic.keys():
+						sort_composition_set = Set([v for v in sort_composition_list if v in self.abstract_sorts_hierarchy_dic.keys()])
+						for v in sort_composition_list:
+							 if '{' in v: sort_composition_set.update(Set(v.strip('{}').split(',')))
+						self.abstract_sorts_hierarchy_dic[sort_name] = sort_composition_set
+					elif '(' in sort_composition_list[0] or sort_composition_list[0] in self.abstract_sorts_hierarchy_dic.keys():
+						sort_composition_set = Set([v for v in sort_composition_list if v in self.abstract_sorts_hierarchy_dic.keys()])
+						for v in sort_composition_list:
+							if '(' in v:
+								v = v.strip(')').split('(')
+								self.abstract_sorts_hierarchy_dic[v[0]] = v[1].split(',')
+								sort_composition_set.add(v[0])
+						self.abstract_sorts_hierarchy_dic[sort_name] = sort_composition_set
+
 
 				if is_refined_attributes_line:
 					self.refined_attributes_lines.append(line)
@@ -86,15 +112,19 @@ class DomainInfo():
 				if is_abstract_sorts_line: self.abstract_sorts_lines.append(line)
 				if is_abstract_attributes_line: self.abstract_attributes_lines.append(line)
 
-		self.constants = Set()
-		for values in self.sorts_hierarchy_dic.values(): self.constants.update(Set([v for v in values if v not in self.sorts_hierarchy_dic.keys()]))
+		self.refined_constants = Set()
+		for values in self.refined_sorts_hierarchy_dic.values(): self.refined_constants.update(Set([v for v in values if v not in self.refined_sorts_hierarchy_dic.keys()]))
 
-		self.functions = Set([v for v in self.sorts_hierarchy_dic.keys() if '#' not in v  and v not in self.constants])
+		self.abstract_constants = Set()
+		for values in self.abstract_sorts_hierarchy_dic.values(): self.abstract_constants.update(Set([v for v in values if v not in self.abstract_sorts_hierarchy_dic.keys()]))
 
 
-		self.constants_sorts_dic = {k:v for k,v in self.sorts_hierarchy_dic.items() if Set(v).issubset(self.constants)}
-		self.abstract_constants_sorts_dic = {k.replace('coarse_',''):v for k,v in self.constants_sorts_dic.items() if 'coarse_' in k}
-		self.refined_constants_sorts_dic = {k:v for k,v in self.constants_sorts_dic.items() if 'coarse_' not in k}
+		self.refined_functions = Set([v for v in self.refined_sorts_hierarchy_dic.keys() if '#' not in v  and v not in self.refined_constants])
+		self.abstract_functions = Set([v for v in self.abstract_sorts_hierarchy_dic.keys() if '#' not in v  and v not in self.abstract_constants])
+
+		self.refined_constants_sorts_dic = {k:v for k,v in self.refined_sorts_hierarchy_dic.items() if Set(v).issubset(self.refined_constants)}
+		self.abstract_constants_sorts_dic = {k.replace('coarse_',''):v for k,v in self.refined_constants_sorts_dic.items() if 'coarse_' in k}
+		self.refined_constants_sorts_dic = {k:v for k,v in self.refined_constants_sorts_dic.items() if 'coarse_' not in k}
 		self.abstract_constants_lines = [k + ' = ' + '{' + ', '.join(v) + '}.' for k,v in self.abstract_constants_sorts_dic.items()]
 		self.refined_constants_lines = [k + ' = ' + '{' + ', '.join(v) + '}.' for k,v in self.refined_constants_sorts_dic.items()]
 
@@ -109,10 +139,10 @@ class DomainInfo():
 
 		self.actions_param_and_exec_conditions_dic = self.get_dic_action_variables_conditions(self.abstract_executability_conditions)
 
-		print '\n\n\n\nthis is my abstract executability conditions dictionary: '
-		print self.abstract_executability_conditions
-		print '\n\n\n\nthis is my action paramterrs conditions dictionary: '
-		print self.actions_param_and_exec_conditions_dic
+#		print '\n\n\n\nthis is my abstract executability conditions dictionary: '
+#		print self.abstract_executability_conditions
+#		print '\n\n\n\nthis is my action paramterrs conditions dictionary: '
+#		print self.actions_param_and_exec_conditions_dic
 		self.refined_world_causal_law = '-holds(in_hand(R,OP2),I+1) :- occurs(put_down(rob1,OP1),I), comp(OP1,B), comp(OP2,B), holds(coarse_in_hand(rob1,B),I).'
 		self.inferring_indirect_observations_display_string = 'holds(indirectly_observed(rob1,B,C),numSteps).'
 		self.refined_world_display_string = 'occurs.\nholds(loc(A,B),numSteps).\nholds(in_hand(A,B),numSteps).\nholds(coarse_loc(A,B),numSteps).\nholds(coarse_in_hand(A,B),numSteps).\n'
@@ -123,27 +153,26 @@ class DomainInfo():
 		self.create_pre_ASP_inferring_indirect_observations()
 		self.create_pre_ASP_refined_planning()
 
-	def create_relevant_sorts_lines(self,relevant_sorts_hierarchy_dic):
+	def create_relevant_refined_sorts_lines(self,relevant_refined_sorts_hierarchy_dic):
 		lines = []
-		for sort in relevant_sorts_hierarchy_dic.keys():
+		for sort in relevant_refined_sorts_hierarchy_dic.keys():
 			if '#' in sort:
-				values = relevant_sorts_hierarchy_dic[sort]
+				values = relevant_refined_sorts_hierarchy_dic[sort]
 				sorts = [v for v in values if '#' in v]
-				functions = [v for v in values if '#' not in v and v in relevant_sorts_hierarchy_dic.keys()]
-				constants = [v for v in values if '#' not in v and v not in relevant_sorts_hierarchy_dic.keys()]
+				functions = [v for v in values if '#' not in v and v in relevant_refined_sorts_hierarchy_dic.keys()]
+				constants = [v for v in values if '#' not in v and v not in relevant_refined_sorts_hierarchy_dic.keys()]
 				string_split = []
 				if constants:
-					string_split.append('{' + ','.join(constants) + '}')
+					string_split.append('{' + ','.join(sorted(constants)) + '}')
 				if functions:
 					functions_strings = []
 					for f in functions:
-						functions_strings.append(f+'('+ ','.join(relevant_sorts_hierarchy_dic[f]) +')')
+						functions_strings.append(f+'('+ ','.join(relevant_refined_sorts_hierarchy_dic[f]) +')')
 					string_split.append(' + '.join(functions_strings))
 				if sorts:
 					string_split.append(' + '.join(sorts))
 				line = sort + ' = ' + ' + '.join(string_split) + '.'
 				lines.append(line)
-
 		return lines
 
 
@@ -211,7 +240,7 @@ class DomainInfo():
 			dic_action_parameters_conditions[k] = (dic_action_parameters[k],dic_action_conditions[k])
 		return dic_action_parameters_conditions
 
-	# this functions takes two strings A and B  and a list of conditions of the form 'holds(loc(R,B)' as input
+	# this functions takes two strings A and B  and a list of conditions of the form 'holds(loc(R,A)' as input
 	# it replaces the paramter A with the value B in each fluents and returns the
 	# new list of fluents.
 	def replace_parameter_in_conditions_list(self,A,B,conditions_list):
@@ -230,7 +259,8 @@ class DomainInfo():
 			conditions_list[i] = condition_head+fluent_name + '('+ ','.join(fluent_parameters)+')'
 		return conditions_list
 
-	# it returns the list of paramterers in the fluent given as input.
+	# it returns the list of paramterers in the fluent of the form in_hand(rob1,book1) or loc(book2,kitchen) given as input.
+	# in those examples it will return ['rob1','book1'] or ['book2','kitchen']
 	def get_parameters(self,fluent):
 		return fluent[fluent.find('(')+1:fluent.find(')')].split(',')
 
@@ -238,7 +268,7 @@ class DomainInfo():
 	def get_fluent(self,holds_string):
 		return holds_string[holds_string.find('(')+1:holds_string.find(')')+1]
 
-	#this function takes a string 'fluent', a string 'value' and an integer 'index' as input.
+	# this function takes a string 'fluent', a string 'value' and an integer 'index' as input.
 	# it then replaces the parameter of 'fluent' positioned in 'index' given as input
 	# with the 'value' given as input. It returns the fluent with the new value as the paramter with the given index.
 	def add_flunet_value_in_index(self,fluent,value,index):
@@ -253,7 +283,7 @@ class DomainInfo():
 	# is not an object that can be found in the set of all_obj_consts in the domain.
 	def not_grounded_indexes(self,fluent):
 		parameters = self.get_parameters(fluent)
-		return [i for i in range(len(parameters)) if parameters[i] not in self.constants]
+		return [i for i in range(len(parameters)) if parameters[i] not in self.refined_constants]
 
  	# this flunction returns a boolean indicating if all the paramters of the fluent given as input
 	# are elements of the set of all_obj_consts of the domain.
@@ -261,27 +291,31 @@ class DomainInfo():
 		fluent = condition
 		if 'holds' in condition: fluent = self.get_fluent(condition)
 		parameters = self.get_parameters(fluent)
-		return [o for o in parameters if o not in self.constants] == []
+		return [o for o in parameters if o not in self.refined_constants] == []
 
 
 	# this function gets a string fluent as input and it will return a list of all
 	# possible groundings of this fluent. Note that in the input fluent there may be
 	# already some grounded parameters which will not be changed. Only the variables
 	# will be replace with possible values and returned.
-	def all_possible_groundings(self, conditions_list):
+	def all_possible_groundings(self, conditions_list,abstraction_level):
 		grounded_conditions_set = Set([c for c in conditions_list if self.is_fully_grounded(self.get_fluent(c))])
 		not_grounded_conditions_list = [c for c in conditions_list if c not in grounded_conditions_set]
 		for condition in not_grounded_conditions_list:
 			condition_head = condition[:condition.find('(')+1]
 			fluent = self.get_fluent(condition)
 			parameters = self.get_parameters(fluent)
-			indexes = self.not_grounded_indexes(fluent)
-			for value in self.constants:
-				new_condition =  condition_head + self.add_flunet_value_in_index(fluent,value,indexes[0])
+			first_index = self.not_grounded_indexes(fluent)[0]
+			parameter_abstract_sort = self.get_paramter_sorts(fluent,abstraction_level)[first_index]
+			my_constants = self.get_all_constant_subsorts(parameter_abstract_sort,abstraction_level)
+
+			for value in my_constants:
+				new_condition =  condition_head + self.add_flunet_value_in_index(fluent,value,first_index)
 				if self.is_fully_grounded(new_condition):
 					grounded_conditions_set.add(new_condition)
 				else: grounded_conditions_set.update(self.all_possible_groundings([new_condition]))
 		return grounded_conditions_set
+
 
 	#this functions gets a list of 'holds' strings (not '-holds' strings) and retruns the dictionary state according
 	def dic_answerToState(self,answer_split):
@@ -304,7 +338,7 @@ class DomainInfo():
 		if 'in_hand(rob1' in dic_state: object_in_hand = dic_state['in_hand(rob1']
 		# if we do not have an object in hand, we include the coarse -holds statements.
 
-		for object in self.sorts_hierarchy_dic['#coarse_object']:
+		for object in self.refined_sorts_hierarchy_dic['#coarse_object']:
 			if object != object_in_hand: holds_set.add('-holds(in_hand(rob1,'+ object+'),'+str(step)+').')
 		return holds_set
 
@@ -318,10 +352,13 @@ class DomainInfo():
 		object_in_hand = ''
 		if 'in_hand(rob1' in dic_state: object_in_hand = dic_state['in_hand(rob1']
 		# if we do not have an object in hand, we include the coarse -holds statements.
-		for object in self.sorts_hierarchy_dic['#coarse_object']:
+		for object in self.refined_sorts_hierarchy_dic['#coarse_object']:
 			if object != object_in_hand: holds_set.add('-holds(coarse_in_hand(rob1,'+ object+'),'+str(step)+').')
 		return holds_set
 
+	def fluentToHoldsString(self,fluent,step):
+		if fluent == '': return fluent
+		return 'holds(' + fluent + ',' + str(step) + ').'
 
 	def dic_refinedStateToRefinedHoldsSet(self,dic_state,step):
 		holds_set = Set()
@@ -331,7 +368,7 @@ class DomainInfo():
 		# if we have an object in hand, we return the set of statements.
 		if 'coarse_in_hand(rob1' in dic_state or 'in_hand(rob1' in dic_state: return holds_set
 		# if we do not have an object in hand, we include all the coarse -holds statements.
-		for object in self.sorts_hierarchy_dic['#coarse_object']:
+		for object in self.refined_sorts_hierarchy_dic['#coarse_object']:
 			holds_set.add('-holds(coarse_in_hand(rob1,'+ object+'),'+str(step)+').')
 		return holds_set
 
@@ -344,39 +381,165 @@ class DomainInfo():
 
 	# This function takes as input a statement of the form "directly_observed(rob1,#fluent,#boolean)"
 	# and a integer step, and returns and trainsformes it into a statement of the form "obs(#fluent,#boolean,#step)."
-	def directObservationToRefinedObs(self,directObservation,step):
+	def directObservationToObs(self,directObservation,step):
 		directObservation_formatted = directObservation.replace('directly_observed(rob1,','obs(')
 		obs = directObservation_formatted[:-1]+','+str(step)+').'
 		return obs
 
 
-	# This function takes a set of constant from the domain as a set of strings and returns an ordered dictionary
-	# that contains only the sorts hierarchy (based on the original sorts hierarchy of the domain) that are relevant to the set of constants
-	# that have been given as input.
-	def infer_relevant_sorts_hierarchy_dic(self, constants):
-		relevant_constants_sorts_fluents_actions = Set(constants)
+	# this fuctions gets a sort as string as a paramter, for example '#thing', and returns
+	# all basic sorts that belong to the set of #thing which are, in this case, 'rob1', 'book1' and 'book2'.
+	def get_all_constant_subsorts(self,sort,abstraction):
+		if abstraction == 'refined':
+			my_constants = self.refined_constants
+			my_dic = self.refined_sorts_hierarchy_dic
+		elif abstraction == 'abstract':
+			my_constants = self.abstract_constants
+			my_dic = self.abstract_sorts_hierarchy_dic
+		if sort in my_constants: return sort
+		my_subsorts = my_dic[sort]
+		my_constant_subsorts = my_subsorts & my_constants
+		not_constant_sorts = my_subsorts - my_constant_subsorts
+		for s in not_constant_sorts: my_constant_subsorts.update(self.get_all_constant_subsorts(s,abstraction))
+		return my_constant_subsorts
 
+	def get_all_function_subsorts(self,sort,abstraction):
+		print '\n\nThese is my sort: ' + sort
+
+		if abstraction == 'refined':
+			my_functions = self.refined_functions
+			my_dic = self.refined_sorts_hierarchy_dic
+		elif abstraction == 'abstract':
+			my_functions = self.abstract_functions
+			my_dic = self.abstract_sorts_hierarchy_dic
+		if sort in my_functions: return {sort}
+		print 'sort is not function so I will dig in '
+		all_objects = {sort}
+		for s in my_dic[sort]:
+			print 'a subsort of my object is: ' + s
+			all_objects.update(self.get_all_function_subsorts(s,abstraction))
+		return all_objects
+
+
+	#this function gets a function name as input and returns a list with the name of the sorts of its variables.
+	def get_paramter_sorts(self, function, abstraction_level):
+		function_name = (function.split('('))[0]
+		if abstraction_level == 'refined': return self.refined_sorts_hierarchy_dic[function_name]
+		elif abstraction_level == 'abstract': return self.abstract_sorts_hierarchy_dic[function_name]
+		return [Set(self.refined_sorts_hierarchy_dic[function_name])|Set(self.abstract_sorts_hierarchy_dic[function_name])]
+
+
+	# This function takes a set of constant from the domain as a set of strings and returns an ordered dictionary
+	# that contains only the refined sorts hierarchy (based on the original refined sorts hierarchy of the domain) that are relevant to the set of refined constants
+	# that have been given as input.
+	def infer_relevant_refined_sorts_hierarchy_dic(self, constants):
+		return self.infer_relevant_refined_sorts_hierarchy_dic_form_given_hierarchy_dic(constants, self.refined_sorts_hierarchy_dic)
+
+
+	def remove_objects_from_dictionary(self,dictionary,objects):
+		pprint(dictionary.items())
+		newDictionary = dictionary.copy()
+		for o in objects:
+			if o in newDictionary.keys(): del newDictionary[o]
+			else:
+				for key in newDictionary.keys():
+					if o in newDictionary[key]: del newDictionary[key][o]
+
+	# This function takes a set of constant from the domain as a set of strings and returns an ordered dictionary
+	# that contains only the refined sorts hierarchy (based on the given refined sorts hierarchy) that are relevant to the set of refined constants
+	# that have been given as input.
+	def infer_relevant_refined_sorts_hierarchy_dic_form_given_hierarchy_dic(self, constants, sorts_hierarchy_dic):
+		relevant_constants_sorts_fluents_actions = Set(constants)
 		#keep on adding relevant basic_sorts, functions and function_sorts until
 		#no more can be added to the set
 		elementsAdded = True
 		while elementsAdded:
 			adding_again = Set()
-			for sort in self.sorts_hierarchy_dic.keys():
+			for sort in sorts_hierarchy_dic.keys():
 				if '#' in sort:
-					if len(Set(self.sorts_hierarchy_dic[sort]).intersection(relevant_constants_sorts_fluents_actions)) > 0: adding_again.add(sort)
+					if len(Set(sorts_hierarchy_dic[sort]).intersection(relevant_constants_sorts_fluents_actions)) > 0: adding_again.add(sort)
 				else: #it is a function and therefore all values on the dictionary must be part of the set of relevant relevant_constants_sorts_fluents_actions
-					if Set(self.sorts_hierarchy_dic[sort]).issubset(relevant_constants_sorts_fluents_actions): adding_again.add(sort)
+					if Set(sorts_hierarchy_dic[sort]).issubset(relevant_constants_sorts_fluents_actions): adding_again.add(sort)
 			length_before = len(relevant_constants_sorts_fluents_actions)
 			relevant_constants_sorts_fluents_actions.update(adding_again)
 			length_after = len(relevant_constants_sorts_fluents_actions)
 			elementsAdded = length_before!=length_after
 
-		relevant_sorts_hierarchy_dic = OrderedDict()
-		for sort in self.sorts_hierarchy_dic.keys():
+		relevant_refined_sorts_hierarchy_dic = OrderedDict()
+		for sort in sorts_hierarchy_dic.keys():
 			if sort in relevant_constants_sorts_fluents_actions:
-				relevant_sorts_hierarchy_dic[sort] = [x for x in self.sorts_hierarchy_dic[sort] if x in relevant_constants_sorts_fluents_actions]
+				relevant_refined_sorts_hierarchy_dic[sort] = [x for x in sorts_hierarchy_dic[sort] if x in relevant_constants_sorts_fluents_actions]
+		return relevant_refined_sorts_hierarchy_dic
 
-		return relevant_sorts_hierarchy_dic
+
+
+	def add_more_objects_to_sorts_hierarchy_dic(self, sorts_hierarchy_dic, my_objects):
+		import copy
+		new_hierarchy_dic = copy.deepcopy(sorts_hierarchy_dic)
+		objects = my_objects.copy()
+		#add supersorts
+		while any([self.supersort(o,'refined') not in objects and self.supersort(o,'refined')!=None for o in objects]):
+			objects.update(Set([self.supersort(o,'refined') for o in objects if self.supersort(o,'refined') not in objects]))
+
+		for object in objects:
+			# add the supersort of my object
+			supersort = self.supersort(object,'refined')
+			if not supersort: continue
+			elif supersort in new_hierarchy_dic.keys():
+				if object not in new_hierarchy_dic[supersort]:
+					new_hierarchy_dic[supersort].append(object)
+			elif supersort not in new_hierarchy_dic.keys():
+				new_hierarchy_dic[supersort] = [object]
+			#if the object is a function, make sure it is a key of the new dictionary with its original values
+			if object in self.refined_functions and object not in new_hierarchy_dic.keys():
+				new_hierarchy_dic[object] = self.refined_sorts_hierarchy_dic[object]
+
+		return new_hierarchy_dic
+
+	#this functions orderes the dictionary given as first parameter following the same keys order
+	#as the second dictionary
+	def order_first_dictionary(self,dictionary_to_order, ordered_dictionary):
+		common_ordered_keys = [k for k in ordered_dictionary.keys() if k in dictionary_to_order.keys()]
+		for key in common_ordered_keys:
+			dictionary_to_order[key] = dictionary_to_order.pop(key)
+
+
+
+	def supersort(self,object,abstraction):
+		if abstraction == 'refined': my_dic = self.refined_sorts_hierarchy_dic
+		elif abstraction == 'abstract': my_dic = self.abstract_sorts_hierarchy_dic
+		for sort, objectList in my_dic.items():
+			if object in objectList and '#' in sort: return sort
+
+	# This function takes a set of constant from the domain as a set of strings and returns an ordered dictionary
+	# that contains only the abstract sorts hierarchy (based on the original abstract sorts hierarchy of the domain) that are relevant to the set of refined constants
+	# that have been given as input.
+	def infer_relevant_abstract_sorts_hierarchy_dic(self, constants):
+		relevant_constants_sorts_fluents_actions = Set(constants)
+		#keep on adding relevant basic_sorts, functions and function_sorts until
+		#no more can be added to the set
+		elementsAdded = True
+		while elementsAdded:
+			adding_again = Set()
+			for sort in self.abstract_sorts_hierarchy_dic.keys():
+				if '#' in sort:
+					if len(Set(self.abstract_sorts_hierarchy_dic[sort]).intersection(relevant_constants_sorts_fluents_actions)) > 0: adding_again.add(sort)
+				else: #it is a function and therefore all values on the dictionary must be part of the set of relevant relevant_constants_sorts_fluents_actions
+					if Set(self.abstract_sorts_hierarchy_dic[sort]).issubset(relevant_constants_sorts_fluents_actions): adding_again.add(sort)
+			length_before = len(relevant_constants_sorts_fluents_actions)
+			relevant_constants_sorts_fluents_actions.update(adding_again)
+			length_after = len(relevant_constants_sorts_fluents_actions)
+			elementsAdded = length_before!=length_after
+
+		relevant_abstract_sorts_hierarchy_dic = OrderedDict()
+		for sort in self.abstract_sorts_hierarchy_dic.keys():
+			if sort in relevant_constants_sorts_fluents_actions:
+				relevant_abstract_sorts_hierarchy_dic[sort] = [x for x in self.abstract_sorts_hierarchy_dic[sort] if x in relevant_constants_sorts_fluents_actions]
+
+		return relevant_abstract_sorts_hierarchy_dic
+
+
+
 
 	def create_pre_ASP_refined_world(self):
 		reader = open(self.file_name_pre_ASP_refined_domain, 'r')
@@ -470,7 +633,7 @@ class DomainInfo():
 	def init_files_markers(self):
 		self.history_marker = '%% HISTORY GOES HERE'
 		self.goal_marker = '%% GOAL GOES HERE'
-		self.constants_marker = '%% CONSTANTS GO HERE'
+		self.refined_constants_marker = '%% CONSTANTS GO HERE'
 		self.sorts_marker = '%% SORTS GO HERE'
 		self.attributes_marker = '%% ATTRIBUTES GO HERE'
 		self.causal_law_marker = '%% CAUSAL LAWS GO HERE'

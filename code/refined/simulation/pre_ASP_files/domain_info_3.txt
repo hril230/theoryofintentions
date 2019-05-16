@@ -1,19 +1,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Abstract Sorts
-#room = {library, kitchen, office1, office2}.
+#place = {library, kitchen, office1, office2}.
 #book = {book1, book2, book3}.
 #robot = {rob1}.
 #object = #book.
 #thing = #object + #robot.
 #boolean = {true, false}.
-#inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object).
+#inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
 #fluent = #inertial_fluent.
-#rob_action = move(#robot, #room) + pickup(#robot, #object) + put_down(#robot, #object).
-#exo_action = exo_move(#object,#room).
+#rob_action = move(#robot, #place) + pickup(#robot, #object) + put_down(#robot, #object).
+#exo_action = exo_move(#object,#place).
 #rob_action = #rob_action + #exo_action.
 %% End of Abstract Sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Abstract Attributes
 next_to(library, kitchen).
@@ -52,20 +52,30 @@ next_to(office1, office2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Refined Attributes
 next_to(c1, c2).
-next_to(c2, c3).
+next_to(c2, c4).
+next_to(c1, c3).
 next_to(c3, c4).
-next_to(c4, c5).
+
+next_to(c4, c7).
+
 next_to(c5, c6).
 next_to(c6, c7).
 next_to(c7, c8).
-next_to(c8, c9).
+next_to(c6, c8).
+
+next_to(c8, c10).
+
 next_to(c9, c10).
-next_to(c10, c11).
+next_to(c9, c11).
 next_to(c11, c12).
-next_to(c12, c13).
+next_to(c10, c12).
+
+next_to(c12, c14).
+
 next_to(c13, c14).
-next_to(c14, c15).
+next_to(c13, c15).
 next_to(c15, c16).
+next_to(c14, c16).
 
 comp(c1, library).
 comp(c2, library).
@@ -96,6 +106,7 @@ comp(ref3_book3, book3).
 
 %% End of Refined Attributes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-max_number_steps_refined_planning = 16
+% 5*n-3 where n is number of cells
+% 2*m where m is number of rooms. This number only works if the goal includes only one fluent. If it includes x fluents we need to multiply this number by x.
+max_number_steps_refined_planning = 17
 max_number_steps_ToI_planning = 8
