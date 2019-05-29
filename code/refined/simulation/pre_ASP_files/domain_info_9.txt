@@ -1,8 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Abstract Sorts
 #place = {library, kitchen, office1, office2, storage_room}.
-#object = {book1, book2, book3, book4, cup1,cup2,cup3,cup4, pen1, pen2, pen3, pen4,noteBook1, noteBook2, noteBook3, noteBook4, plate1,plate2,plate3,plate4, markerPen1, markerPen2, markerPen3, markerPen4}.
-
+#object = {book1, book2, book3, book4, cup1,cup2,cup3,cup4, pen1, pen2, pen3, pen4}.
 #robot = {rob1}.
 #thing = #object + #robot.
 #boolean = {true, false}.
@@ -26,9 +25,9 @@ next_to(office2, storage_room).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Refined Sorts
 #coarse_place = {library,kitchen,office1,office2,storage_room}.
-#coarse_object = {book1,book2,book3,book4,cup1,cup2,cup3,cup4, pen1, pen2, pen3, pen4,noteBook1,noteBook2,noteBook3,noteBook4,plate1,plate2,plate3,plate4, markerPen1, markerPen2, markerPen3, markerPen4}.
-#object = {ref1_book1,ref2_book1,ref1_book2,ref2_book2, ref1_book3,ref2_book3, ref1_book4,ref2_book4, ref1_cup1,ref2_cup1,ref1_cup2,ref2_cup2,ref1_cup3,ref2_cup3, ref1_cup4,ref2_cup4, ref1_pen1, ref1_pen2,ref1_pen3, ref1_pen4, ref1_noteBook1,ref2_noteBook1,ref1_noteBook2,ref2_noteBook2, ref1_noteBook3,ref2_noteBook3, ref1_noteBook4,ref2_noteBook4, ref1_plate1,ref2_plate1,ref1_plate2,ref2_plate2,ref1_plate3,ref2_plate3, ref1_plate4,ref2_plate4, ref1_markerPen1, ref1_markerPen2,ref1_markerPen3, ref1_markerPen4}.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25,c26,c27,c28,c29,c30,c31,c32,c33,c34,c35,c36,c37,c38,c39,c40,c41,c42,c42,c43,c44,c45,c46,c47,c48,c49,c50, c51, c52, c53, c54, c55, c56, c57, c58, c59, c60, c61, c62, c63, c64, c65, c66, c67, c68, c69, c70, c71, c72, c73, c74, c75,c76,c77,c78,c79,c80}.
+#coarse_object = {book1,book2,book3,book4,cup1,cup2,cup3,cup4, pen1, pen2, pen3, pen4}.
+#object = {ref1_book1,ref2_book1,ref1_book2,ref2_book2, ref1_book3,ref2_book3, ref1_book4,ref2_book4, ref1_cup1,ref2_cup1,ref1_cup2,ref2_cup2,ref1_cup3,ref2_cup3, ref1_cup4,ref2_cup4, ref1_pen1, ref1_pen2,ref1_pen3, ref1_pen4}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25,c26,c27,c28,c29,c30,c31,c32,c33,c34,c35,c36,c37,c38,c39,c40,c41,c42,c42,c43,c44,c45,c46,c47,c48,c49,c50, c51, c52, c53, c54, c55, c56, c57, c58, c59, c60, c61, c62, c63, c64, c65, c66, c67, c68, c69, c70, c71, c72, c73, c74, c75,c76,c77,c78,c79,c80,c81,c82,c83,c84,c85,c86,c87,c88,c89,c90,c91,c92,c92,c93,c94,c95,c96,c97,c98,c99,c100}.
 
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
@@ -56,149 +55,102 @@ next_to(office2, storage_room).
 next_to(c1, c2).
 next_to(c2, c3).
 next_to(c3, c4).
+next_to(c4, c5).
 next_to(c5, c6).
 next_to(c6, c7).
 next_to(c7, c8).
+next_to(c8, c9).
 next_to(c9, c10).
 next_to(c10, c11).
 next_to(c11, c12).
+next_to(c12, c13).
 next_to(c13, c14).
 next_to(c14, c15).
 next_to(c15, c16).
-
-next_to(c1, c5).
-next_to(c2, c6).
-next_to(c3, c7).
-next_to(c4, c8).
-next_to(c9, c5).
-next_to(c10, c6).
-next_to(c11, c7).
-next_to(c12, c8).
-next_to(c9, c13).
-next_to(c10, c14).
-next_to(c11, c15).
-next_to(c12, c16).
-
-next_to(c16, c29).
-
-
+next_to(c16, c17).
 next_to(c17, c18).
 next_to(c18, c19).
 next_to(c19, c20).
+next_to(c20, c21).
 next_to(c21, c22).
 next_to(c22, c23).
 next_to(c23, c24).
+next_to(c24, c25).
 next_to(c25, c26).
 next_to(c26, c27).
 next_to(c27, c28).
+next_to(c28, c29).
 next_to(c29, c30).
 next_to(c30, c31).
 next_to(c31, c32).
-
-next_to(c21, c17).
-next_to(c22, c18).
-next_to(c23, c19).
-next_to(c24, c20).
-next_to(c21, c25).
-next_to(c22, c26).
-next_to(c23, c27).
-next_to(c24, c28).
-next_to(c25, c29).
-next_to(c26, c30).
-next_to(c27, c31).
-next_to(c28, c32).
-
-next_to(c32, c45).
-
-
-
+next_to(c32, c33).
 next_to(c33, c34).
 next_to(c34, c35).
 next_to(c35, c36).
+next_to(c36, c37).
 next_to(c37, c38).
 next_to(c38, c39).
 next_to(c39, c40).
+next_to(c40, c41).
 next_to(c41, c42).
 next_to(c42, c43).
 next_to(c43, c44).
+next_to(c44, c45).
 next_to(c45, c46).
 next_to(c46, c47).
 next_to(c47, c48).
-
-next_to(c33, c37).
-next_to(c34, c38).
-next_to(c35, c39).
-next_to(c36, c40).
-next_to(c37, c41).
-next_to(c38, c42).
-next_to(c39, c43).
-next_to(c40, c44).
-next_to(c45, c41).
-next_to(c46, c42).
-next_to(c47, c43).
-next_to(c48, c44).
-
-
-next_to(c48, c61).
-
-
+next_to(c48, c49).
 next_to(c49, c50).
 next_to(c50, c51).
 next_to(c51, c52).
+next_to(c52, c53).
 next_to(c53, c54).
 next_to(c54, c55).
 next_to(c55, c56).
+next_to(c56, c57).
 next_to(c57, c58).
 next_to(c58, c59).
 next_to(c59, c60).
+next_to(c60, c61).
 next_to(c61, c62).
 next_to(c62, c63).
 next_to(c63, c64).
-
-next_to(c49, c53).
-next_to(c50, c54).
-next_to(c51, c55).
-next_to(c52, c56).
-next_to(c57, c53).
-next_to(c58, c54).
-next_to(c59, c55).
-next_to(c60, c56).
-next_to(c57, c61).
-next_to(c58, c62).
-next_to(c59, c63).
-next_to(c60, c64).
-
-next_to(c64, c77).
-
-
+next_to(c64, c65).
 next_to(c65, c66).
 next_to(c66, c67).
 next_to(c67, c68).
+next_to(c68, c69).
 next_to(c69, c70).
 next_to(c70, c71).
 next_to(c71, c72).
+next_to(c72, c73).
 next_to(c73, c74).
 next_to(c74, c75).
 next_to(c75, c76).
+next_to(c76, c77).
 next_to(c77, c78).
 next_to(c78, c79).
 next_to(c79, c80).
-
-next_to(c65, c69).
-next_to(c66, c70).
-next_to(c67, c71).
-next_to(c68, c72).
-next_to(c73, c69).
-next_to(c74, c70).
-next_to(c75, c71).
-next_to(c76, c72).
-next_to(c73, c77).
-next_to(c74, c78).
-next_to(c75, c79).
-next_to(c76, c80).
-
-
-
+next_to(c80, c81).
+next_to(c81, c82).
+next_to(c82, c83).
+next_to(c83, c84).
+next_to(c84, c85).
+next_to(c85, c86).
+next_to(c86, c87).
+next_to(c87, c88).
+next_to(c88, c89).
+next_to(c89, c90).
+next_to(c90, c91).
+next_to(c91, c92).
+next_to(c92, c93).
+next_to(c93, c94).
+next_to(c94, c95).
+next_to(c95, c96).
+next_to(c96, c97).
+next_to(c97, c98).
+next_to(c98, c99).
+next_to(c99, c100).
 
 
 comp(c1, library).
@@ -217,10 +169,10 @@ comp(c13, library).
 comp(c14, library).
 comp(c15, library).
 comp(c16, library).
-comp(c17, kitchen).
-comp(c18, kitchen).
-comp(c19, kitchen).
-comp(c20, kitchen).
+comp(c17, library).
+comp(c18, library).
+comp(c19, library).
+comp(c20, library).
 comp(c21, kitchen).
 comp(c22, kitchen).
 comp(c23, kitchen).
@@ -233,14 +185,14 @@ comp(c29, kitchen).
 comp(c30, kitchen).
 comp(c31, kitchen).
 comp(c32, kitchen).
-comp(c33, office1).
-comp(c34, office1).
-comp(c35, office1).
-comp(c36, office1).
-comp(c37, office1).
-comp(c38, office1).
-comp(c39, office1).
-comp(c40, office1).
+comp(c33, kitchen).
+comp(c34, kitchen).
+comp(c35, kitchen).
+comp(c36, kitchen).
+comp(c37, kitchen).
+comp(c38, kitchen).
+comp(c39, kitchen).
+comp(c40, kitchen).
 comp(c41, office1).
 comp(c42, office1).
 comp(c43, office1).
@@ -249,38 +201,58 @@ comp(c45, office1).
 comp(c46, office1).
 comp(c47, office1).
 comp(c48, office1).
-comp(c49, office2).
-comp(c50, office2).
-comp(c51, office2).
-comp(c52, office2).
-comp(c53, office2).
-comp(c54, office2).
-comp(c55, office2).
-comp(c56, office2).
-comp(c57, office2).
-comp(c58, office2).
-comp(c59, office2).
-comp(c60, office2).
+comp(c49, office1).
+comp(c50, office1).
+comp(c51, office1).
+comp(c52, office1).
+comp(c53, office1).
+comp(c54, office1).
+comp(c55, office1).
+comp(c56, office1).
+comp(c57, office1).
+comp(c58, office1).
+comp(c59, office1).
+comp(c60, office1).
 comp(c61, office2).
 comp(c62, office2).
 comp(c63, office2).
 comp(c64, office2).
-comp(c65, storage_room).
-comp(c66, storage_room).
-comp(c67, storage_room).
-comp(c68, storage_room).
-comp(c69, storage_room).
-comp(c70, storage_room).
-comp(c71, storage_room).
-comp(c72, storage_room).
-comp(c73, storage_room).
-comp(c74, storage_room).
-comp(c75, storage_room).
-comp(c76, storage_room).
-comp(c77, storage_room).
-comp(c78, storage_room).
-comp(c79, storage_room).
-comp(c80, storage_room).
+comp(c65, office2).
+comp(c66, office2).
+comp(c67, office2).
+comp(c68, office2).
+comp(c69, office2).
+comp(c70, office2).
+comp(c71, office2).
+comp(c72, office2).
+comp(c73, office2).
+comp(c74, office2).
+comp(c75, office2).
+comp(c76, office2).
+comp(c77, office2).
+comp(c78, office2).
+comp(c79, office2).
+comp(c80, office2).
+comp(c81, storage_room).
+comp(c82, storage_room).
+comp(c83, storage_room).
+comp(c84, storage_room).
+comp(c85, storage_room).
+comp(c86, storage_room).
+comp(c87, storage_room).
+comp(c88, storage_room).
+comp(c89, storage_room).
+comp(c90, storage_room).
+comp(c91, storage_room).
+comp(c92, storage_room).
+comp(c93, storage_room).
+comp(c94, storage_room).
+comp(c95, storage_room).
+comp(c96, storage_room).
+comp(c97, storage_room).
+comp(c98, storage_room).
+comp(c99, storage_room).
+comp(c100, storage_room).
 
 comp(ref1_book1, book1).
 comp(ref2_book1, book1).
@@ -291,15 +263,6 @@ comp(ref2_book3, book3).
 comp(ref1_book4, book4).
 comp(ref2_book4, book4).
 
-comp(ref1_noteBook1, noteBook1).
-comp(ref2_noteBook1, noteBook1).
-comp(ref1_noteBook2, noteBook2).
-comp(ref2_noteBook2, noteBook2).
-comp(ref1_noteBook3, noteBook3).
-comp(ref2_noteBook3, noteBook3).
-comp(ref1_noteBook4, noteBook4).
-comp(ref2_noteBook4, noteBook4).
-
 comp(ref1_cup1, cup1).
 comp(ref2_cup1, cup1).
 comp(ref1_cup2, cup2).
@@ -309,27 +272,14 @@ comp(ref2_cup3, cup3).
 comp(ref1_cup4, cup4).
 comp(ref2_cup4, cup4).
 
-comp(ref1_plate1, plate1).
-comp(ref2_plate1, plate1).
-comp(ref1_plate2, plate2).
-comp(ref2_plate2, plate2).
-comp(ref1_plate3, plate3).
-comp(ref2_plate3, plate3).
-comp(ref1_plate4, plate4).
-comp(ref2_plate4, plate4).
-
 comp(ref1_pen1, pen1).
 comp(ref1_pen2, pen2).
 comp(ref1_pen3, pen3).
 comp(ref1_pen4, pen4).
 
-comp(ref1_markerPen1, markerPen1).
-comp(ref1_markerPen2, markerPen2).
-comp(ref1_markerPen3, markerPen3).
-comp(ref1_markerPen4, markerPen4).
 %% End of Refined Attributes
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 5*n-3 where n is number of cells
+% 5*n-4 where n is number of cells
 % 2*m where m is number of rooms. This number only works if the goal includes only one fluent. If it includes x fluents we need to multiply this number by x.
-max_number_steps_refined_planning = 77
+max_number_steps_refined_planning = 96
 max_number_steps_ToI_planning = 10

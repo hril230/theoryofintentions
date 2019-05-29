@@ -10,7 +10,7 @@ sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
 
-#object = {book1, book2, book3, book4}.
+#object = {pen3, noteBook1, noteBook2, noteBook3, noteBook4, book1, book2, book3, book4, cup1, cup2, cup3, cup4, pen2, pen4, markerPen3, markerPen2, pen1, markerPen1, markerPen4, plate2, plate3, plate1, plate4}.
 #place = {kitchen, library, office2, office1, storage_room}.
 #robot = {rob1}.
 #thing = #object + #robot.
@@ -152,16 +152,58 @@ next_to(office2, storage_room).
 %%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%
-holds(in_hand(rob1,book3),0).
-holds(loc(book1,kitchen),0).
--holds(in_hand(rob1,book1),0).
+holds(loc(noteBook1,office1),0).
+-holds(in_hand(rob1,cup3),0).
+-holds(in_hand(rob1,plate3),0).
 -holds(in_hand(rob1,book4),0).
-holds(loc(book3,office1),0).
-holds(loc(rob1,office1),0).
+holds(loc(pen1,storage_room),0).
+holds(loc(book4,office2),0).
+holds(loc(cup4,kitchen),0).
 holds(loc(book2,office1),0).
-holds(loc(book4,kitchen),0).
+holds(loc(plate2,office2),0).
+-holds(in_hand(rob1,plate4),0).
 -holds(in_hand(rob1,book2),0).
-hpd(move(rob1,office2), 0).
+holds(loc(cup1,office1),0).
+holds(loc(noteBook4,office2),0).
+holds(loc(plate4,office2),0).
+holds(loc(markerPen3,storage_room),0).
+holds(loc(pen3,storage_room),0).
+holds(loc(book3,kitchen),0).
+holds(loc(plate1,office2),0).
+holds(loc(markerPen4,kitchen),0).
+-holds(in_hand(rob1,cup1),0).
+holds(loc(rob1,library),0).
+holds(loc(plate3,office1),0).
+-holds(in_hand(rob1,noteBook3),0).
+holds(loc(cup2,kitchen),0).
+holds(in_hand(rob1,markerPen2),0).
+-holds(in_hand(rob1,noteBook4),0).
+-holds(in_hand(rob1,pen1),0).
+-holds(in_hand(rob1,plate1),0).
+holds(loc(markerPen2,library),0).
+-holds(in_hand(rob1,markerPen3),0).
+-holds(in_hand(rob1,cup4),0).
+-holds(in_hand(rob1,book3),0).
+-holds(in_hand(rob1,pen3),0).
+-holds(in_hand(rob1,pen2),0).
+-holds(in_hand(rob1,markerPen4),0).
+-holds(in_hand(rob1,cup2),0).
+holds(loc(noteBook3,office1),0).
+-holds(in_hand(rob1,book1),0).
+-holds(in_hand(rob1,noteBook2),0).
+holds(loc(cup3,office1),0).
+-holds(in_hand(rob1,noteBook1),0).
+-holds(in_hand(rob1,plate2),0).
+holds(loc(pen2,office2),0).
+holds(loc(book1,office1),0).
+-holds(in_hand(rob1,pen4),0).
+holds(loc(pen4,office1),0).
+holds(loc(noteBook2,library),0).
+holds(loc(markerPen1,storage_room),0).
+-holds(in_hand(rob1,markerPen1),0).
+hpd(move(rob1,kitchen), 0).
+obs(loc(markerPen2,kitchen),true,1).
+obs(loc(rob1,kitchen),true,1).
 
 %%%%%%%%%%
 display

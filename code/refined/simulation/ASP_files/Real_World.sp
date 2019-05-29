@@ -5,9 +5,10 @@ sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
 #coarse_place = {library,kitchen,office1,office2,storage_room}.
-#coarse_object = {book1,book2,book3,book4}.
-#object = {ref1_book1,ref2_book1,ref3_book1,ref4_book1, ref1_book2,ref2_book2,ref3_book2,ref4_book2, ref1_book3,ref2_book3,ref3_book3,ref4_book3, ref1_book4,ref2_book4,ref3_book4,ref4_book4}.
-#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30}.
+#coarse_object = {book1,book2,book3,book4,cup1,cup2,cup3,cup4, pen1, pen2, pen3, pen4,noteBook1,noteBook2,noteBook3,noteBook4,plate1,plate2,plate3,plate4, markerPen1, markerPen2, markerPen3, markerPen4}.
+#object = {ref1_book1,ref2_book1,ref1_book2,ref2_book2, ref1_book3,ref2_book3, ref1_book4,ref2_book4, ref1_cup1,ref2_cup1,ref1_cup2,ref2_cup2,ref1_cup3,ref2_cup3, ref1_cup4,ref2_cup4, ref1_pen1, ref1_pen2,ref1_pen3, ref1_pen4, ref1_noteBook1,ref2_noteBook1,ref1_noteBook2,ref2_noteBook2, ref1_noteBook3,ref2_noteBook3, ref1_noteBook4,ref2_noteBook4, ref1_plate1,ref2_plate1,ref1_plate2,ref2_plate2,ref1_plate3,ref2_plate3, ref1_plate4,ref2_plate4, ref1_markerPen1, ref1_markerPen2,ref1_markerPen3, ref1_markerPen4}.
+#place = {c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25,c26,c27,c28,c29,c30,c31,c32,c33,c34,c35,c36,c37,c38,c39,c40,c41,c42,c42,c43,c44,c45,c46,c47,c48,c49,c50, c51, c52, c53, c54, c55, c56, c57, c58, c59, c60, c61, c62, c63, c64, c65, c66, c67, c68, c69, c70, c71, c72, c73, c74, c75,c76,c77,c78,c79,c80}.
+
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
@@ -186,51 +187,149 @@ occurs(A,I) :- hpd(A,I).
 %%%%%%%%%%%%%%%
 next_to(c1, c2).
 next_to(c2, c3).
-next_to(c4, c5).
+next_to(c3, c4).
 next_to(c5, c6).
-next_to(c1, c4).
-next_to(c2, c5).
-next_to(c3, c6).
-
-next_to(c6, c10).
-
+next_to(c6, c7).
 next_to(c7, c8).
-next_to(c8, c9).
+next_to(c9, c10).
 next_to(c10, c11).
 next_to(c11, c12).
-next_to(c7, c10).
-next_to(c8, c11).
-next_to(c9, c12).
-
-next_to(c12, c16).
-
 next_to(c13, c14).
 next_to(c14, c15).
-next_to(c16, c17).
+next_to(c15, c16).
+
+next_to(c1, c5).
+next_to(c2, c6).
+next_to(c3, c7).
+next_to(c4, c8).
+next_to(c9, c5).
+next_to(c10, c6).
+next_to(c11, c7).
+next_to(c12, c8).
+next_to(c9, c13).
+next_to(c10, c14).
+next_to(c11, c15).
+next_to(c12, c16).
+
+next_to(c16, c29).
+
+
 next_to(c17, c18).
-next_to(c13, c16).
-next_to(c14, c17).
-next_to(c15, c18).
-
-next_to(c18, c22).
-
+next_to(c18, c19).
 next_to(c19, c20).
-next_to(c20, c21).
+next_to(c21, c22).
 next_to(c22, c23).
 next_to(c23, c24).
-next_to(c19, c22).
-next_to(c20, c23).
-next_to(c21, c24).
-
-next_to(c24, c28).
-
 next_to(c25, c26).
-next_to(c2, c27).
-next_to(c28, c28).
+next_to(c26, c27).
+next_to(c27, c28).
 next_to(c29, c30).
-next_to(c25, c28).
-next_to(c26, c29).
-next_to(c27, c30).
+next_to(c30, c31).
+next_to(c31, c32).
+
+next_to(c21, c17).
+next_to(c22, c18).
+next_to(c23, c19).
+next_to(c24, c20).
+next_to(c21, c25).
+next_to(c22, c26).
+next_to(c23, c27).
+next_to(c24, c28).
+next_to(c25, c29).
+next_to(c26, c30).
+next_to(c27, c31).
+next_to(c28, c32).
+
+next_to(c32, c45).
+
+
+
+next_to(c33, c34).
+next_to(c34, c35).
+next_to(c35, c36).
+next_to(c37, c38).
+next_to(c38, c39).
+next_to(c39, c40).
+next_to(c41, c42).
+next_to(c42, c43).
+next_to(c43, c44).
+next_to(c45, c46).
+next_to(c46, c47).
+next_to(c47, c48).
+
+next_to(c33, c37).
+next_to(c34, c38).
+next_to(c35, c39).
+next_to(c36, c40).
+next_to(c37, c41).
+next_to(c38, c42).
+next_to(c39, c43).
+next_to(c40, c44).
+next_to(c45, c41).
+next_to(c46, c42).
+next_to(c47, c43).
+next_to(c48, c44).
+
+
+next_to(c48, c61).
+
+
+next_to(c49, c50).
+next_to(c50, c51).
+next_to(c51, c52).
+next_to(c53, c54).
+next_to(c54, c55).
+next_to(c55, c56).
+next_to(c57, c58).
+next_to(c58, c59).
+next_to(c59, c60).
+next_to(c61, c62).
+next_to(c62, c63).
+next_to(c63, c64).
+
+next_to(c49, c53).
+next_to(c50, c54).
+next_to(c51, c55).
+next_to(c52, c56).
+next_to(c57, c53).
+next_to(c58, c54).
+next_to(c59, c55).
+next_to(c60, c56).
+next_to(c57, c61).
+next_to(c58, c62).
+next_to(c59, c63).
+next_to(c60, c64).
+
+next_to(c64, c77).
+
+
+next_to(c65, c66).
+next_to(c66, c67).
+next_to(c67, c68).
+next_to(c69, c70).
+next_to(c70, c71).
+next_to(c71, c72).
+next_to(c73, c74).
+next_to(c74, c75).
+next_to(c75, c76).
+next_to(c77, c78).
+next_to(c78, c79).
+next_to(c79, c80).
+
+next_to(c65, c69).
+next_to(c66, c70).
+next_to(c67, c71).
+next_to(c68, c72).
+next_to(c73, c69).
+next_to(c74, c70).
+next_to(c75, c71).
+next_to(c76, c72).
+next_to(c73, c77).
+next_to(c74, c78).
+next_to(c75, c79).
+next_to(c76, c80).
+
+
 
 
 
@@ -240,48 +339,126 @@ comp(c3, library).
 comp(c4, library).
 comp(c5, library).
 comp(c6, library).
-comp(c7, kitchen).
-comp(c8, kitchen).
-comp(c9, kitchen).
-comp(c10, kitchen).
-comp(c11, kitchen).
-comp(c12, kitchen).
-comp(c13, office1).
-comp(c14, office1).
-comp(c15, office1).
-comp(c16, office1).
-comp(c17, office1).
-comp(c18, office1).
-comp(c19, office2).
-comp(c20, office2).
-comp(c21, office2).
-comp(c22, office2).
-comp(c23, office2).
-comp(c24, office2).
-comp(c25, storage_room).
-comp(c26, storage_room).
-comp(c27, storage_room).
-comp(c28, storage_room).
-comp(c29, storage_room).
-comp(c30, storage_room).
+comp(c7, library).
+comp(c8, library).
+comp(c9, library).
+comp(c10, library).
+comp(c11, library).
+comp(c12, library).
+comp(c13, library).
+comp(c14, library).
+comp(c15, library).
+comp(c16, library).
+comp(c17, kitchen).
+comp(c18, kitchen).
+comp(c19, kitchen).
+comp(c20, kitchen).
+comp(c21, kitchen).
+comp(c22, kitchen).
+comp(c23, kitchen).
+comp(c24, kitchen).
+comp(c25, kitchen).
+comp(c26, kitchen).
+comp(c27, kitchen).
+comp(c28, kitchen).
+comp(c29, kitchen).
+comp(c30, kitchen).
+comp(c31, kitchen).
+comp(c32, kitchen).
+comp(c33, office1).
+comp(c34, office1).
+comp(c35, office1).
+comp(c36, office1).
+comp(c37, office1).
+comp(c38, office1).
+comp(c39, office1).
+comp(c40, office1).
+comp(c41, office1).
+comp(c42, office1).
+comp(c43, office1).
+comp(c44, office1).
+comp(c45, office1).
+comp(c46, office1).
+comp(c47, office1).
+comp(c48, office1).
+comp(c49, office2).
+comp(c50, office2).
+comp(c51, office2).
+comp(c52, office2).
+comp(c53, office2).
+comp(c54, office2).
+comp(c55, office2).
+comp(c56, office2).
+comp(c57, office2).
+comp(c58, office2).
+comp(c59, office2).
+comp(c60, office2).
+comp(c61, office2).
+comp(c62, office2).
+comp(c63, office2).
+comp(c64, office2).
+comp(c65, storage_room).
+comp(c66, storage_room).
+comp(c67, storage_room).
+comp(c68, storage_room).
+comp(c69, storage_room).
+comp(c70, storage_room).
+comp(c71, storage_room).
+comp(c72, storage_room).
+comp(c73, storage_room).
+comp(c74, storage_room).
+comp(c75, storage_room).
+comp(c76, storage_room).
+comp(c77, storage_room).
+comp(c78, storage_room).
+comp(c79, storage_room).
+comp(c80, storage_room).
 
 comp(ref1_book1, book1).
 comp(ref2_book1, book1).
-comp(ref3_book1, book1).
-comp(ref4_book1, book1).
 comp(ref1_book2, book2).
 comp(ref2_book2, book2).
-comp(ref3_book2, book2).
-comp(ref4_book2, book2).
 comp(ref1_book3, book3).
 comp(ref2_book3, book3).
-comp(ref3_book3, book3).
-comp(ref4_book3, book3).
 comp(ref1_book4, book4).
 comp(ref2_book4, book4).
-comp(ref3_book4, book4).
-comp(ref4_book4, book4).
 
+comp(ref1_noteBook1, noteBook1).
+comp(ref2_noteBook1, noteBook1).
+comp(ref1_noteBook2, noteBook2).
+comp(ref2_noteBook2, noteBook2).
+comp(ref1_noteBook3, noteBook3).
+comp(ref2_noteBook3, noteBook3).
+comp(ref1_noteBook4, noteBook4).
+comp(ref2_noteBook4, noteBook4).
+
+comp(ref1_cup1, cup1).
+comp(ref2_cup1, cup1).
+comp(ref1_cup2, cup2).
+comp(ref2_cup2, cup2).
+comp(ref1_cup3, cup3).
+comp(ref2_cup3, cup3).
+comp(ref1_cup4, cup4).
+comp(ref2_cup4, cup4).
+
+comp(ref1_plate1, plate1).
+comp(ref2_plate1, plate1).
+comp(ref1_plate2, plate2).
+comp(ref2_plate2, plate2).
+comp(ref1_plate3, plate3).
+comp(ref2_plate3, plate3).
+comp(ref1_plate4, plate4).
+comp(ref2_plate4, plate4).
+
+comp(ref1_pen1, pen1).
+comp(ref1_pen2, pen2).
+comp(ref1_pen3, pen3).
+comp(ref1_pen4, pen4).
+
+comp(ref1_markerPen1, markerPen1).
+comp(ref1_markerPen2, markerPen2).
+comp(ref1_markerPen3, markerPen3).
+comp(ref1_markerPen4, markerPen4).
 
 %%%%%%%%%
 %% Goal:
@@ -292,24 +469,75 @@ comp(ref4_book4, book4).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(loc(ref4_book4,c12),0).
-holds(loc(ref1_book2,c16),0).
-holds(loc(ref4_book2,c16),0).
-holds(loc(ref1_book1,c11),0).
-holds(loc(ref4_book1,c11),0).
-holds(loc(ref3_book3,c18),0).
-holds(in_hand(rob1,ref2_book3),0).
-holds(loc(ref2_book1,c11),0).
-holds(loc(ref3_book4,c12),0).
-holds(loc(ref3_book1,c11),0).
-holds(loc(ref2_book2,c16),0).
-holds(loc(rob1,c18),0).
-holds(loc(ref4_book3,c18),0).
-holds(loc(ref1_book3,c18),0).
-holds(loc(ref1_book4,c12),0).
-holds(loc(ref3_book2,c16),0).
-holds(loc(ref2_book4,c12),0).
-holds(loc(ref2_book3,c18),0).
+holds(coarse_loc(pen3,storage_room),0).
+holds(loc(rob1,c16),0).
+holds(loc(ref1_noteBook3,c40),0).
+holds(loc(ref1_cup1,c36),0).
+holds(coarse_in_hand(rob1,markerPen2),0).
+holds(loc(ref2_noteBook1,c41),0).
+holds(loc(ref2_plate2,c61),0).
+holds(coarse_loc(book3,kitchen),0).
+holds(loc(ref1_cup3,c44),0).
+holds(loc(ref1_pen3,c74),0).
+holds(loc(ref1_noteBook1,c41),0).
+holds(coarse_loc(markerPen4,kitchen),0).
+holds(loc(ref2_plate3,c33),0).
+holds(loc(ref1_plate2,c61),0).
+holds(loc(ref2_cup4,c24),0).
+holds(loc(ref2_book1,c40),0).
+holds(coarse_loc(noteBook2,library),0).
+holds(loc(ref1_cup4,c24),0).
+holds(coarse_loc(plate4,office2),0).
+holds(loc(ref1_markerPen2,c16),0).
+holds(loc(ref2_noteBook4,c63),0).
+holds(loc(ref1_markerPen3,c70),0).
+holds(coarse_loc(noteBook3,office1),0).
+holds(loc(ref2_cup2,c26),0).
+holds(loc(ref2_noteBook2,c1),0).
+holds(loc(ref1_cup2,c26),0).
+holds(loc(ref1_book3,c28),0).
+holds(loc(ref1_markerPen4,c21),0).
+holds(loc(ref2_book2,c41),0).
+holds(coarse_loc(rob1,library),0).
+holds(loc(ref1_noteBook2,c1),0).
+holds(loc(ref1_noteBook4,c63),0).
+holds(coarse_loc(pen2,office2),0).
+holds(loc(ref2_book3,c28),0).
+holds(loc(ref1_plate4,c50),0).
+holds(coarse_loc(book2,office1),0).
+holds(loc(ref1_book1,c40),0).
+holds(coarse_loc(cup1,office1),0).
+holds(coarse_loc(plate1,office2),0).
+holds(coarse_loc(noteBook4,office2),0).
+holds(loc(ref2_cup1,c36),0).
+holds(loc(ref1_markerPen1,c80),0).
+holds(loc(ref1_book4,c56),0).
+holds(loc(ref1_pen1,c67),0).
+holds(loc(ref2_book4,c56),0).
+holds(loc(ref2_plate1,c50),0).
+holds(coarse_loc(book4,office2),0).
+holds(coarse_loc(pen4,office1),0).
+holds(coarse_loc(cup2,kitchen),0).
+holds(coarse_loc(markerPen3,storage_room),0).
+holds(loc(ref2_plate4,c50),0).
+holds(loc(ref1_pen4,c33),0).
+holds(loc(ref2_cup3,c44),0).
+holds(loc(ref2_noteBook3,c40),0).
+holds(coarse_loc(book1,office1),0).
+holds(coarse_loc(cup4,kitchen),0).
+holds(coarse_loc(markerPen2,library),0).
+holds(coarse_loc(pen1,storage_room),0).
+holds(in_hand(rob1,ref1_markerPen2),0).
+holds(coarse_loc(plate3,office1),0).
+holds(coarse_loc(cup3,office1),0).
+holds(coarse_loc(plate2,office2),0).
+holds(loc(ref1_book2,c41),0).
+holds(loc(ref1_pen2,c57),0).
+holds(loc(ref1_plate1,c50),0).
+holds(coarse_loc(noteBook1,office1),0).
+holds(coarse_loc(markerPen1,storage_room),0).
+holds(loc(ref1_plate3,c33),0).
+hpd(move(rob1,c29),0).
 
 %%%%%%%%%
 display

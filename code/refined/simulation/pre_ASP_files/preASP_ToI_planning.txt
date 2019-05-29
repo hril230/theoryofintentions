@@ -10,7 +10,7 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#object = {book1, book2, book3, book4}.
+#object = {pen3, noteBook1, noteBook2, noteBook3, noteBook4, book1, book2, book3, book4, cup1, cup2, cup3, cup4, pen2, pen4, markerPen3, markerPen2, pen1, markerPen1, markerPen4, plate2, plate3, plate1, plate4}.
 #place = {kitchen, library, office2, office1, storage_room}.
 #robot = {rob1}.
 #thing = #object + #robot.

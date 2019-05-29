@@ -1,13 +1,13 @@
-#const numSteps = 5.
+#const numSteps = 9.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#coarse_place = {office1,office2}.
-#coarse_object = {book3}.
-#object = {ref1_book3,ref2_book3,ref3_book3,ref4_book3}.
-#place = {c13,c14,c15,c16,c17,c18,c19,c20,c21,c22,c23,c24}.
+#coarse_place = {kitchen,library}.
+#coarse_object = {markerPen2}.
+#object = {ref1_markerPen2}.
+#place = {c1,c10,c11,c12,c13,c14,c15,c16,c17,c18,c19,c2,c20,c21,c22,c23,c24,c25,c26,c27,c28,c29,c3,c30,c31,c32,c4,c5,c6,c7,c8,c9}.
 #robot = {rob1}.
 #coarse_thing = #coarse_object + #robot.
 #thing = #object + #robot.
@@ -195,64 +195,132 @@ something_happened(I) :- occurs(A, I).
 %%%%%%%%%%%%%%%
 %% Attributes:
 %%%%%%%%%%%%%%%
-
-
-
-
+next_to(c1, c2).
+next_to(c2, c3).
+next_to(c3, c4).
+next_to(c5, c6).
+next_to(c6, c7).
+next_to(c7, c8).
+next_to(c9, c10).
+next_to(c10, c11).
+next_to(c11, c12).
 next_to(c13, c14).
 next_to(c14, c15).
-next_to(c16, c17).
+next_to(c15, c16).
+
+next_to(c1, c5).
+next_to(c2, c6).
+next_to(c3, c7).
+next_to(c4, c8).
+next_to(c9, c5).
+next_to(c10, c6).
+next_to(c11, c7).
+next_to(c12, c8).
+next_to(c9, c13).
+next_to(c10, c14).
+next_to(c11, c15).
+next_to(c12, c16).
+
+next_to(c16, c29).
+
+
 next_to(c17, c18).
-next_to(c13, c16).
-next_to(c14, c17).
-next_to(c15, c18).
-
-next_to(c18, c22).
-
+next_to(c18, c19).
 next_to(c19, c20).
-next_to(c20, c21).
+next_to(c21, c22).
 next_to(c22, c23).
 next_to(c23, c24).
-next_to(c19, c22).
-next_to(c20, c23).
-next_to(c21, c24).
+next_to(c25, c26).
+next_to(c26, c27).
+next_to(c27, c28).
+next_to(c29, c30).
+next_to(c30, c31).
+next_to(c31, c32).
+
+next_to(c21, c17).
+next_to(c22, c18).
+next_to(c23, c19).
+next_to(c24, c20).
+next_to(c21, c25).
+next_to(c22, c26).
+next_to(c23, c27).
+next_to(c24, c28).
+next_to(c25, c29).
+next_to(c26, c30).
+next_to(c27, c31).
+next_to(c28, c32).
 
 
 
 
 
-comp(c13, office1).
-comp(c14, office1).
-comp(c15, office1).
-comp(c16, office1).
-comp(c17, office1).
-comp(c18, office1).
-comp(c19, office2).
-comp(c20, office2).
-comp(c21, office2).
-comp(c22, office2).
-comp(c23, office2).
-comp(c24, office2).
 
-comp(ref1_book3, book3).
-comp(ref2_book3, book3).
-comp(ref3_book3, book3).
-comp(ref4_book3, book3).
 
+
+
+
+
+
+
+
+
+
+
+
+
+comp(c1, library).
+comp(c2, library).
+comp(c3, library).
+comp(c4, library).
+comp(c5, library).
+comp(c6, library).
+comp(c7, library).
+comp(c8, library).
+comp(c9, library).
+comp(c10, library).
+comp(c11, library).
+comp(c12, library).
+comp(c13, library).
+comp(c14, library).
+comp(c15, library).
+comp(c16, library).
+comp(c17, kitchen).
+comp(c18, kitchen).
+comp(c19, kitchen).
+comp(c20, kitchen).
+comp(c21, kitchen).
+comp(c22, kitchen).
+comp(c23, kitchen).
+comp(c24, kitchen).
+comp(c25, kitchen).
+comp(c26, kitchen).
+comp(c27, kitchen).
+comp(c28, kitchen).
+comp(c29, kitchen).
+comp(c30, kitchen).
+comp(c31, kitchen).
+comp(c32, kitchen).
+
+
+
+
+
+
+comp(ref1_markerPen2, markerPen2).
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-goal(I) :- holds(coarse_loc(book3,office2),I), holds(coarse_loc(rob1,office2),I), holds(coarse_in_hand(rob1,book3),I).
+goal(I) :- holds(coarse_loc(rob1,kitchen),I), holds(coarse_loc(markerPen2,kitchen),I), holds(coarse_in_hand(rob1,markerPen2),I).
 
 %%%%%%%%%%%%%%%%%
 %% History:
 %%%%%%%%%%%%%%%%%
-holds(loc(rob1,c18),0).
-holds(in_hand(rob1,ref1_book3),0).
-holds(coarse_loc(rob1,office1),0).
-holds(coarse_loc(book3,office1),0).
-holds(coarse_in_hand(rob1,book3),0).
+holds(loc(rob1,c6),0).
+holds(in_hand(rob1,ref1_markerPen2),0).
+holds(coarse_loc(rob1,library),0).
+holds(coarse_loc(markerPen2,library),0).
+holds(coarse_in_hand(rob1,markerPen2),0).
 
 %%%%%%%%%
 display

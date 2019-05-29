@@ -42,9 +42,10 @@ class ControllerToI():
 
 
 
-	def run(self,error, abstractPlanningTime, inferObsTime, diagnosingTime, execTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun):
+	def run(self, error, refinedPlanningTime, abstractPlanningTime, inferObsTime, diagnosingTime, execTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun):
 		self.completeRun = completeRun
 		self.abstractPlanningTime = abstractPlanningTime
+		self.refinedPlanningTime = refinedPlanningTime
 		self.inferObsTime = inferObsTime
 		self.diagnosingTime = diagnosingTime
 		self.execTime = execTime
@@ -251,12 +252,14 @@ class ControllerToI():
 		try:
 			answer_set = subprocess.check_output('java -jar '+self.domain_info.sparc_path + ' ' + myFile +' -A',shell=True)
 		except subprocess.CalledProcessError, e:
+			self.refinedPlanningTime.value += (datetime.now() - startTime).total_seconds()
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.recordFinalData('\nError running '+myFile+'; caught at line '+str(lineno))
 			self.recordFinalData(e.output)
 			self.set_error()
 			return None
+		self.refinedPlanningTime.value += (datetime.now() - startTime).total_seconds()
 		if answer_set == '':
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_too_many_answers
@@ -282,6 +285,7 @@ class ControllerToI():
 			print myFile + ' with number of steps: ' + str(numStepsPlanning)
 			startTime = datetime.now()
 			answer_set = subprocess.check_output('java -jar '+self.domain_info.sparc_path + ' ' + myFile +' -A',shell=True)
+			self.refinedPlanningTime.value += (datetime.now() - startTime).total_seconds()
 			self.lines_to_write.append('\nTime taken to create refined plan with a max of '+ str(numStepsPlanning)+' steps: ' + str(datetime.now() - startTime))
 			if answer_set == '':
 				lineno = self.lineno()

@@ -42,6 +42,7 @@ def runAndWrite( goal, dic_initial_state):
 
 	controllerToI = ControllerToI( domain_info, executer, robot_refined_location, initial_history , goal)
 	error = multiprocessing.Event()
+	refinedPlanningTime = multiprocessing.Value('d', 0)
 	abstractPlanningTime = multiprocessing.Value('d', 0)
 	inferObsTime = multiprocessing.Value('d', 0)
 	diagnosingTime = multiprocessing.Value('d', 0)
@@ -51,13 +52,14 @@ def runAndWrite( goal, dic_initial_state):
 	numAbsAct = multiprocessing.Value('d', 0)
 	numRefAct = multiprocessing.Value('d', 0)
 	completeRun = multiprocessing.Value('c','_')
-	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error, abstractPlanningTime, inferObsTime, diagnosingTime, execTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
+	p1 = multiprocessing.Process(target=controllerToI.run, name="Func", args=(error, refinedPlanningTime, abstractPlanningTime, inferObsTime, diagnosingTime, execTime, numAbsPlans, numRefPlans, numAbsAct, numRefAct,completeRun))
 	timeTaken = 0
 	p1.start()
 	startTime = datetime.now()
 	timeout = False
   	while True:
 		if error.is_set():
+			print refinedPlanningTime.value
 			print abstractPlanningTime.value
 			print inferObsTime.value
 			print diagnosingTime.value
@@ -97,13 +99,9 @@ def runAndWrite( goal, dic_initial_state):
 		'''
 	timeTaken = (datetime.now()-startTime).total_seconds()
 	print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$: Total run time: ' + str(timeTaken) + ' seconds.'
-	nonPlanningTime = inferObsTime.value + execTime.value
-	totalAbstractPlanningTime = diagnosingTime.value + abstractPlanningTime.value
-	totalPlanningTime = timeTaken - nonPlanningTime
-	refinedPlanningTime = totalPlanningTime - totalAbstractPlanningTime
 	results = open(global_variables.txt_results_file, 'a')
 	results.write('\nTotal trial time: ' + str(timeTaken) + ' seconds.')
-	results.write('\nTime Refined planning: '+ str(refinedPlanningTime))
+	results.write('\nTime Refined planning: '+ str(refinedPlanningTime.value))
 	results.write('\nTime Abstract planning: '+ str(abstractPlanningTime.value))
 	results.write('\nTime Diagnosing: '+ str(diagnosingTime.value))
 	results.write('\nTime Inferring coarse resolution obs: '+str(inferObsTime.value))
@@ -115,7 +113,8 @@ def runAndWrite( goal, dic_initial_state):
 	results.write('\nComplete run code: ' + str(completeRun.value))
 	results.write('\n----------------------------------------------------------------------------\n\n\n')
 	results.close()
-	return [timeTaken,totalPlanningTime, numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
+
+	return [timeTaken,refinedPlanningTime.value,abstractPlanningTime.value,diagnosingTime.value, inferObsTime.value, numAbsPlans.value,numAbsAct.value,numRefPlans.value,numRefAct.value,completeRun.value]
 
 
 def create_pre_ASP_abstract_belief_file():
@@ -152,21 +151,27 @@ def runPairwiseControllersAndWrite(dic_initial_state, goal):
 	global_variables.controller_type = 'zooming'
 	resultsListZooming = runAndWrite(goal, dic_initial_state)
 
-	global_variables.controller_type = 'non_zooming'
-	resultsListNonZooming = runAndWrite(goal, dic_initial_state)
-	#TODO just wanting to run zooming part. I need to uncomment two lines above and remove one line below.
-	#resultsListNonZooming = resultsListZooming
+	if global_variables.complexity_level <= 4: #run both zooming and non zooming
+		global_variables.controller_type = 'non_zooming'
+		resultsListNonZooming = runAndWrite(goal, dic_initial_state)
+	else: resultsListNonZooming = ['']*len(resultsListZooming)
 
 	resultsList = [trialCount, str(global_variables.complexity_level)]
 	for i in range(len(resultsListZooming)-1):
-		if(i < 2):
-			resultsList.append("{0:.2f}".format(resultsListZooming[i]))
-			resultsList.append("{0:.2f}".format(resultsListNonZooming[i]))
+		if(i < 5):
+			try: resultsList.append("{0:.2f}".format(resultsListZooming[i]))
+			except: resultsList.append("")
+			try: resultsList.append("{0:.2f}".format(resultsListNonZooming[i]))
+			except: resultsList.append("")
 		else:
-			resultsList.append(int(resultsListZooming[i]))
-			resultsList.append(int(resultsListNonZooming[i]))
-		try: resultsList.append("{0:.2f}".format(resultsListNonZooming[i]/resultsListZooming[i]))
-		except ZeroDivisionError: resultsList.append(float("inf"))
+			try: resultsList.append(int(resultsListZooming[i]))
+			except: resultsList.append("")
+			try: resultsList.append(int(resultsListNonZooming[i]))
+			except: resultsList.append("")
+		if resultsListNonZooming[-1] == "C" and resultsListZooming[-1] == "C":
+			try: resultsList.append("{0:.2f}".format(resultsListNonZooming[i]/resultsListZooming[i]))
+			except ZeroDivisionError: resultsList.append(float("inf"))
+		else: resultsList.append("")
 	resultsList.append(resultsListZooming[-1])
 	resultsList.append(resultsListNonZooming[-1])
 
@@ -217,8 +222,8 @@ if __name__ == "__main__":
 	trialCount = 0
 	singleRunTest = False
 	number_runs = 200
-	for level in [4]:
-		trialCount = 0
+	for level in [8]:
+		trialCount = 24
 		global_variables.init()
 		global_variables.complexity_level = level # TODO change this number to change the complexity level
 		global_variables.csv_results_file = 'simulation/results/experimental_results_' +  str(global_variables.complexity_level) +  '.csv'
@@ -230,7 +235,7 @@ if __name__ == "__main__":
 		create_pre_ASP_ToI_planning_file()
 		with open(global_variables.csv_results_file, 'a') as writeFile:
 			writer = csv.writer(writeFile)
-			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming','Run-time non_zooming','Run-time Ratio', 'Planning Time - zooming','Planning Time - non_zooming','Planning Time - Ratio', '# Abstract Plans - zooming', '# Abstract Plans - non_zooming','# Abstract Plans - Ratio','# Abstract Actions - zooming','# Abstract Actions - non_zooming','# Abstract Actions - Ratio','# Refined Plans - zooming','# Refined Plans - non_zooming','# Refined Plans - Ratio',  '# Refined Actions - zooming','# Refined Actions - non_zooming' ,'# Refined Actions - Ratio','Complete Run - zooming','Complete Run - non_zooming'])
+			writer.writerow(['Trial Number', 'Complexity Level', 'Run-time zooming','Run-time non_zooming','Run-time Ratio',  'Refined Planning Time - zooming','Refined Planning Time - non_zooming','Refined Planning Time - Ratio', 'Abstract Planning Time - zooming','Abstract Planning Time - non_zooming','Abstract Planning Time - Ratio','Diagnosing - zooming', 'Diagnosing - non_zooming', 'Diagnosing - Ratio', 'Inferring -zooming', ' Inferring - non_zooming', 'Inferring - Ratio', '# Abstract Plans - zooming', '# Abstract Plans - non_zooming','# Abstract Plans - Ratio','# Abstract Actions - zooming','# Abstract Actions - non_zooming','# Abstract Actions - Ratio','# Refined Plans - zooming','# Refined Plans - non_zooming','# Refined Plans - Ratio',  '# Refined Actions - zooming','# Refined Actions - non_zooming' ,'# Refined Actions - Ratio','Complete Run - zooming','Complete Run - non_zooming'])
 		remaining_runs = number_runs - trialCount
 		if(singleRunTest): remaining_runs = 1
 		for x in range (0,remaining_runs):
