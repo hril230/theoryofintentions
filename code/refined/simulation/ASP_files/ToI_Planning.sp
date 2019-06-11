@@ -1,5 +1,5 @@
-#const numSteps = 5. % maximum number of steps.
-#const max_len = 4. % maximum activity_length of an activity.
+#const numSteps = 7. % maximum number of steps.
+#const max_len = 6. % maximum activity_length of an activity.
 #const max_name = 1.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -10,7 +10,7 @@
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #step = 0..numSteps.
-#object = {pen3, noteBook1, noteBook2, noteBook3, noteBook4, book1, book2, book3, book4, cup1, cup2, cup3, cup4, pen2, pen4, markerPen3, markerPen2, pen1, markerPen1, markerPen4, plate2, plate3, plate1, plate4}.
+#object = {pen4, pen3, pen2, pen1, book1, book2, book3, book4, cup1, cup2, cup3, cup4}.
 #place = {kitchen, library, office2, office1, storage_room}.
 #robot = {rob1}.
 #thing = #object + #robot.
@@ -523,81 +523,60 @@ next_to(office2, storage_room).
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
-holds(my_goal,I) :- holds(loc(markerPen2,kitchen),I).
+holds(my_goal,I) :- holds(loc(book2,office2),I).
 
 
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
-current_step(4).
+current_step(5).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-obs(loc(rob1,library),true,3).
-obs(in_hand(rob1,markerPen2),true,3).
-obs(loc(markerPen2,library),true,3).
-obs(loc(markerPen2,kitchen),true,4).
-obs(loc(rob1,kitchen),true,4).
+obs(loc(rob1,kitchen),true,3).
+obs(loc(rob1,office1),true,4).
+obs(loc(book2,office1),true,5).
+obs(in_hand(rob1,book2),true,5).
+obs(loc(rob1,office1),true,5).
 hpd(select(my_goal),true,0).
 attempt(start(1),1).
-attempt(pickup(rob1,markerPen2),2).
-attempt(move(rob1,kitchen),3).
+attempt(move(rob1,kitchen),2).
+attempt(move(rob1,office1),3).
+attempt(pickup(rob1,book2),4).
 activity_goal(1,my_goal).
-activity_component(1,1,pickup(rob1,markerPen2)).
-activity_component(1,2,move(rob1,kitchen)).
-activity_length(1,2).
-explanation(0,4).
-holds(loc(noteBook1,office1),0).
-holds(loc(pen1,storage_room),0).
-holds(loc(book4,office2),0).
-holds(loc(cup4,kitchen),0).
+activity_component(1,1,move(rob1,kitchen)).
+activity_component(1,2,move(rob1,office1)).
+activity_component(1,3,pickup(rob1,book2)).
+activity_component(1,4,move(rob1,office2)).
+activity_length(1,4).
+explanation(0,5).
+holds(loc(book3,office1),0).
+holds(loc(cup2,office2),0).
+holds(loc(book4,library),0).
 holds(loc(book2,office1),0).
-holds(loc(plate2,office2),0).
-holds(loc(cup1,office1),0).
-holds(loc(noteBook4,office2),0).
-holds(loc(plate4,office2),0).
-holds(loc(markerPen3,storage_room),0).
-holds(loc(pen3,storage_room),0).
-holds(loc(book3,kitchen),0).
-holds(loc(plate1,office2),0).
-holds(loc(markerPen4,kitchen),0).
+holds(loc(cup3,office2),0).
+holds(loc(pen1,library),0).
 holds(loc(rob1,library),0).
-holds(loc(plate3,office1),0).
-holds(loc(cup2,kitchen),0).
-holds(loc(markerPen2,library),0).
-holds(loc(noteBook3,office1),0).
-holds(loc(cup3,office1),0).
-holds(loc(pen2,office2),0).
+holds(loc(cup4,storage_room),0).
+holds(loc(pen3,office2),0).
+holds(loc(cup1,storage_room),0).
+holds(loc(pen4,library),0).
 holds(loc(book1,office1),0).
-holds(loc(pen4,office1),0).
-holds(loc(noteBook2,library),0).
-holds(loc(markerPen1,storage_room),0).
--holds(in_hand(rob1,markerPen2),0).
+holds(loc(pen2,storage_room),0).
 -holds(in_hand(rob1,cup3),0).
--holds(in_hand(rob1,plate3),0).
--holds(in_hand(rob1,book4),0).
--holds(in_hand(rob1,plate4),0).
 -holds(in_hand(rob1,book2),0).
 -holds(in_hand(rob1,cup1),0).
--holds(in_hand(rob1,noteBook3),0).
--holds(in_hand(rob1,noteBook4),0).
+-holds(in_hand(rob1,book4),0).
 -holds(in_hand(rob1,pen1),0).
--holds(in_hand(rob1,plate1),0).
--holds(in_hand(rob1,markerPen3),0).
 -holds(in_hand(rob1,cup4),0).
 -holds(in_hand(rob1,book3),0).
 -holds(in_hand(rob1,pen3),0).
 -holds(in_hand(rob1,pen2),0).
--holds(in_hand(rob1,markerPen4),0).
 -holds(in_hand(rob1,cup2),0).
 -holds(in_hand(rob1,book1),0).
--holds(in_hand(rob1,noteBook2),0).
--holds(in_hand(rob1,noteBook1),0).
--holds(in_hand(rob1,plate2),0).
 -holds(in_hand(rob1,pen4),0).
--holds(in_hand(rob1,markerPen1),0).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,5 +1,4 @@
 #const numSteps = 1. % maximum number of steps.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,20 +30,23 @@ sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+comp(#refined_component, #coarse_component).
+holds(#fluent, #step).
+
+%% NEXT LINES NOT RELEVANT TO INFERRING
 next_to(#place, #place).
 coarse_next_to(#coarse_place, #coarse_place).
-holds(#fluent, #step).
 occurs(#action, #step).
 obs(#fluent, #boolean, #step).
 hpd(#action, #step).
 success().
 goal(#step).
 something_happened(#step).
-comp(#refined_component, #coarse_component).
-
+%% NEXT LINES ARE RELEVANT TO INFERRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% NEXT LINES NOT RELEVANT TO INFERRING
 
 %%%%%%%%%%%%%%%%%
 %% Causal Laws %%
@@ -68,6 +70,7 @@ holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 %% STATE CONSTRAINTS GO HERE
 % Reflexive property of next_to relation.
 next_to(C1, C2) :- next_to(C2, C1), #place(C1), #place(C2).
+coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #place(C1), #place(C2).
 
 % Any object exists in only one refined location.
 -holds(loc(T, C2), I) :- holds(loc(T, C1), I), C1!=C2.
@@ -86,14 +89,6 @@ holds(loc(OP, C), I) :- holds(loc(R, C), I), holds(in_hand(R, OP), I).
 % A thing cannot be at two places at the same time.
 -holds(coarse_loc(T, C2), I) :- holds(coarse_loc(T, C1), I), C1!=C2.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Coarse-resolution attributes and fine-resolution counterparts %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
-holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
-holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
-holds(loc(RB2, C) ,I) :- holds(loc(RB1, C), I), comp(RB1, B), comp(RB2,B).
-coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #place(C1), #place(C2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Executability Conditions %%
@@ -116,15 +111,64 @@ coarse_next_to(Z1, Z2) :- next_to(C1, C2), comp(C1, Z1), comp(C2, Z2), Z1!=Z2, #
 % Cannot execute two actions at the same time.
 :- occurs(A1,I), occurs(A2,I), A1 != A2, #rob_action(A1), #rob_action(A2).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Axioms for observing the environment %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%
+%% CWA for Actions.
+%%%%%%%%%%%%%%%%%%%
+-occurs(A,I) :- not occurs(A,I).
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Axioms for testing %%
+%%%%%%%%%%%%%%%%%%%%%%%%
 holds(can_be_tested(rob1, loc(T, C), V), I) :- holds(loc(rob1, C), I).
 holds(can_be_tested(rob1, in_hand(rob1, OP), V), I).
 holds(directly_observed(rob1, F, true), I+1) :- holds(F, I), occurs(test(rob1, F, true), I).
 holds(directly_observed(rob1, F, false), I+1) :- -holds(F, I), occurs(test(rob1, F, false), I).
 -occurs(test(rob1, F, O), I) :- -holds(can_be_tested(rob1, F, O), I).
 
+%%%%%%%%%%%%%%%%%%%
+%% Testing Actions
+%%%%%%%%%%%%%%%%%%%
+%% TESTING RULES GO HERE
+
+%%%%%%%%%%%%%%%%%%%
+%% Awareness axiom.
+%%%%%%%%%%%%%%%%%%%
+holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% History and initial state rules
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Take what actually happened into account.
+occurs(A,I) :- hpd(A,I).
+
+%% Reality check axioms.
+:- obs(F, true, I), -holds(F, I).
+:- obs(F, false, I), holds(F, I).
+
+%% NEXT LINES ARE RELEVANT TO INFERRING
+%%%%%%%%%%%%%%%%%%%
+%% Inertia Axioms.
+%%%%%%%%%%%%%%%%%%%
+holds(F,I+1) :- #inertial_fluent(F), holds(F,I), not -holds(F,I+1).
+-holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CWA for Actions and Defined Fluents.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-holds(F,I) :- #defined_fluent(F), not holds(F,I).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Coarse-resolution attributes and fine-resolution counterparts %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+holds(coarse_loc(T, Z), I) :- holds(loc(T, C), I), comp(C, Z).
+holds(coarse_loc(B, Z),I) :- holds(loc(RB,C), I), comp(RB,B), comp(C,Z).
+holds(coarse_in_hand(rob1, O), I) :- holds(in_hand(rob1, OP), I), comp(OP, O).
+holds(loc(RB2, C) ,I) :- holds(loc(RB1, C), I), comp(RB1, B), comp(RB2,B).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Axioms for inferrnig observations %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(T, C), true), I), comp(C, R).
 holds(indirectly_observed(rob1, coarse_loc(T, R), true), I) :- holds(directly_observed(rob1, loc(Z, C), true), I), comp(C,R), comp(Z,T).
 holds(indirectly_observed(rob1, coarse_in_hand(rob1, O), true), I) :- holds(directly_observed(rob1, in_hand(rob1, OP), true), I), comp(OP, O).
@@ -143,38 +187,6 @@ holds(may_discover(rob1, coarse_loc(T, R), true), I) :- -holds(indirectly_observ
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, true), I).
 -holds(directly_observed(rob1, F, undet), I) :- holds(directly_observed(rob1, F, false), I).
 -holds(directly_observed(R,loc(O,C1),true),I) :- holds(directly_observed(R,loc(O,C2),true),I), C1!=C2.
-
-%%%%%%%%%%%%%%%%%%%
-%% Testing Actions
-%%%%%%%%%%%%%%%%%%%
-%% TESTING RULES GO HERE
-
-%%%%%%%%%%%%%%%%%%%
-%% Awareness axiom.
-%%%%%%%%%%%%%%%%%%%
-holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).
-
-%%%%%%%%%%%%%%%%%%%
-%% Inertia Axioms.
-%%%%%%%%%%%%%%%%%%%
-holds(F,I+1) :- #inertial_fluent(F), holds(F,I), not -holds(F,I+1).
--holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% CWA for Actions and Defined Fluents.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
--occurs(A,I) :- not occurs(A,I).
--holds(F,I) :- #defined_fluent(F), not holds(F,I).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% History and initial state rules
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Take what actually happened into account.
-occurs(A,I) :- hpd(A,I).
-
-%% Reality check axioms.
-:- obs(F, true, I), -holds(F, I).
-:- obs(F, false, I), holds(F, I).
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -328,11 +340,6 @@ next_to(c73, c77).
 next_to(c74, c78).
 next_to(c75, c79).
 next_to(c76, c80).
-
-
-
-
-
 comp(c1, library).
 comp(c2, library).
 comp(c3, library).
@@ -469,75 +476,71 @@ comp(ref1_markerPen4, markerPen4).
 %% History:
 %%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(coarse_loc(pen3,storage_room),0).
-holds(loc(rob1,c16),0).
-holds(loc(ref1_noteBook3,c40),0).
-holds(loc(ref1_cup1,c36),0).
-holds(coarse_in_hand(rob1,markerPen2),0).
-holds(loc(ref2_noteBook1,c41),0).
-holds(loc(ref2_plate2,c61),0).
-holds(coarse_loc(book3,kitchen),0).
-holds(loc(ref1_cup3,c44),0).
-holds(loc(ref1_pen3,c74),0).
-holds(loc(ref1_noteBook1,c41),0).
-holds(coarse_loc(markerPen4,kitchen),0).
-holds(loc(ref2_plate3,c33),0).
-holds(loc(ref1_plate2,c61),0).
-holds(loc(ref2_cup4,c24),0).
-holds(loc(ref2_book1,c40),0).
-holds(coarse_loc(noteBook2,library),0).
-holds(loc(ref1_cup4,c24),0).
-holds(coarse_loc(plate4,office2),0).
-holds(loc(ref1_markerPen2,c16),0).
-holds(loc(ref2_noteBook4,c63),0).
-holds(loc(ref1_markerPen3,c70),0).
-holds(coarse_loc(noteBook3,office1),0).
-holds(loc(ref2_cup2,c26),0).
-holds(loc(ref2_noteBook2,c1),0).
-holds(loc(ref1_cup2,c26),0).
-holds(loc(ref1_book3,c28),0).
-holds(loc(ref1_markerPen4,c21),0).
-holds(loc(ref2_book2,c41),0).
-holds(coarse_loc(rob1,library),0).
-holds(loc(ref1_noteBook2,c1),0).
-holds(loc(ref1_noteBook4,c63),0).
-holds(coarse_loc(pen2,office2),0).
-holds(loc(ref2_book3,c28),0).
-holds(loc(ref1_plate4,c50),0).
-holds(coarse_loc(book2,office1),0).
-holds(loc(ref1_book1,c40),0).
-holds(coarse_loc(cup1,office1),0).
-holds(coarse_loc(plate1,office2),0).
-holds(coarse_loc(noteBook4,office2),0).
-holds(loc(ref2_cup1,c36),0).
-holds(loc(ref1_markerPen1,c80),0).
-holds(loc(ref1_book4,c56),0).
-holds(loc(ref1_pen1,c67),0).
-holds(loc(ref2_book4,c56),0).
-holds(loc(ref2_plate1,c50),0).
-holds(coarse_loc(book4,office2),0).
-holds(coarse_loc(pen4,office1),0).
-holds(coarse_loc(cup2,kitchen),0).
-holds(coarse_loc(markerPen3,storage_room),0).
-holds(loc(ref2_plate4,c50),0).
+-holds(coarse_in_hand(rob1,noteBook4),0).
+holds(loc(ref2_book2,c66),0).
+-holds(coarse_in_hand(rob1,pen2),0).
+holds(loc(ref2_plate3,c69),0).
+-holds(coarse_in_hand(rob1,plate4),0).
+holds(loc(ref2_cup2,c77),0).
+holds(loc(ref1_pen1,c27),0).
+-holds(coarse_in_hand(rob1,book2),0).
+holds(loc(ref2_book1,c8),0).
+holds(loc(ref1_book2,c66),0).
+holds(loc(ref1_markerPen2,c69),0).
+holds(loc(ref1_plate1,c27),0).
+holds(loc(ref2_plate2,c54),0).
+holds(loc(ref1_noteBook3,c15),0).
+holds(loc(ref1_plate3,c69),0).
+-holds(coarse_in_hand(rob1,pen4),0).
+holds(loc(ref2_noteBook3,c15),0).
+-holds(coarse_in_hand(rob1,cup1),0).
+holds(loc(ref2_cup1,c13),0).
+holds(loc(ref2_noteBook1,c44),0).
+-holds(coarse_in_hand(rob1,book3),0).
+-holds(coarse_in_hand(rob1,cup4),0).
+holds(loc(rob1,c57),0).
+holds(loc(ref1_book3,c1),0).
+holds(loc(ref2_book3,c1),0).
+-holds(coarse_in_hand(rob1,pen1),0).
+-holds(coarse_in_hand(rob1,noteBook3),0).
+-holds(coarse_in_hand(rob1,markerPen3),0).
+-holds(coarse_in_hand(rob1,markerPen4),0).
 holds(loc(ref1_pen4,c33),0).
-holds(loc(ref2_cup3,c44),0).
-holds(loc(ref2_noteBook3,c40),0).
-holds(coarse_loc(book1,office1),0).
-holds(coarse_loc(cup4,kitchen),0).
-holds(coarse_loc(markerPen2,library),0).
-holds(coarse_loc(pen1,storage_room),0).
-holds(in_hand(rob1,ref1_markerPen2),0).
-holds(coarse_loc(plate3,office1),0).
-holds(coarse_loc(cup3,office1),0).
-holds(coarse_loc(plate2,office2),0).
-holds(loc(ref1_book2,c41),0).
-holds(loc(ref1_pen2,c57),0).
-holds(loc(ref1_plate1,c50),0).
-holds(coarse_loc(noteBook1,office1),0).
-holds(coarse_loc(markerPen1,storage_room),0).
-holds(loc(ref1_plate3,c33),0).
-hpd(move(rob1,c29),0).
+holds(loc(ref1_pen3,c27),0).
+-holds(coarse_in_hand(rob1,plate2),0).
+holds(loc(ref1_markerPen4,c27),0).
+holds(loc(ref1_noteBook1,c44),0).
+holds(loc(ref2_cup4,c45),0).
+-holds(coarse_in_hand(rob1,book4),0).
+holds(loc(ref1_plate4,c29),0).
+holds(loc(ref2_noteBook2,c12),0).
+-holds(coarse_in_hand(rob1,noteBook2),0).
+holds(loc(ref1_cup1,c13),0).
+holds(loc(ref1_book4,c12),0).
+holds(loc(ref2_cup3,c43),0).
+-holds(coarse_in_hand(rob1,book1),0).
+holds(loc(ref1_cup2,c77),0).
+holds(loc(ref1_noteBook2,c12),0).
+holds(loc(ref1_pen2,c17),0).
+holds(loc(ref1_cup4,c45),0).
+holds(loc(ref2_plate4,c29),0).
+-holds(coarse_in_hand(rob1,noteBook1),0).
+-holds(coarse_in_hand(rob1,cup2),0).
+-holds(coarse_in_hand(rob1,cup3),0).
+holds(loc(ref2_book4,c12),0).
+-holds(coarse_in_hand(rob1,pen3),0).
+holds(loc(ref2_noteBook4,c16),0).
+-holds(coarse_in_hand(rob1,markerPen2),0).
+holds(loc(ref1_cup3,c43),0).
+holds(loc(ref1_markerPen3,c76),0).
+-holds(coarse_in_hand(rob1,plate3),0).
+holds(loc(ref1_plate2,c54),0).
+holds(loc(ref1_noteBook4,c16),0).
+holds(loc(ref1_markerPen1,c3),0).
+holds(loc(ref2_plate1,c27),0).
+-holds(coarse_in_hand(rob1,markerPen1),0).
+holds(loc(ref1_book1,c8),0).
+-holds(coarse_in_hand(rob1,plate1),0).
 
 %%%%%%%%%
 display

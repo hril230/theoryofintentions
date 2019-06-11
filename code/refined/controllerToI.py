@@ -11,6 +11,7 @@ import global_variables
 import multiprocessing
 import inspect
 import random
+import copy
 class ControllerToI():
 
 	def __init__(self, domain_info, executer, refined_location, initial_conditions , goal):
@@ -38,7 +39,7 @@ class ControllerToI():
 		self.refined_location = refined_location
 
 		print ('ControllerToI ' + global_variables.controller_type + ' - initial coarse belief dictionary: ' + str(self.dic_belief))
-		print ('Controller ToI - initial refined location: ' + str(self.refined_location))
+		print ('ControllerToI - initial refined location: ' + str(self.refined_location))
 
 
 
@@ -163,7 +164,8 @@ class ControllerToI():
 						numRefAct.value += 1
 				numAbsAct.value += 1
 				all_direct_observations = Set(goal_direct_observations) | execution_direct_observations
-				indirectObservations = self.infer_abstract_obs_from_direct_observations(all_direct_observations,refined_plan_step)
+				indirectObservations = self.infer_abstract_obs(all_direct_observations, refined_plan_step)
+
 				if self.error.is_set(): break
 				abstract_step_obs = Set([self.domain_info.indirectObservationToObs(entry[entry.find('(')+1:entry.rfind(',')],self.current_step+1) for entry in indirectObservations])
 
@@ -212,7 +214,7 @@ class ControllerToI():
 		refined_fluents_to_observe = Set()
 		for myfluent in self.get_fluents_relevant_to_goal():
 			thisObjectRefinedFluents = []
-			objectsInAbstractFluent = [ob for ob in self.domain_info.refined_sorts_hierarchy_dic['#coarse_object'] if ob in myfluent]
+			objectsInAbstractFluent = [ob for ob in self.domain_info.refined_signature_dic['#coarse_object'] if ob in myfluent]
 			abstractLocationIncluded = [loc for loc in self.domain_info.get_all_constant_subsorts('#coarse_place','refined') if loc in myfluent]
 			for ob in objectsInAbstractFluent:
 				refinedObjects = [refOb for refOb in self.domain_info.components_dic.keys() if self.domain_info.components_dic[refOb] == ob ]
@@ -237,7 +239,10 @@ class ControllerToI():
 	def run_refined_ASP(self,refined_history,abstract_action,refined_plan_step):
 		numStepsPlanning = max(5,refined_plan_step+1) #starting one step ahead of the plan we have so far, if it has already startes
 		if 'pickup' in abstract_action: numStepsPlanning = max(5,refined_plan_step+4) #when searching for an object, each time that the pick up fails, the agent needs at least 4 more actions to plan to move to the next cell, test its movement, test the loation of the object and pickup.
-		self.refined_planning_relevant_lines[self.history_index_refined_planning_lines] = '\n'.join(refined_history)
+		for i,l in enumerate(self.refined_planning_relevant_lines):
+			if self.domain_info.history_marker in l: self.refined_planning_relevant_lines[i] = self.refined_planning_relevant_lines[i] + '\n' + '\n'.join(refined_history)
+
+
 		self.refined_planning_relevant_lines[0] = '#const numSteps = ' + str(numStepsPlanning) +'.'
 		asp = '\n'.join(self.refined_planning_relevant_lines)
 		if global_variables.controller_type == 'zooming': myFile = self.domain_info.asp_zoomed_domain_file
@@ -257,6 +262,7 @@ class ControllerToI():
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.recordFinalData('\nError running '+myFile+'; caught at line '+str(lineno))
 			self.recordFinalData(e.output)
+			#pprint(asp)
 			self.set_error()
 			return None
 		self.refinedPlanningTime.value += (datetime.now() - startTime).total_seconds()
@@ -264,6 +270,7 @@ class ControllerToI():
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.recordFinalData('\nToo many answers on ASP '+myFile+'; caught at line '+str(lineno))
+			#pprint(asp)
 			self.set_error()
 			return None
 		self.lines_to_write.append('\nTime taken to create refined plan for abstract action: '+abstract_action+', ' + str(datetime.now() - startTime))
@@ -276,10 +283,10 @@ class ControllerToI():
 			reader = open(myFile, 'r')
 			my_text = reader.read()
 			reader.close()
-			my_text_split = my_text.split('\n')
-			my_text_split[0] = '#const numSteps = '+ str(numStepsPlanning) +'.'
+			asp = my_text.split('\n')
+			asp[0] = '#const numSteps = '+ str(numStepsPlanning) +'.'
 			writer = open(myFile, 'w')
-			writer.write('\n'.join(my_text_split))
+			writer.write('\n'.join(asp))
 			writer.close()
 			answer_set = ''
 			print myFile + ' with number of steps: ' + str(numStepsPlanning)
@@ -291,12 +298,14 @@ class ControllerToI():
 				lineno = self.lineno()
 				self.completeRun.value = global_variables.character_code_too_many_answers
 				self.recordFinalData('\nToo many answers on ASP '+myFile+'; caught at line '+str(lineno))
+				#pprint(asp)
 				self.set_error()
 				return None
 		if answer_set == '\n' and numStepsPlanning >= self.domain_info.max_number_steps_refined_planning:
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_inconsistency
 			self.recordFinalData('\nInconsistency on ASP '+myFile+'; caught at line '+str(lineno))
+			#pprint(asp)
 			self.set_error()
 			return None
 		answer_set_split = answer_set.rstrip().split('\n\n')
@@ -332,6 +341,7 @@ class ControllerToI():
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.recordFinalData('\nToo many answers on ASP '+myFile+'; caught at line '+str(lineno))
+			#pprint(asp)
 			self.set_error()
 			return None
 		max_step = int(self.current_step + self.domain_info.max_number_steps_ToI_planning+2)
@@ -355,6 +365,7 @@ class ControllerToI():
 				lineno = self.lineno()
 				self.completeRun.value = global_variables.character_code_too_many_answers
 				self.recordFinalData('\nToo many answers on ASP '+myFile+'; caught at line '+str(lineno))
+				#pprint(asp)
 				self.set_error()
 				return None
 			self.number_toi_steps +=1
@@ -405,6 +416,7 @@ class ControllerToI():
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_too_many_answers
 			self.recordFinalData('\nToo many answers on ASP '+myFile+'; caught at line '+str(lineno))
+			#pprint(asp)
 			self.set_error()
 			return
 		answers = answer_set.rstrip().split('\n\n')
@@ -466,6 +478,7 @@ class ControllerToI():
 			lineno = self.lineno()
 			self.completeRun.value = global_variables.character_code_inconsistency
 			self.recordFinalData('\nInconsistency on ASP '+myFile+'; caught at line '+str(lineno))
+			#pprint(asp)
 			self.set_error()
 			return None
 		answer_split = ((answer_set.rstrip().split('\n\n'))[0]).strip('{}\n').split(', ')
@@ -495,90 +508,12 @@ class ControllerToI():
 			elif answer_set == '\n':
 				self.completeRun.value = global_variables.character_code_inconsistency
 				self.recordFinalData('\nInconsistency on ASP '+myFile+'; caught at line '+str(lineno))
+			#pprint(asp)
 			self.set_error()
 			return
 		answer_split = ((answer_set.rstrip().split('\n\n'))[0]).strip('{}\n').split(', ')
 		self.dic_belief = self.domain_info.dic_answerToState(answer_split)
 
-
-	'''
-	#This function calls a zoomed refined ASP to infer the abstract 'obs' from the refined_history and other
-	#direct observations that has been collected during the execution of the refined plan.
-	#If this controller is using zooming, then the sorts and attributes included in the ASP file will
-	#be limited to only those that are used in the direct_observations given as input.
-	def infer_abstract_obs_from_direct_observations_2(self,direct_observations, steps):
-		########################################################################
-		####### 1.- Find relevant constants and sorts hierarchy if zoomed domain
-		relevant_constants = self.domain_info.refined_constants
-		if global_variables.controller_type == 'zooming':
-			relevant_constants = Set({'true','false','undet'})
-			## add all refined constants in history
-			for c in self.domain_info.refined_constants:
-				for line in direct_observations:
-					if c in re.findall(self.domain_info.reg_exp_sorts,line): relevant_constants.add(c)
-			#add the coarse counterparts of all the refined objects in history so far.
-			more_coarse_relevant_constants = Set()
-			for c in [c for c in relevant_constants if c in self.domain_info.components_dic.keys()]: #for refined constants found in history
-				more_coarse_relevant_constants.add(self.domain_info.components_dic[c])
-			relevant_constants.update(more_coarse_relevant_constants)
-			#add the refined coutnerparts of all the coarse objects in history so far.
-			more_refined_relevant_constants = Set()
-			for c in [c for c  in relevant_constants if c in self.domain_info.components_dic.values()]: #for coarse constants found in history
-				for refined_object in self.domain_info.components_dic.keys():
-					if self.domain_info.components_dic[refined_object] == c: more_refined_relevant_constants.add(refined_object)
-			relevant_constants.update(more_refined_relevant_constants)
-
-		self.action_refined_sorts_hierarchy_dic = self.domain_info.infer_relevant_refined_sorts_hierarchy_dic(relevant_constants)
-		relevant_objects = Set(self.action_refined_sorts_hierarchy_dic.keys()).union(relevant_constants)
-		irrelevant_objects = Set(self.domain_info.refined_sorts_hierarchy_dic.keys()).union(self.domain_info.refined_constants) - relevant_objects
-
-
-		########################################################################
-		####### 2.- Write the information and other relevnat lines in the right file
-		reader = open(self.domain_info.file_name_preASP_inferring_indirect_observations, 'r')
-		inferring_indirect_observations_lines = reader.read().split('\n')
-		reader.close()
-
-		relevant_lines = inferring_indirect_observations_lines[:]
-		for line in inferring_indirect_observations_lines:
-			for object in irrelevant_objects:
-				if object in re.findall(self.domain_info.reg_exp_sorts,line):
-					relevant_lines.remove(line)
-					break
-
-		#now we add our new hierarchy sorts, initial conditions and goal in the right places of the list.
-		relevant_lines[0]= '#const numSteps = ' + str(steps) +'.'
-		relevant_lines[relevant_lines.index(self.domain_info.sorts_marker)] = '\n'.join(self.domain_info.create_relevant_refined_sorts_lines(self.action_refined_sorts_hierarchy_dic))
-		relevant_lines[relevant_lines.index(self.domain_info.history_marker)] = '\n'.join(direct_observations)
-		if 'holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).' in relevant_lines:
-			relevant_lines.remove('holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).')
-		#####################################################################################################
-		####### 3.- Run the asp file, format the answer into obs statements of abstract fluents and return.
-		asp = '\n'.join(relevant_lines)
-		myFile = self.domain_info.asp_inferring_indirect_observations_file
-		f1 = open(myFile, 'w')
-		f1.write(asp)
-		f1.close()
-		print ('\nControllerToI ' + global_variables.controller_type + ' : Inferring indirect coarse obs from refined direct observations ')
-		print myFile
-		startTime = datetime.now()
-		answer_set = subprocess.check_output('java -jar '+self.domain_info.sparc_path + ' ' + myFile +' -A ', shell=True)
-		self.inferObsTime.value += (datetime.now() - startTime).total_seconds()
-		if answer_set == '' or answer_set =='\n':
-			lineno = self.lineno()
-			if answer_set == '':
-				self.completeRun.value = global_variables.character_code_too_many_answers
-				self.recordFinalData('\nToo many answers on ASP '+myFile+'; caught at line '+str(lineno))
-			elif answer_set == '\n':
-				self.completeRun.value = global_variables.character_code_inconsistency
-				self.recordFinalData('\nInconsinstancy on ASP '+myFile+'; caught at line '+str(lineno))
-			self.set_error()
-			return None
-		answer_split = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
-		print '\nInferred Abstract Observations: ' + str(answer_split)
-		if answer_split == ['']: return Set()
-		return Set(answer_split)
-		'''
 
 
 	def refined_zoom(self, action):
@@ -619,17 +554,17 @@ class ControllerToI():
 			rel_constants.update(Set(self.domain_info.get_parameters(self.domain_info.get_fluent(condition))))
 
 
-		#add refine the relevant abstract objects and add them to the relevant_refined_constants:
-		relevant_refined_constants = Set()
+		#add refine the relevant abstract objects and add them to the observed_refined_constants:
+		observed_refined_constants = Set()
 		for abstract_object_constant in rel_constants.copy():
 			for refined_object in self.domain_info.components_dic.keys():
-				if self.domain_info.components_dic[refined_object] == abstract_object_constant: relevant_refined_constants.add(refined_object)
-		rel_constants.update(relevant_refined_constants)
+				if self.domain_info.components_dic[refined_object] == abstract_object_constant: observed_refined_constants.add(refined_object)
+		rel_constants.update(observed_refined_constants)
 
 
 		#get all the relevant sorts following the initial sorts hierarchy
-		self.action_refined_sorts_hierarchy_dic = self.domain_info.infer_relevant_refined_sorts_hierarchy_dic(rel_constants)
-		irrelevant_sorts = Set(self.domain_info.refined_sorts_hierarchy_dic.keys()) - Set(self.action_refined_sorts_hierarchy_dic.keys())
+		self.action_refined_signature_dic = self.domain_info.infer_relevant_refined_signature_dic(rel_constants)
+		irrelevant_sorts = Set(self.domain_info.refined_signature_dic.keys()) - Set(self.action_refined_signature_dic.keys())
 		irrelevant_constants =  self.domain_info.refined_constants - rel_constants
 		irrelevant_objects = irrelevant_constants.union(irrelevant_sorts)
 
@@ -665,7 +600,7 @@ class ControllerToI():
 		goal = 'goal(I) :- ' + ', '.join(relevant_final_conditions_list) + '.'
 
 
-		sorts_hierarchy_info_lines = '\n'.join(self.domain_info.create_relevant_refined_sorts_lines(self.action_refined_sorts_hierarchy_dic))
+		signature_info_lines = '\n'.join(self.domain_info.create_signature_lines(self.action_refined_signature_dic))
 
 		# read the preASP text and discard irrelevant lines
 		original_asp_reader = open(self.domain_info.file_name_preASP_refined_planning, 'r')
@@ -680,38 +615,42 @@ class ControllerToI():
 
 		# copy only relevant lines
 		all_indexes = Set(range(len(pre_ASP_refined_planning_lines)))
-		relevant_lines = [pre_ASP_refined_planning_lines[i] for i in all_indexes ^ irrelevant_indexes]
+		relevant_lines = [pre_ASP_refined_planning_lines[i] for i in sorted(all_indexes ^ irrelevant_indexes)]
 
-		#now we add our new hierarchy sorts, initial conditions and goal in the right places of the list.
-		self.history_index_refined_planning_lines = relevant_lines.index(self.domain_info.history_marker) #also used in inferring_indirect_observations_lines
-		self.sorts_index_refined_planning_lines = relevant_lines.index(self.domain_info.sorts_marker) #also used in inferring_indirect_observations_lines
-		relevant_lines[self.sorts_index_refined_planning_lines] = '\n'.join(self.domain_info.create_relevant_refined_sorts_lines(self.action_refined_sorts_hierarchy_dic))
-		relevant_lines[self.history_index_refined_planning_lines] = '\n'.join(relevant_initial_conditions)
-		relevant_lines[relevant_lines.index(self.domain_info.goal_marker)] = goal
+		for i,l in enumerate(relevant_lines):
+			if self.domain_info.sorts_marker in l: relevant_lines[i] = relevant_lines[i] + '\n' +  '\n'.join(self.domain_info.create_signature_lines(self.action_refined_signature_dic))
+			if self.domain_info.history_marker in l: relevant_lines[i] = relevant_lines[i] + '\n' + '\n'.join(relevant_initial_conditions)
+			if self.domain_info.goal_marker in l: relevant_lines[i] = relevant_lines[i] + '\n' + goal
 
 		self.refined_planning_relevant_lines = relevant_lines
+
 		return relevant_initial_conditions
 
 
+	def infer_abstract_obs(self, direct_observations,steps):
+		inferring_complete_singature_dic = copy.deepcopy(self.domain_info.refined_signature_dic)
+		#removing actions of my new signature dic
+		for a in self.domain_info.get_all_function_subsorts('#action','refined'): inferring_complete_singature_dic.pop(a, None)
 
-	def infer_abstract_obs_from_direct_observations(self,direct_observations, steps):
-		########################################################################
-		####### 2.- Write the information and other relevnat lines in the right file
-		reader = open(self.domain_info.file_name_preASP_inferring_indirect_observations, 'r')
-		my_lines = reader.read().split('\n')
+		observed_refined_constants = Set([c for c in self.domain_info.get_all_constant_subsorts('#refined_component','refined') if c in re.findall(r"[\w']+", ','.join(direct_observations))])
+		relevant_abstract_constants = Set([self.domain_info.components_dic[r] for r in observed_refined_constants])
+		relevant_refined_constants = Set([r for r in self.domain_info.components_dic.keys() if self.domain_info.components_dic[r] in relevant_abstract_constants])
+		all_relevant_constants =self.domain_info.get_all_constant_subsorts('#robot','refined')|Set({'true','false','undet'})|relevant_abstract_constants|relevant_refined_constants
+		#print re.findall(r"[\w']+", ','.join(direct_observations))
+		new_signature_dic = self.domain_info.infer_relevant_refined_signature_dic_form_given_hierarchy_dic(all_relevant_constants,inferring_complete_singature_dic)
+		new_signature_string = '\n'.join(self.domain_info.create_signature_lines(new_signature_dic))
+		my_components_lines = ['comp('+r+','+self.domain_info.components_dic[r]+').' for r in relevant_refined_constants]
+		reader = open(self.domain_info.file_name_preASP_inferring_obs, 'r')
+		relevant_lines = (reader.read()).split('\n')
 		reader.close()
-		#now we add our new hierarchy sorts, initial conditions and goal in the right places of the list.
-		my_lines[0]= '#const numSteps = ' + str(steps) +'.'
-		my_lines[my_lines.index(self.domain_info.sorts_marker)] = '\n'.join(self.domain_info.create_relevant_refined_sorts_lines(self.domain_info.refined_sorts_hierarchy_dic))
-		my_lines[my_lines.index(self.domain_info.history_marker)] = '\n'.join(direct_observations)
-		if 'holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).' in my_lines:
-			my_lines.remove('holds(F, 0) | -holds(F, 0) :- #physical_inertial_fluent(F).')
-		#####################################################################################################
-		####### 3.- Run the asp file, format the answer into obs statements of abstract fluents and return.
-		asp = '\n'.join(my_lines)
-		myFile = self.domain_info.asp_inferring_indirect_observations_file
+		relevant_lines[0] = '#const numSteps = ' + str(steps) +'.'
+		relevant_lines[relevant_lines.index(self.domain_info.sorts_marker)] = new_signature_string
+		relevant_lines[relevant_lines.index(self.domain_info.attributes_marker)] = '\n'.join(my_components_lines)
+		relevant_lines[relevant_lines.index(self.domain_info.history_marker)] = '\n'.join(direct_observations)
+		myFile =self.domain_info.asp_inferring_indirect_obs_file
+
 		f1 = open(myFile, 'w')
-		f1.write(asp)
+		f1.write('\n'.join(relevant_lines))
 		f1.close()
 		print ('\nControllerToI ' + global_variables.controller_type + ' : Inferring indirect coarse obs from refined direct observations ')
 		print myFile
@@ -726,10 +665,12 @@ class ControllerToI():
 			elif answer_set == '\n':
 				self.completeRun.value = global_variables.character_code_inconsistency
 				self.recordFinalData('\nInconsinstancy on ASP '+myFile+'; caught at line '+str(lineno))
+			asp = relevant_lines
+			#pprint(asp)
 			self.set_error()
 			return None
 		answer_split = ((answer_set.rstrip().split('\n\n'))[0]).strip('{').strip('}').split(', ')
-		print '\nInferred Abstract Observations: ' + str(answer_split)
+		print '\nInferred Abstract Obs: ' + str(answer_split)
 		if answer_split == ['']: return Set()
 		return Set(answer_split)
 
@@ -743,13 +684,10 @@ class ControllerToI():
 		reader = open(self.domain_info.file_name_preASP_refined_planning, 'r')
 		relevant_lines = reader.read().split('\n')
 		goal = 'goal(I) :- ' + (',').join(final_conditions_list) + '.'
-		relevant_lines[relevant_lines.index(self.domain_info.sorts_marker)] = '\n'.join(self.domain_info.refined_sorts_lines)
-		relevant_lines[relevant_lines.index(self.domain_info.goal_marker)] = goal
-		self.history_index_refined_planning_lines = relevant_lines.index(self.domain_info.history_marker)
+		for i,l in enumerate(relevant_lines):
+			if self.domain_info.sorts_marker in l: relevant_lines[i] = relevant_lines[i] + '\n' +   '\n'.join(self.domain_info.refined_sorts_lines)
+			if self.domain_info.goal_marker in l: relevant_lines[i] = relevant_lines[i] + '\n' + goal
 		self.refined_planning_relevant_lines = relevant_lines
-		#writer = open(self.domain_info.asp_non_zoomed_domain_file, 'w')
-		#writer.write('\n'.join(self.refined_planning_relevant_lines))
-		#writer.close()
 		return initial_conditions
 
 	# This function uses the preASP_refined_Domain.txt file and SPARC to

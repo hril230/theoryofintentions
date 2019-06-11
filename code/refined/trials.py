@@ -158,7 +158,7 @@ def runPairwiseControllersAndWrite(dic_initial_state, goal):
 
 	resultsList = [trialCount, str(global_variables.complexity_level)]
 	for i in range(len(resultsListZooming)-1):
-		if(i < 5):
+		if(i < 5 or i == 31):
 			try: resultsList.append("{0:.2f}".format(resultsListZooming[i]))
 			except: resultsList.append("")
 			try: resultsList.append("{0:.2f}".format(resultsListNonZooming[i]))
@@ -182,9 +182,9 @@ def runPairwiseControllersAndWrite(dic_initial_state, goal):
 
 def createInitialConditionsAndGoal():
 	dic_initial_state = OrderedDict()
-	refined_objects = list(domain_info.refined_sorts_hierarchy_dic['#object'])
-	refined_locations = list(domain_info.refined_sorts_hierarchy_dic['#place'])
-	abstract_objects = list(domain_info.refined_sorts_hierarchy_dic['#coarse_object'])
+	refined_objects = list(domain_info.refined_signature_dic['#object'])
+	refined_locations = list(domain_info.refined_signature_dic['#place'])
+	abstract_objects = list(domain_info.refined_signature_dic['#coarse_object'])
 	for book in abstract_objects:
 		chosen_location = random.choice(refined_locations)
 		for ref_book in refined_objects:
@@ -197,7 +197,7 @@ def createInitialConditionsAndGoal():
 
 	#creating gol
 	book_choice = random.choice(abstract_objects)
-	locations = list(domain_info.refined_sorts_hierarchy_dic['#coarse_place'])
+	locations = list(domain_info.refined_signature_dic['#coarse_place'])
 	chosen_book_location = dic_initial_state['loc(ref1_'+book_choice]
 	chosen_book_abstract_location = domain_info.components_dic[chosen_book_location]
 	locations.remove(chosen_book_abstract_location)
@@ -222,8 +222,8 @@ if __name__ == "__main__":
 	trialCount = 0
 	singleRunTest = False
 	number_runs = 200
-	for level in [8]:
-		trialCount = 24
+	for level in [8,7,31,9]:
+		trialCount = 0
 		global_variables.init()
 		global_variables.complexity_level = level # TODO change this number to change the complexity level
 		global_variables.csv_results_file = 'simulation/results/experimental_results_' +  str(global_variables.complexity_level) +  '.csv'

@@ -50,10 +50,15 @@ next_to(library, kitchen).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Refined Attributes
 next_to(c1, c2).
+%% End of Refined Attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Refined Components
 comp(c1, library).
 comp(c2, kitchen).
 comp(ref1_book1, book1).
-%% End of Refined Attributes
+%% End of Refined Components
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 5*n-3 where n is number of cells
 % 2*m where m is number of rooms. This number only works if the goal includes only one fluent. If it includes x fluents we need to multiply this number by x.

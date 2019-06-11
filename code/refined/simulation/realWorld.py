@@ -9,7 +9,7 @@
 #'in_hand(rob1': 'ref3_book1',
 #'coarse_in_hand(rob1': 'book1',
 #'loc(ref3_book2': 'c14'
-
+from pprint import pprint
 import subprocess
 import random
 history_marker = '%% HISTORY GOES HERE'
@@ -69,6 +69,7 @@ class World(object):
 		else:
 			print ('                nothing happned in real world ')
 			self.history.append(action + "realWorld -  (FAILED) ")
+
 
 
 	def __getDirectObservation(self,answer):

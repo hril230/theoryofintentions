@@ -76,7 +76,11 @@ next_to(c13, c14).
 next_to(c13, c15).
 next_to(c15, c16).
 next_to(c14, c16).
+%% End of Refined Attributes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Refined Components
 comp(c1, library).
 comp(c2, library).
 comp(c3, library).
@@ -104,7 +108,7 @@ comp(ref1_book3, book3).
 comp(ref2_book3, book3).
 comp(ref3_book3, book3).
 
-%% End of Refined Attributes
+%% End of Refined Components
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 5*n-3 where n is number of cells
 % 2*m where m is number of rooms. This number only works if the goal includes only one fluent. If it includes x fluents we need to multiply this number by x.
