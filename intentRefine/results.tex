@@ -1,0 +1,92 @@
+
+\documentclass[11pt, oneside]{article}   
+\usepackage{geometry}   
+\geometry{a4paper}                   		
+\usepackage{graphicx}				
+\usepackage{float}
+
+\usepackage{amssymb, amsmath,mathtools}
+\usepackage{wrapfig}
+
+\usepackage{multirow}
+\usepackage{hhline}
+
+\begin{document}
+\section{Evaluating Hypothesis $H3$}
+
+
+Next to evaluate hypothesis $H3$, we ran experiments in the eight
+complexity levels listed in Section~\ref{sec:expres}, with and without
+including zooming. Table~\ref{tab:av-of-ratios-over-zoom} and Table~\ref{tab:higher-complexities} summarize the corresponding results. 
+All trials included $\mathcal{ATI}$ for
+coarse-resolution reasoning with the adapted theory of intentions, and
+fine-resolution domain representation for fine-resolution reasoning. As
+before, the goal in each experimental trial was to find and move a
+target object to a target location. 
+
+
+\begin{table}[h]
+\small\addtolength{\tabcolsep}{-3pt}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{3}{|c|}{Domain}  & $L1$     & $L2$     & $L3$ 
+\\ \hline
+\multirow{4}{*}[-3ex]{\rotatebox[origin=c]{90}{Average Ratios}}
+&\multirow{2}{3cm}{Total Reasoning Time} 
+& Zooming    & 1.00 (6.24\pm 1.56) & 1.00 (8.82\pm 2.95) & 1.00 (11.59\pm 3.88)   \\ \cline{3-6} 
+&& Non-Z      & 1.01 (6.28\pm 1.57) & 1.20 (10.74\pm 4.14) & 20.07 (225.49\pm 177.64)      \\ \cline{2-6} 
+&\multirow{2}{3cm}{Fine-Resolution Reasoning Time}
+& Zooming    & 1.00 (1.57\pm 0.51) & 1.00 (2.53\pm 0.92) & 1.00 (4.19\pm 1.48)   \\ \cline{3-6} 
+&& Non-Z      & 1.02 (1.61\pm 0.54) & 1.71 (4.46\pm 2.29)  & 55.23 (218.1\pm 176.97)    \\ \cline{2-6} 
+&\multirow{2}{3cm}{Coarse-Resolution Reasoning Time}
+& Zooming    & 1.00 (4.67\pm 1.05) & 1.00 (6.29\pm 2.06) & 1.00 (7.4\pm 2.57)  \\ \cline{3-6} 
+&& Non-Z      & 1.00 (4.67\pm 1.03) & 1.00 (6.28\pm 2.06) & 1.00 (7.39\pm 2.58)      \\ \cline{2-6} 
+&\multirow{2}{3cm}{Average Time per Refined Plan}
+& Zooming    & 1.00 (0.37\pm 0.02) & 1.00 (0.41\pm 0.02)  & 1.00 (0.56\pm 0.05)  \\ \cline{3-6} 
+&& Non-Z      & 1.03 (0.39\pm 0.01) & 2.26 (0.93\pm 0.32)  & 83.49 (45.98\pm 43.05)       \\ \hline
+\multicolumn{2}{|c|}{\multirow{2}{*}{Completed Runs}}
+& Zooming     & 100\% & 100\% & 100\%   \\ \cline{3-6} 
+\multicolumn{2}{|c|}{}& Non-Z      & 100\% & 100\% & 65\%      \\ \hline
+\end{tabular}
+\caption[A]{Comparing performance of runs with and without zooming. Values of performance measures of reasoning times for non-zooming are expressed as a fraction of the values with zooming. In the averages of complexity level $L3$, we only consider the ratios of those trials in which both runs (with zooming and without zooming) are completed (i.e. we do not get errors due to complexity). }
+  \label{tab:av-of-ratios-over-zoom}
+\end{table}
+
+
+
+\begin{table}[h]
+\small\addtolength{\tabcolsep}{-3pt}
+\begin{tabular}{|c|l|l|l|l|l|}
+\hline
+ Domain  				& $L4$     	& $L5$     	& $L6$  	& $L7$ 			& $L8$     \\ \hline
+Average Total Reasoning Time 	 	& 18.63\pm 5.49 & 22.73\pm 7.46 & 29.8\pm 10.55 & 41.93\pm 17.26 	& 42.99\pm 18.04\\   \hline
+Fine-Resolution Reasoning Time   	& 8.89\pm 2.99 	& 10.78\pm 4.08 & 17.77\pm 7.55 & 30.07\pm 15.48  	& 29.36\pm 15.76\\   \hline
+Coarse-Resolution Reasoning Time 	& 9.74\pm 3.26 	& 11.95\pm 4.17 & 12.03\pm 4.33 & 11.86\pm 4.12  	& 13.63\pm 5.07\\  \hline
+Average Time per Refined Plan 		& 0.95\pm 0.26 	& 0.98\pm 0.22 	& 1.64\pm 0.68 	& 2.3\pm 1.02 		& 2.3\pm 1.09\\  \hline
+\end{tabular}
+\caption[B]{Values of performance for runs using zooming only for higher complexities. Only runs using zooming are included as non-zooming runs were not able to finish any run at complexity level $L4$ and above. All runs using zooming were able to complete $100\%$ of runs at all complexity levels. Reasoning and planning times increase at a reasonable pace giving evidence of the scalability of the \math{ATI} when using zooming.}
+  \label{tab:higher-complexities}
+\end{table}
+
+
+ We make the following observations from the results obtained:
+\begin{itemize}
+\item When $\mathcal{ATI}$ is used with zooming, all runs are terminated successfully at the eight different complexity levels (see Table~\ref{tab:av-of-ratios-over-zoom). Without zooming, however, the system achieves the goal in all trials of complexity levels $L1$ and $L2$, and 65\% of the trials at complexity level $L3$, but it is unable to finish any run at level $L4$. This failure is because there are too many options to consider during fine-resolution reasoning in the absence of zooming and fine-resolution planning terminated unexpectedly (i.e., before the goal is achieved) in the absence of zooming. We did not consider necessary to run paired trials above complexity level $L4$, and we only run trials using zooming.
+
+
+\item The coarse-resolution reasoning time (the total time spent computing plans and diagnosing observations at coarse-resolution level) increases very steadily with the increase in the complexity level for runs with zooming and without zooming, as expected. The fine-resolution reasoning time (i.e. the total time spent computing plans at fine resolution and inferring fine-resolution observations to coarse-resolution observations) also increases with the complexity level for the runs with zooming, but at a reasonable steady pace. However, the increase in fine-resolution reasoning time is much more pronounced with the absence of zooming taking, in average, over 55\% longer to run at complexity level $L3$ than when using zooming.
+
+\item The average time spent in each refined plan also scales well with the level of complexity when zooming is used. When zooming is not used the average time spent in each refined plan increases dramatically and only by level $L3$ is, in average, each plan takes 85\% longer than those runs using zooming. 
+
+\item Looking at Table~\ref{tab:higher-complexities}, we can see how the reasoning time at coarse-resolution and at fine-resolution increases at a reasonlable pace when using zooming, giving evidence of the capability of the system to scale well at higher levels of complexity.
+
+\item Looking more closely at the time differences between levels $L7$ and $L8$ we observe that only the coarse-resolution reasoning time is affected. The differences between the domains in these two complexities is simply double the number of coarse-resolution objects, and we kept the refinement of each object consistent (i.e. at most two fine-resolution parts per coarse-resolution object) and the refinement of each room consistent (at 16 grid cells per room). This indicates that the potential effect of an exponential growth in time when adding of objects in the domain is dissipated with zooming.  
+\item 
+
+
+
+\end{itemize}
+These results provide evidence in support of hypothesis $H3$. 
+ 
+\end{document}
+

@@ -1,0 +1,76 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Finding next intended action given an activity and a goal
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+As long as an activity has a next action AA that is not impossible, it will occur.
+occurs(AA,I1) :- current_step(I),
+		I <= I1,
+		active_goal_activity(AN,I),
+		holds(in_progress_activity(AN),I1),
+		holds(next_action(AN,AA),I1),
+		not impossible(AA,I1),
+		#agent_action(AA).
+
+If the goal holds in a future step (given that the activity actions have occured), it means that our activy AN has a projected success.
+projected_success(AN,I) :- current_step(I),
+			I < I1,
+		     	holds(active_activity(AN),I1),
+		     	activity_goal(AN,G),
+ 			holds(G,I1).
+
+If we do not have a projected success it must have been because one of our actions cannot occur, or our activity does not reach the goal.
+-projected_success(AN,I) :-  current_step(I),
+			not projected_success(AN,I).
+
+
+If our activity has a projected success, the next intended action will be the next action of the acivity.
+intended_action(AA,I) :- current_step(I),
+                        active_goal_activity(AN,I),
+			holds(next_action(AN,AA),I),
+			projected_success(AN,I),
+			#agent_action(AA).
+
+
+
+----------------------------------------------------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Defining an active activity as futile:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Given an activie actity AN, as longa as there is a sequence of actions that are not impossible, these actions will occur.
+occurs(AA,I1) :- current_step(I),
+		I <= I1,
+		active_goal_activity(AN,I),
+		holds(in_progress_activity(AN),I1),
+		holds(next_action(AN,AA),I1),
+		not impossible(AA,I1),
+		#agent_action(AA).
+
+We determine if while having an activity AN (for goal G), will make the goal G holds  in a future step (given that our sequence of actions in the activity AN occur. 
+projected_success(AN,I) :- current_step(I),
+			I < I1,
+		     	holds(active_activity(AN),I1),
+		     	activity_goal(AN,G),
+ 			holds(G,I1).
+
+If we do not have a projected success it must have been because one of our actions cannot occur, or our activity does not reach the goal.
+-projected_success(AN,I) :-  current_step(I),
+			not projected_success(AN,I).
+
+We make it impossible to have an active activity AN which does not have a projected success, unless it has been defined as futile.
+:- current_step(I),
+	active_goal_activity(AN,I),
+	-projected_success(AN,I),
+	not futile_activity(AN,I).
+
+And we add a consistency rule to define our activity AN as futile in those cirumstances.
+futile_activity(AN,I) :+ current_step(I),
+        active_goal_activity(AN,I),
+	-projected_success(AN,I).
+
+If the active activity is defined as futile, the next intended action of the robot will be to stop the activity AN
+intended_action(stop(AN),I) :- current_step(I),
+	active_goal_activity(AN,I),
+	futile_activity(AN,I).
+
+

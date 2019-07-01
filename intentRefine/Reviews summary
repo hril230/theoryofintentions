@@ -1,0 +1,107 @@
+
+Reviewer 1.
+
+1. Need clarifications in presentation:
+
+* The authors mention several times algorithms modelling and estimating uncertainty in sensing and actuation. These algorithms are not presented in the paper at all.
+
+* The use of the action language is insufficiently presented. Concepts such as reality checks, consistency restoring rules and the use of 'step' should be (better) explained. To make the paper self-contained, parts of the action descriptions should be presented in the paper as opposed to the online code repository.
+
+* It is also unclear how the relevant information from the fine-resolution observations is added to the coarse-resolution history.
+
+* In the related work section, it would be useful to discuss how the proposed method relates to the use of abstraction in model checking.
+
+2. A key result is that for any transition in the coarse resolution transition diagram there exists a path between refined states. But this is a result of previous work.
+
+3. The presented experiments do not support the claims on scalability.
+
+Summary: I recommend that, at the very least, the issues of presentation and empirical analysis mentioned above are addressed before publication.
+
+
+
+
+Reviewer 2.
+
+1. Stable model semantics are never formally presented (nor defining an answer set, a stable model, etc.) although they feature as a core part in realising non-monotonicity and the benefits of coarse/fine reasoning in plan beliefs, corrections, etc. I suggest this be included.
+
+2. Spatial reasoning is not addressed explicitly in the paper although there is quite some active research on this, specifically in robots, and in logic programming....I strongy suggest the authors add some pointers in the "related work" section,... 
+
+3. The second future research point (that ATI could be applied to other domains) is very vague and open ended.
+
+4. The third future research point is also tying in with very established research areas like multi-agent planning etc. but as it's currently written doesn't add much to the paper.
+
+5. Why is execution and planning time (Table 2, p21) for L3 so much larger than L4 for non-zooming?
+
+
+
+
+
+Reviewer 3.
+
+
+1. Presentation issues:
+(i) the paper is a bit hard to follow for a first time reader who's not familiar with previous work in the area, more information could be conveyed into the abstract and introduction as to help the reader identify what the contributions are. 
+examples that need explanation: 
+* "intentional actions",  
+* "tightly-coupled transition diagrams"
+* "smooth transfer".  
+* what CR-Prolog is and why it is a convenient choice for this architecture (this is done much later). 
+* some citations appear to be missing here (e.g., please add a citation when CR-Prolog is first mentioned).
+
+
+
+(ii)The authors should clarify and justify some aspects of their methodology:
+* In Section 3 (and similarly elsewhere) the authors say that "We use existing implementations of probabilistic algorithms for executing concrete actions". I really would like them to specify what algorithms are used for this and briefly describe them, or at least to put a citation here. 
+
+* In Section 4.2, the authors use "TP" as a general term for a "traditional planner". I would like to know more about the traditional planner: is it a pre-existing framework or is it a bespoke one you implemented for the purpose of testing? 
+
+* On page 13, the authors explain how they tackle the problem of dealing with knowledge-producing actions. As there is an extensive body of literature on this, I wonder whether they built upon a model from the literature (please provide references in this case) or if this was built from scratch. 
+
+* More in general, the authors claim that their framework is able to deal with uncertainty in sensing and actuation, but little information is provided about the models they use.
+
+* At the bottom of page 10, you claim that "[…] the revised system description $\mathcal{D}'_c$ and history $\mathcal{H}'_c$ can be translating automatically to a CR-Prolog program […]". Is such a general translation procedure available? 
+
+* A final point I'm uncertain about is that this architecture appears to be only suitable for settings where the agent is somewhat continuously sensing the external environment, and therefore cannot really "plan" to sense information that is needed for achieving a certain goal. Am I correct in assuming this?
+
+* As a final comment, I would like to point the authors towards the paper "Modular-E and the role of elaboration tolerance in solving the qualification problem" by Kakas et al., as I find it very close to the present work for what regards recovery from unexpected observations.
+
+
+_____________________________________________________________________________________________________________________________________________________
+
+
+Typos and minor points:
+
+
+- ASP is used to stand for Answer Set Prolog, although nowadays ASP would rather stand for Answer Set Programming - minor point but something to consider changing to avoid confusion.
+
+- in the empirical experiments, the number of room cells seems rather small (e.g. 5 per room)
+
+- explain hpb acronym used predicate, line 30 p11
+
+- I suggest to add a brief (one sentence) explanation of "statements" (causal law etc.) similar to [11]
+
+- I suggest to include the raw data (or summary of) on experiments with real robots, perhaps in an appendix. It would also be useful to summarise the results in a table (even a small one) to highlight the results, even if they're discussed in text
+
+- I would suggest changing the section name "Cognitive Architecture" (Section 3), that term refers to models of the human mind in quite a distinct research field (e.g. ACT-R etc.)
+
+Typos:
+- fig 3 "n and two books in office1. " should be office 2
+- line 41 p8: "and if it not there"
+- line 23 p23 "abd"
+- line 33 p23 "are add to"
+- line 49 p20 " All trials trials included "
+- line 27 p21 "this increase in more pronounced"
+
+
+- Page 4: The claim that "Methods based on first-order logic do not support non-monotonic logical reasoning […]" is not quite right (e.g. circumscription could be implemented in first-order logic using appropriate axiom schemas), please rephrase.
+
+- Page 6: I suggest the use of "(non-)inertial fluent" instead of defined/basic fluents as I find it more natural.
+
+- Bottom of page 12: I find the notation used for functions to be non-standard. For example, instead of $move(robot,place)$ I would write something along the lines of $move:\mathcal{R}\times\mathcal{P}\rightarrow\mathcal{A}$ for sets $\mathcal{R}$, $\mathcal{P}$ and $\mathcal{A}$ of robots, places and actions respectively. Similarly elsewhere.
+
+- Bottom of page 14: I find the word "restriction" used here to be a bit strange - in fact, the "restricted" signatures are more inclusive than the non-restricted ones. Perhaps use another term?
+
+- Page 21, footnote 3: This URL is not accessible.
+
+- Page 22: Typo: "[…] reasons with domain knowledge abd belief [...]"
+
