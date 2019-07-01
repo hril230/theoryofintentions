@@ -193,12 +193,12 @@ next_to(kitchen,library).
 %% History:
 %%%%%%%%%%%%
 %% HISTORY GOES HERE
-holds(locked(library),0).
 holds(loc(rob1,library),0).
-holds(loc(book2,kitchen),0).
+holds(loc(book2,library),0).
 holds(loc(book1,library),0).
 -holds(in_hand(rob1,book1),0).
 -holds(in_hand(rob1,book2),0).
+-holds(locked(library),0).
 try_observing(rob1,in_hand(rob1,book2),0).
 try_observing(rob1,in_hand(rob1,book1),0).
 try_observing(rob1,loc(book1,library),0).

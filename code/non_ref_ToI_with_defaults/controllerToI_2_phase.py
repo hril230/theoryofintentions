@@ -51,15 +51,13 @@ def controllerToI(new_domain_info_formatting, newGoal, new_executer, initial_kno
 
 	finish = False
 	while(finish == False):
-		defaultsOutput = checkingDefaults()
-		inputForPlanning = diagnose(defaultsOutput)
+		inputForPlanning = diagnose()
 		nextAction = planning(inputForPlanning)
 
 		actionObservations = []
 		if(nextAction == 'finish'):
 			if check_goal_feedback():
 				print '\nCheck goal feedback ' + str(check_goal_feedback())
-				toi_history.add('attempt('+nextAction+','+str(currentStep)+').')
 				finish = True
 				break
 			else:
@@ -67,8 +65,7 @@ def controllerToI(new_domain_info_formatting, newGoal, new_executer, initial_kno
 				while(nextAction == 'finish'):
 					toi_history.update(['obs(my_goal,false,' + str(n) + ').' for n in range(currentStep+1)])
 					print('Wrong assumption - goal not reached !!!!! ')
-					defaultsOutput = checkingDefaults()
-					inputForPlanning = diagnose(defaultsOutput)
+					inputForPlanning = diagnose()
 					nextAction = planning(inputForPlanning)
 
 		if(nextAction == None):
@@ -94,8 +91,6 @@ def controllerToI(new_domain_info_formatting, newGoal, new_executer, initial_kno
 			toi_history.update([obs+'.' for obs in list(step_obs)])
 		currentStep += 1
 		other_relevant_information[currentStep] = []
-
-
 	other_relevant_information_list	= []
 	for step in range(currentStep):
 		step +=1
@@ -141,6 +136,9 @@ def planning(outputDefaultsAndDiagnosis):
 	f1.close()
 	print '\n' + asp_file
 	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + asp_file +' -A ',shell=True)
+	if answerSet == '':
+		toi_history.add('Too many answers at ' + asp_file)
+		return
 	while( 'intended_action' not in answerSet and 'selected_goal_holds' not in answerSet and numberSteps < currentStep + domain_info_formatting.max_number_steps_ToI_planning+3):
 		current_asp_split[0] = '#const n = '+str(numberSteps+1)+'. % maximum number of steps.'
 		current_asp_split[1] = '#const max_len = '+str(numberSteps)+'. % maximum activity_length of an activity.'
@@ -150,8 +148,10 @@ def planning(outputDefaultsAndDiagnosis):
 		f1.close()
 		print ('\n' + asp_file +' - Increasing numberSteps. ASP_ToI_Planning with ' + str(numberSteps) +' number of steps.')
 		answerSet = subprocess.check_output('java -jar ' + domain_info_formatting.sparc_path + ' ' + asp_file +' -A ',shell=True)
+		if answerSet == '':
+			toi_history.add('Too many answers at ' + asp_file)
+			return
 		numberSteps +=1
-
         possibleAnswers = answerSet.rstrip().split('\n\n')
 
 	chosenAnswer = possibleAnswers[0]
@@ -188,60 +188,6 @@ def get_fluents_relevant_before_action(action):
 def get_fluents_relevant_to_goal():
 	return Set([domain_info_formatting.get_fluent(entry) for entry in goal.split(', ') ])
 
-def checkingDefaults():
-	global current_defaults
-	global other_relevant_information
-	preASP_toi_split[toi_current_step_index +1] = 'current_step('+str(currentStep)+').'
-	preASP_toi_split[0] = '#const n = '+str(numberSteps+1)+'. % maximum number of steps.'
-	preASP_toi_split[1] = '#const max_len = '+str(numberSteps)+'. % maximum activity_length of an activity.'
-	preASP_toi_split[2] = '#const max_name = ' + str(numberActivities) + '.'
-	previous_defaults = current_defaults
-	current_defaults = Set()
-	checkingDefaultsFlag = 'finding_defaults('+str(currentStep)+').'
-	checkingDefaultsDisplayLines = ['%%%%%%\ndisplay\n%%%%%%','defined_by_default.','ab_d1.','ab_d2.']
-	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + get_toi_history_sorted_list()  + toi_activities + [checkingDefaultsFlag] + checkingDefaultsDisplayLines
-	asp_file = domain_info_formatting.asp_ToI_defaults_file
-	f1 = open(asp_file, 'w')
-	f1.write('\n'.join(current_asp_split))
-	f1.close()
-	print ('\n' + asp_file)
-	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + asp_file +' -A ',shell=True)
-	if answerSet == '' or answerSet == '\n':
-		diagnosingFlag = 'diagnosing('+str(currentStep)+').'
-		current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + get_toi_history_sorted_list() + toi_activities + [checkingDefaultsFlag] +[diagnosingFlag]+ checkingDefaultsDisplayLines + ['unobserved.']
-		asp_file = domain_info_formatting.asp_ToI_defaults_file
-		f1 = open(asp_file, 'w')
-		f1.write('\n'.join(current_asp_split))
-		f1.close()
-		print ('\nIncluding diagnosis and running: ' + asp_file)
-		answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + asp_file +' -A ',shell=True)
-		if answerSet == '' or answerSet == '\n':
-			print '!!! Something went wrong in ' + asp_file
-			raw_input()
-
-	if '{}' in answerSet:
-		if current_defaults != previous_defaults: print 'New Current Defaults: '
-		return []
-
-	answers = answerSet.rstrip().split('\n\n')
-
-	for a in [answer for answer in answers if answer]:
-		answer_defaults = Set([v for v in a.strip('{}\n').split(', ') if 'unobserved' not in v])
-		if previous_defaults==answer_defaults:
-			current_defaults = answer_defaults
-			break
-		elif previous_defaults.issubset(answer_defaults):
-			current_defaults = answer_defaults
-			break
-
-	if not current_defaults and answers[0]:
-		current_defaults = Set([v for v in answers[0].strip('{}\n').split(', ') if 'unobserved' not in v])
-
-	if current_defaults != previous_defaults:
-		other_relevant_information[currentStep] = other_relevant_information[currentStep] + list(current_defaults)
-		print 'New Current Defaults: ' + '. '.join(current_defaults)
-	#raw_input()
-	return [e+'.' for e in current_defaults]
 
 def get_toi_history_sorted_list():
 	global toi_history
@@ -256,14 +202,22 @@ def sort_activity_info(new_activity_info):
 	activity_components_sorted = [','.join(v) for v in activity_components_split]
 	return [a for a in new_activity_info if not 'component' in a] + activity_components_sorted
 
-def diagnose(defaultsOutput):
+def diagnose():
+	global toi_history
 	global current_diagnosis
+	global current_defaults
 	global other_relevant_information
 	last_diagnosis = current_diagnosis
-	diagnosingFlag = 'diagnosing('+str(currentStep)+').'
-	diagnosingDisplayLines = ['\n%%%%%%\ndisplay\n%%%%%%','unobserved.']
+	previous_defaults = current_defaults
+	current_defaults = Set()
+	flags = ['diagnosing('+str(currentStep)+').','finding_defaults('+str(currentStep)+').']
+	diagnosingDisplayLines = ['\n%%%%%%\ndisplay\n%%%%%%','unobserved.','defined_by_default.','ab_d1.','ab_d2.']
+	preASP_toi_split[toi_current_step_index +1] = 'current_step('+str(currentStep)+').'
+	preASP_toi_split[0] = '#const n = '+str(numberSteps+1)+'. % maximum number of steps.'
+	preASP_toi_split[1] = '#const max_len = '+str(numberSteps)+'. % maximum activity_length of an activity.'
+	preASP_toi_split[2] = '#const max_name = ' + str(numberActivities) + '.'
 
-	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + defaultsOutput + get_toi_history_sorted_list() + toi_activities +[diagnosingFlag]  + diagnosingDisplayLines
+	current_asp_split = preASP_toi_split[: toi_beginning_history_index +1] + get_toi_history_sorted_list() + toi_activities +flags  + diagnosingDisplayLines
 	asp = '\n'.join(current_asp_split)
 	asp_file = domain_info_formatting.asp_ToI_diagnosing_file
 	f1 = open(asp_file, 'w')
@@ -273,11 +227,15 @@ def diagnose(defaultsOutput):
 	# running only diagnosis
 	print ('\n' + asp_file)
 	answerSet = subprocess.check_output('java -jar '+domain_info_formatting.sparc_path + ' ' + asp_file +' -A ',shell=True)
+	if answerSet == '':
+		toi_history.add('Too many answers at ' + asp_file)
+		return
+	print answerSet
+
 	if answerSet == '' or answerSet == '\n':
 		print '!!! Something went wrong in ' + asp_file
 		raw_input()
 	answers = answerSet.rstrip().split('\n\n')
-
 	chosenAnswer = None
 	# the preferred choice is that in which we keep the current diagnosis
 	for a in answers:
@@ -289,17 +247,21 @@ def diagnose(defaultsOutput):
 	# if we still do not have an answer, then any answer would do.
 	if not chosenAnswer: chosenAnswer = answers[0].strip('{}').split(', ')
 	current_diagnosis = Set([v for v in chosenAnswer if 'unobserved' in v])
-
-
-
+	print '\n\nchosen answer: '
+	print chosenAnswer
 	if current_diagnosis != last_diagnosis:
 		other_relevant_information[currentStep] = [v for v in other_relevant_information[currentStep] if all('unobserved' not in e for e in other_relevant_information[currentStep])]
 		other_relevant_information[currentStep] = other_relevant_information[currentStep] + list(current_diagnosis)
 		print 'Current diagnosis: ' + ', '.join(current_diagnosis)
 
-	diagnosisAndDefaultsOutput = defaultsOutput + [e + '.' for e in current_diagnosis]
+
+	current_defaults = Set([v for v in chosenAnswer if 'unobserved' not in v])
+	if current_defaults != previous_defaults:
+		other_relevant_information[currentStep] = other_relevant_information[currentStep] + list(current_defaults)
+		print 'New Current Defaults: ' + '. '.join(current_defaults)
+
 	#raw_input()
-	return diagnosisAndDefaultsOutput
+	return [e + '.' for e in chosenAnswer if e != '']
 
 def preparePreASP_string_lists():
 	global preASP_toi_split

@@ -42,6 +42,10 @@ def run_and_write(initial_conditions_index,dic_initial_condition, initial_knowle
 	scenarioRecreated_toi = 0
 	length = 0
 
+	textfile.write("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"   $$$$$$$$$$$$$$$$$$$\n")
+	textfile.write("Goal: "+goal+"\n")
+	textfile.write("Initial World State: "+str(dic_initial_condition)+"\n")
+	textfile.write("Initial Conditions Index: "+str(initial_conditions_index)+"\n")
 
 	randomSeed = runCount
 	start_time_toi = datetime.now()
@@ -86,13 +90,14 @@ def run_and_write(initial_conditions_index,dic_initial_condition, initial_knowle
 		if('activity_length(1' in item): firstActivityLength = int(item[item.rfind(',')+1:-2])
 
 	for item in history_toi:
-	   	if('finish' in item or 'selected_goal_holds' in item or 'Goal is futile' in item or 'Goal holds' in item):
+		if('finish' in item or 'selected_goal_holds' in item or 'Goal is futile' in item or 'Goal holds' in item):
 			otherInfo.append(item)
+	   	elif('Too many answers' in item):
+			textfile.write(item)
 		else:
 			if('attempt(stop(1),' in item): firstStop = int(item[16:-2])
 			if('attempt(start(2),' in item): secondActivity = True
 			split_item = [''] * 2
-
 			split_item[0] = item[:item.rfind(',')]
 			split_item[1] = item[item.rfind(',')+1:-2]
 			historyInfoSplit.append(split_item)
@@ -122,12 +127,9 @@ def run_and_write(initial_conditions_index,dic_initial_condition, initial_knowle
 
 
 	#Writing to txt
-	textfile.write("$$$$$$$$$$$$$$$$$$$   Run number " + str(runCount) +"   $$$$$$$$$$$$$$$$$$$\n")
-	textfile.write("Running Scenario "+str(scenarioRecreated_toi)+"\n")
-	textfile.write("Goal: "+goal+"\n")
-	textfile.write("Initial World State: "+str(dic_initial_condition)+"\n")
-	textfile.write("Initial Conditions Index: "+str(initial_conditions_index)+"\n")
+
 	textfile.write("Achieved goal ToI: "+ str(achieved_goal_toi)+"\n")
+	textfile.write("Running Scenario "+str(scenarioRecreated_toi)+"\n")
 	textfile.write("\nHistory World: \n" + '\n'.join(historyWorld_toi) +"\n")
 	textfile.write("\nHistory ToI: \n"+ '\n'.join(history_toi)+'\n')
 	textfile.write("\nOther Relevant Information: \n" + '\n'.join(other_relevant_information) +"\n")
@@ -144,10 +146,12 @@ def run_and_write(initial_conditions_index,dic_initial_condition, initial_knowle
 def createConditionsAndRunAll():
 	initial_conditions_index = 0
 	## lines below is to flag that we only get one run, with condition index held by controlledRunConditions variable.
-	controlledRun = True
+	#controlledRun = True
 	controlledRun = False
-	controlledRunConditions = random.randrange(1,193,1)
-	#controlledRunConditions = 2
+	#controlledRunConditions = random.randrange(1,193,1)
+	#controlledRunConditions = 8
+	#global runCount
+	#runCount = controlledRunConditions-1
 
 	locations = domain_info_formatting.get_all_constant_subsorts('#room')
 	#Cases when rob1 is holding book1
@@ -206,7 +210,7 @@ def createConditionsAndRunAll():
 
 if __name__ == "__main__":
 	global goal
-	textfile = open('results/results_ToI_test.txt', 'w')
+	textfile = open('results/results_ToI_test.txt', 'a')
 	domain_info_formatting = DomainInfoFormatting()
 
 	initial_knowledge = []

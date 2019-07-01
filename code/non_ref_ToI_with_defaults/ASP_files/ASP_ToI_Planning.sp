@@ -1,18 +1,6 @@
-#const n = 5. % maximum number of steps.
-#const max_len = 4. % maximum activity_length of an activity.
-#const max_name = 1.
-
-% this is the original version of ToI that uses flags for diagnosing, finding defaults and planning,
-% with two added lines:
-% :- defined_by_default(F), -holds(F,I1), not observed_by(F,true,I1), not holds(F,0), I1<=I, finding_defaults(I).
-% observed_by(F,B,I) :- obs(F,B,I1), I1<=I.
-%
-% These lines maes sure that a defined_by_default is not triggered if a fluent is known to be
-% diffrent from the default value at time I, and it has not been known to be the default value before time I.
-% This will avoid the cases of defining a fluent by default and diagnosing an exogeneous action that
-% changes the value of the default, uless it is necessary (i.e unless it is known that the fluent value
-% was different some time before it was seen.
-
+#const n = 15. % maximum number of steps.
+#const max_len = 14. % maximum activity_length of an activity.
+#const max_name = 2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -66,13 +54,10 @@ activity_length(#activity_name,#index).
 
 holds(#fluent,#step).
 occurs(#action,#step).
-causes(#physical_exogenous_action,#physical_fluent,#boolean).
-constrains(#physical_fluent,#boolean,#physical_fluent,#boolean).
+
 %% used in history
 obs(#fluent, #boolean, #step).
 hpd(#action, #boolean, #step).
-observed_by(#fluent,#boolean,#step).
-holds_by(#fluent,#step).
 attempt(#action,#step).
 impossible(#action, #step).
 current_step(#step).
@@ -109,8 +94,8 @@ ab_d1(#book). % default d1 is: books are in the office1.
 ab_d2(#book). % default d2 is: cups are in office2.
 ab_dL(#book). % default dL is: books are in the library.
 defined_by_default(#inertial_fluent).
-defined_by_default_and_diagnosed(#inertial_fluent).
 
+cost().
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,8 +131,6 @@ holds(locked(L),I+1) :- occurs(exo_lock(L),I).
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
 
-causes(exo_lock(L),locked(L),true).
-causes(exo_move(O,L),loc(O,L),true).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical State Constraints %%
@@ -161,12 +144,7 @@ holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
 
 -holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1!=O2.
 
-constrains(loc(T, L1),true,loc(T, L2),false) :- L1!=L2.
-%constrains(loc(R,L),true,loc(O,L),true) :- holds(in_hand(R,O),I).
-%constrains(in_hand(R,O),true,loc(O,L),true) :- holds(loc(R,L),I).
-%constrains(in_hand(R,O1),true,in_hand(R,O2),false) :- O1!=O2.
 
-causes(A,F2,B2):-causes(A,F1,B1), constrains(F1,B1,F2,B2).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Executability Condition %%
@@ -266,6 +244,8 @@ impossible(MEA,I) :- occurs(PEA,I), #mental_exogenous_action(MEA), #physical_exo
 impossible(MAA,I) :- occurs(MEA,I), #mental_exogenous_action(MEA), #mental_agent_action(MAA).
 impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent_action(MAA).
 
+impossible(PEA,I) :- occurs(MAA,I), #physical_exogenous_action(PEA), #mental_agent_action(MAA).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% Automatic Behaviour %%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -275,21 +255,10 @@ impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% new rules
 holds(F,0) :- defined_by_default(F), not finding_defaults(I), current_step(I).
+occurs(A,I) :- unobserved(A,I).
 
-%:- defined_by_default(F), -holds(F,I1), not holds(F,0), not observed_by(F,true,I1), I1<=I, finding_defaults(I).
-%:- defined_by_default(F), -holds(F,I1),  not observed_by(F,true,I1), I1<=I, finding_defaults(I).
-%:- defined_by_default(F), -holds(F,I1), not holds(F,0), I1<=I, finding_defaults(I).
-:- defined_by_default(F), -holds(F,I1), not holds_by(F,I1), I1<=I, finding_defaults(I),unobserved(PEA,I0), causes(PEA,F,false), I0<I1.
 
-observed_by(F,B,I) :- obs(F,B,I1), I1<=I.
-holds_by(F,I) :- holds(F,I1), I1<=I.
 
-% new possible rule
-% :- defined_by_default(F),  -holds(F,I1), unobserved(PEA,I0), causes(PEA,F,false), I0<I1, I1<=I, diagnosing(I), not defined_by_default_and_diagnosed(F).
-% defined_by_default_and_diagnosed(F) :+ defined_by_default(F),  -holds(F,I1), unobserved(PEA,I0), causes(PEA,F,false), I0<I1, I1<=I, diagnosing(I).
-
-%- defined_by_default(F), -holds(F,I1),  not observed_by(F,true,I1), I1<=I, finding_defaults(I), not defined_by_default_and_diagnosed(F).
-%defined_by_default_and_diagnosed(F)  :+ defined_by_default(F), -holds(F,I1),  not observed_by(F,true,I1), I1<=I, finding_defaults(I).
 
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
@@ -351,26 +320,11 @@ holds(next_available_name(1),0).
 occurs(PEA,I) :- unobserved(PEA,I).
 
 %%(26)
-%%(26)
-
-%unobserved(PEA,I1) :+ diagnosing(I),
-%    obs(F0,B0,I0),
-%    obs(F2,B2,I2),
-%    constrains(F0,B0,F2,B2),
-%    B00 != B0,
-%    causes(PEA,F0,B0),
-%    not hpd(PEA,true,I1),
-%    I0<=I1,
-%    I1<I2,
-%    I2<=I.
-
-%%(26)
-unobserved(PEA,I1) :+ diagnosing(I),
-    not hpd(PEA,true,I1),
-    I1<I.
-
-
-
+unobserved(PEA,I1) :+ current_step(I),
+		diagnosing(I),
+		I1<I,
+		not hpd(PEA,true,I1),
+		#physical_exogenous_action(PEA).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rules for determining intended action %%
@@ -547,7 +501,7 @@ activity_component(AN,I1-I,PAA) :- current_step(I),
 % (50)
 has_component(AN,K) :- current_step(I),
 		planning(I),
-    no_activity_for_goal(G,I),
+                no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
 		activity_component(AN,K,C).
@@ -582,9 +536,6 @@ has_intention(I) :- intended_action(A,I).
 %% Flags %%
 %%%%%%%%%%%
 finding_defaults(I) | planning(I) | diagnosing(I) :- current_step(I).
-current_step(I) :- finding_defaults(I).
-current_step(I) :- planning(I).
-current_step(I) :- diagnosing(I).
 
 %%%%%%%%%%%%%%%%%
 %%Attributes:
@@ -608,10 +559,18 @@ defined_by_default(loc(B,office1)) :- holds(loc(B,office1),0), #book(B), not ab_
 %ab_dL(B) :+ #book(B), -holds(loc(B,library),0), finding_defaults(I), current_step(I).
 %defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_dL(B), finding_defaults(I), current_step(I).
 
-ab_d1(B) :- not ab_d2(B), #book(B).
+
+ab_d2(B) :+ not ab_d1(B), #book(B).
+:- ab_d2(B), not ab_d1(B), #book(B), not cost.
+cost :+ ab_d2(B), not ab_d1(B).
 
 %% Initial choices of undetermined fluents.
 holds(loc(B,library),0) | holds(loc(B,kitchen),0) | holds(loc(B,office1),0) | holds(loc(B,office2),0) :- #book(B).
+
+
+%:- unobserved(E,I1), not cost, diagnosing(I).
+%cost :+ unobserved(E,I1), diagnosing(I).
+
 
 %%%%%%%%%
 %% Goal:
@@ -623,34 +582,108 @@ holds(my_goal,I) :- holds(loc(book2,library),I), holds(loc(book1,library),I), -h
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
-current_step(3).
+current_step(14).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-unobserved(exo_move(book2,office1),2).
-ab_d1(book2).
 ab_d1(book1).
-ab_d2(book2).
 ab_d2(book1).
+ab_d2(book2).
+ab_d1(book2).
+unobserved(exo_lock(library),4).
 obs(locked(library),true,0).
-obs(loc(rob1,library),true,0).
-obs(loc(book2,library),true,0).
-obs(loc(book1,library),true,0).
+obs(loc(rob1,kitchen),true,0).
+obs(loc(book2,kitchen),true,0).
+obs(loc(book1,kitchen),true,0).
 obs(in_hand(rob1,book2),false,0).
-obs(in_hand(rob1,book1),true,0).
+obs(in_hand(rob1,book1),false,0).
 hpd(select(my_goal), true,0).
 attempt(start(1),1).
-obs(in_hand(rob1,book1),true,2).
-attempt(put_down(rob1,book1),2).
-obs(loc(book2,library),false,3).
-obs(loc(book1,library),true,3).
-obs(in_hand(rob1,book1),false,3).
+attempt(pickup(rob1,book1),2).
+obs(locked(library),true,3).
+obs(loc(book2,kitchen),true,3).
+obs(loc(book1,kitchen),true,3).
+obs(in_hand(rob1,book1),true,3).
 obs(in_hand(rob1,book2),false,3).
+attempt(unlock(rob1,library),3).
+obs(locked(library),false,4).
+obs(loc(rob1,kitchen),true,4).
+obs(loc(book2,kitchen),true,4).
+obs(loc(book1,kitchen),true,4).
+obs(in_hand(rob1,book2),false,4).
+obs(in_hand(rob1,book1),true,4).
+attempt(move(rob1,library),4).
+obs(loc(rob1,library),true,5).
+obs(loc(book2,library),false,5).
+obs(loc(book1,library),true,5).
+obs(in_hand(rob1,book1),true,5).
+obs(in_hand(rob1,book2),false,5).
+attempt(put_down(rob1,book1),5).
+obs(locked(library),true,6).
+obs(loc(rob1,library),true,6).
+obs(loc(book2,library),false,6).
+obs(loc(book1,library),true,6).
+obs(in_hand(rob1,book1),false,6).
+obs(in_hand(rob1,book2),false,6).
+attempt(move(rob1,kitchen),6).
+obs(loc(rob1,library),true,7).
+obs(loc(book2,library),false,7).
+obs(loc(book1,library),true,7).
+obs(in_hand(rob1,book2),false,7).
+obs(in_hand(rob1,book1),false,7).
+attempt(stop(1),7).
+attempt(start(2),8).
+obs(locked(library),true,9).
+attempt(unlock(rob1,library),9).
+obs(locked(library),false,10).
+obs(loc(rob1,library),true,10).
+obs(loc(book2,library),false,10).
+obs(loc(book1,library),true,10).
+obs(in_hand(rob1,book2),false,10).
+obs(in_hand(rob1,book1),false,10).
+attempt(move(rob1,kitchen),10).
+obs(loc(rob1,kitchen),true,11).
+obs(loc(book2,kitchen),true,11).
+obs(loc(book1,kitchen),false,11).
+obs(in_hand(rob1,book1),false,11).
+obs(in_hand(rob1,book2),false,11).
+attempt(pickup(rob1,book2),11).
+obs(locked(library),false,12).
+obs(loc(rob1,kitchen),true,12).
+obs(loc(book2,kitchen),true,12).
+obs(loc(book1,kitchen),false,12).
+obs(in_hand(rob1,book1),false,12).
+obs(in_hand(rob1,book2),true,12).
+attempt(move(rob1,library),12).
+obs(loc(rob1,library),true,13).
+obs(loc(book2,library),true,13).
+obs(loc(book1,library),true,13).
+obs(in_hand(rob1,book2),true,13).
+obs(in_hand(rob1,book1),false,13).
+attempt(put_down(rob1,book2),13).
+obs(loc(book2,library),true,14).
+obs(loc(book1,library),true,14).
+obs(in_hand(rob1,book2),false,14).
+obs(in_hand(rob1,book1),false,14).
 activity_goal(1,my_goal).
-activity_length(1,1).
-activity_component(1,1,put_down(rob1,book1)).
-planning(3).
+activity_length(1,8).
+activity_component(1,1,pickup(rob1,book1)).
+activity_component(1,2,unlock(rob1,library)).
+activity_component(1,3,move(rob1,library)).
+activity_component(1,4,put_down(rob1,book1)).
+activity_component(1,5,move(rob1,kitchen)).
+activity_component(1,6,pickup(rob1,book2)).
+activity_component(1,7,move(rob1,library)).
+activity_component(1,8,put_down(rob1,book2)).
+activity_goal(2,my_goal).
+activity_length(2,5).
+activity_component(2,1,unlock(rob1,library)).
+activity_component(2,2,move(rob1,kitchen)).
+activity_component(2,3,pickup(rob1,book2)).
+activity_component(2,4,move(rob1,library)).
+activity_component(2,5,put_down(rob1,book2)).
+planning(14).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 display

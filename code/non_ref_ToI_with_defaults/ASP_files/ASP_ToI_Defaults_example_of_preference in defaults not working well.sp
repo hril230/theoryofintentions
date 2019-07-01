@@ -555,7 +555,7 @@ defined_by_default(loc(B,office1)) :- holds(loc(B,office1),0), #book(B), not ab_
 %defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_dL(B), finding_defaults(I), current_step(I).
 
 
-%ab_d2(B) :- not ab_d1(B), #book(B).
+ab_d2(B) :- not ab_d1(B), #book(B).
 
 %% Initial choices of undetermined fluents.
 holds(loc(B,library),0) | holds(loc(B,kitchen),0) | holds(loc(B,office1),0) | holds(loc(B,office2),0) :- #book(B).
@@ -599,6 +599,7 @@ activity_component(1,5,move(rob1,library)).
 activity_component(1,6,put_down(rob1,book2)).
 finding_defaults(3).
 diagnosing(3).
+
 %%%%%%
 display
 %%%%%%

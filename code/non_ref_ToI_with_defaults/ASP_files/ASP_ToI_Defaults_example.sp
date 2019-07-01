@@ -1,34 +1,31 @@
-#const numSteps = 15. % maximum number of steps.
-#const max_len = 14. % maximum activity_length of an activity.
-#const max_name = 1.
- 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% This ASP is used to plan with ToI and to Diagnose with ToI.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+#const n = 9. % maximum number of steps.
+#const max_len = 8. % maximum activity_length of an activity.
+#const max_name = 2.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 sorts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-#step = 0..numSteps.
-%% CONSTANTS GO HERE
+#step = 0..n.
+#integer = 0..n.
+
+#secure_room = {library}.
+#room = #secure_room + {office1, office2}.
 #robot = {rob1}.
+#book = {book1,book2}.
+#object = #book.
 #thing = #object + #robot.
-
-#boolean = {true, false}.
-
-#integer = 0..numSteps.
 #positive_index = 1..max_len.
 #index = #positive_index + {neg1, 0}.
 #activity_name = 1..max_name.
+#boolean = {true, false}.
 
-#physical_inertial_fluent = loc(#thing, #place) + in_hand(#robot, #object).
+#physical_inertial_fluent = loc(#thing, #room) + in_hand(#robot, #object) + locked(#secure_room).
 #possible_goal = {my_goal}.
 #physical_defined_fluent = #possible_goal.
 
 #physical_fluent = #physical_inertial_fluent + #physical_defined_fluent.
 
-#physical_agent_action = move(#robot,#place) + pickup(#robot,#object) + put_down(#robot,#object).
-#physical_exogenous_action = exo_move(#object, #place).
+#physical_agent_action = move(#robot,#room) + pickup(#robot,#object) + put_down(#robot,#object) + unlock(#robot,#secure_room).
+#physical_exogenous_action = exo_move(#object, #room) + exo_lock(#secure_room).
 
 #mental_agent_action = start(#activity_name) + stop(#activity_name).
 
@@ -46,17 +43,17 @@ sorts
 
 #fluent = #inertial_fluent + #defined_fluent.
 
-%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 predicates
-%%%%%%%%%%%%%
-%% static relations
-next_to(#place,#place).
-holds(#fluent,#step).
-occurs(#action,#step).
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% static relation
+next_to(#room,#room).
 activity_goal(#activity_name,#possible_goal).
 activity_component(#activity_name,#index,#physical_agent_action).
 activity_length(#activity_name,#index).
+
+holds(#fluent,#step).
+occurs(#action,#step).
 
 %% used in history
 obs(#fluent, #boolean, #step).
@@ -64,17 +61,17 @@ hpd(#action, #boolean, #step).
 attempt(#action,#step).
 impossible(#action, #step).
 current_step(#step).
-observed_result(#action, #step).
 unobserved(#physical_exogenous_action, #step).
-number_unobserved(#integer,#step).
-explanation(#integer,#step).
-explaining(#step).
+needed(#step).
+%% flags
+finding_defaults(#step).
+diagnosing(#step).
+planning(#step).
 
 %% three different situations determined by history
 no_goal_for_activity(#activity_name, #step).
 active_goal_activity(#activity_name, #step).
 no_activity_for_goal(#possible_goal, #step).
-
 
 %% used to create a new plan
 active_goal_or_activity(#step).
@@ -82,62 +79,88 @@ some_action_occurred(#step).
 intended_action(#agent_action, #step).
 projected_success(#activity_name,#step).
 has_intention(#step).
+
 candidate(#activity_name,#step).
 has_component(#activity_name,#index).
 equal_activities(#activity_name,#activity_name).
 equal_components(#activity_name,#activity_name).
 different_component(#activity_name,#activity_name).
+
 futile_activity(#activity_name,#step).
+
 selected_goal_holds(#possible_goal,#step).
+%% defaults:
+ab_d1(#book). % default d1 is: books are in the office1.
+ab_d2(#book). % default d2 is: books are in office2.
+ab_dL(#book). % default dL is: books are in the library.
+defined_by_default(#inertial_fluent).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rules
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Inertial axiom + CWA %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CWA for Defined Fluents (Thesis: 2.12)
+-holds(F,I) :- #defined_fluent(F),
+               not holds(F,I).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  General inertia axioms... (Thesis: 2.15)
+holds(F,I+1) :- #inertial_fluent(F),
+                holds(F,I),
+                not -holds(F,I+1).
+-holds(F,I+1) :- #inertial_fluent(F),
+                 -holds(F,I),
+                 not holds(F,I+1).
+
+%%  CWA for Actions... (Thesis: 2.16)
+-occurs(A,I) :- not occurs(A,I).
+
+%% Awareness axiom.
+holds(F, 0) | -holds(F, 0) :- #inertial_fluent(F).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Causal Laws %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 holds(loc(R, L), I+1) :- occurs(move(R, L), I).
 holds(in_hand(R,O),I+1) :- occurs(pickup(R,O), I).
 -holds(in_hand(R,O),I+1) :- occurs(put_down(R,O), I).
+-holds(locked(L),I+1) :- occurs(unlock(R,L),I).
+holds(locked(L),I+1) :- occurs(exo_lock(L),I).
 holds(loc(O,L),I+1) :- occurs(exo_move(O,L),I).
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical State Constraints %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 next_to(L1,L2) :- next_to(L2,L1).
--holds(loc(T, L2), I) :- holds(loc(T, L1), I), L1!=L2.
-holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
--holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1!=O2.
 -next_to(L1,L2) :- not next_to(L1,L2).
+
+-holds(loc(T, L2), I) :- holds(loc(T, L1), I), L1!=L2.
+
+holds(loc(O,L), I) :- holds(loc(R,L), I) , holds(in_hand(R,O),I).
+
+-holds(in_hand(R, O2), I) :- holds(in_hand(R, O1), I), O1!=O2.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Physical Executability Condition %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 -occurs(A,I) :- impossible(A,I).
-%% (Desc: 10 - 14)
 impossible(move(R,L),I) :- holds(loc(R,L),I).
 impossible(move(R,L2),I) :- holds(loc(R,L1),I), -next_to(L1,L2).
+impossible(move(R,L1),I) :- holds(locked(L1),I).
+impossible(move(R,L2),I) :- holds(loc(R,L1),I), holds(locked(L1),I).
+impossible(unlock(R,L), I) :- -holds(locked(L),I).
+impossible(unlock(R,L1),I) :- holds(loc(R,L2),I), -next_to(L1,L2), L1 != L2.
 impossible(put_down(R,O), I) :- -holds(in_hand(R,O), I).
 impossible(pickup(R,O1), I) :- holds(in_hand(R,O2), I).
-impossible(pickup(R,O), I) :- holds(loc(R,L), I), not holds(loc(O,L), I).
+impossible(pickup(R,O), I) :- holds(loc(R,L1), I), holds(loc(O,L2), I) , L1 != L2.
 impossible(exo_move(O,L),I) :- holds(loc(O,L),I).
+impossible(exo_move(O,L),I) :- holds(locked(L),I).
+impossible(exo_move(O,L2),I) :- holds(loc(O,L1),I), holds(locked(L1),I).
 impossible(exo_move(O,L),I) :- holds(in_hand(R,L),I).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Inertial axiom + CWA %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% CWA for Defined Fluents (Thesis: 2.12)
--holds(F,I) :- #defined_fluent(F), not holds(F,I).
-
-%%  General inertia axioms... (Thesis: 2.15)
-holds(F,I+1) :- #inertial_fluent(F),  holds(F,I), not -holds(F,I+1).
--holds(F,I+1) :- #inertial_fluent(F), -holds(F,I), not holds(F,I+1).
-
-%%  CWA for Actions... (Thesis: 2.16)
--occurs(A,I) :- not occurs(A,I).
+impossible(exo_lock(L),I) :- holds(locked(L),I).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Theory of Intention %%%%%%%%%%%%%%%%%%%%%%%
@@ -145,6 +168,7 @@ holds(F,I+1) :- #inertial_fluent(F),  holds(F,I), not -holds(F,I+1).
 %% (1)
 holds(current_action_index(AN,0), I+1) :- occurs(start(AN),I).
 holds(current_action_index(AN,neg1), I+1) :- occurs(stop(AN),I).
+
 
 %% (2)
 holds(active_goal(G),I+1) :- occurs(select(G),I), not holds(G,I).
@@ -217,15 +241,19 @@ impossible(MEA,I) :- occurs(PEA,I), #mental_exogenous_action(MEA), #physical_exo
 impossible(MAA,I) :- occurs(MEA,I), #mental_exogenous_action(MEA), #mental_agent_action(MAA).
 impossible(MEA,I) :- occurs(MAA,I), #mental_exogenous_action(MEA), #mental_agent_action(MAA).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% Automatic Behaviour %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Automatic Behaviour %%
-%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% History records and initial state rules %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Awareness axiom.
-holds(F,0) | -holds(F,0) :- #physical_inertial_fluent(F).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% new rules
+holds(F,0) :- defined_by_default(F), not finding_defaults(I), current_step(I).
+occurs(A,I) :- unobserved(A,I).
+
+
+
 
 %%  (17)
 holds(F, 0) :- obs(F, true, 0).
@@ -244,7 +272,7 @@ occurs(AA,I) :- current_step(I1),
    		I<I1,
    		attempt(AA,I),
    		not impossible(AA,I),
-		#agent_action(AA).
+      #agent_action(AA).
 
 :- current_step(I1),
 	I<I1,
@@ -255,20 +283,19 @@ occurs(AA,I) :- current_step(I1),
 %% (21)
 impossible(select(G),I) :- current_step(I1),
 			I<I1,
-   			occurs(select(G1),I),
+      occurs(select(G1),I),
 			G1 != G.
 impossible(select(G),I) :- current_step(I1),
 			I<I1,
-   			holds(active_activity(AN),I).
+      holds(active_activity(AN),I).
 impossible(select(G),I) :- current_step(I1),
 			I<I1,
-   			holds(active_goal(G1),I).
+      holds(active_goal(G1),I).
 
 %  (22)
 holds(current_action_index(AN,neg1),0).
 -holds(active_goal(G),0).
 holds(next_available_name(1),0).
-
 
 % (24)
 :- current_step(I1),
@@ -285,27 +312,19 @@ holds(next_available_name(1),0).
 %% Diagnosys Generation %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% (25)
-occurs(PEA,I1) :+ current_step(I),
-		explaining(I),
-		I1<I,
-		#physical_exogenous_action(PEA).
+occurs(PEA,I) :- unobserved(PEA,I).
+
 %%(26)
-unobserved(PEA,I1) :- current_step(I),
-		explaining(I),
+unobserved(PEA,I1) :+ current_step(I),
+		diagnosing(I),
 		I1<I,
-		occurs(PEA,I1),
 		not hpd(PEA,true,I1),
 		#physical_exogenous_action(PEA).
-
-%%(27)
-number_unobserved(N,I) :- current_step(I),
-			explaining(I),
-			N = #count{EX:unobserved(EX,IX)}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Rules for determining intended action %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% (29)
+%% (28)
 different_component(AN,AN1) :- activity_component(AN,K,AA),
 	activity_component(AN1,K,AA1),
 	AA != AA1.
@@ -319,36 +338,46 @@ equal_activities(AN,AN1) :- activity_goal(AN,G),
 
 :- equal_activities(AN,AN1), AN != AN1.
 
-%  (30)
+%  (29)
 no_activity_for_goal(G,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			holds(active_goal(G),I),
-                        -holds(in_progress_goal(G),I).
+      -holds(in_progress_goal(G),I).
 
-%% (31)
+%% (30)
 no_goal_for_activity(AN,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			holds(active_activity(AN),I),
 			activity_goal(AN,G),
 			-holds(active_goal(G),I).
 
-%% (32)
+%% (31)
 active_goal_activity(AN,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			holds(in_progress_activity(AN),I).
 
-
-% (22)
+% (32)
 intended_action(finish,I) :- current_step(I),
-			explanation(N, I),
+			planning(I),
 			no_goal_for_activity(AN,I).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Finding intended action for active_goal_activity
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% (34)
+% (33)
+selected_goal_holds(G,I) :- current_step(I),
+    holds(G,I),
+    occurs(select(G),I1),
+    planning(I),
+    I1 <= I.
+
+% (34)
+intended_action(finish,I) :- current_step(I),
+    planning(I),
+    selected_goal_holds(G,I).
+
+
+%%%%%% Finding intended action for active_goal_activity
+%% (35)
 occurs(AA,I1) :- current_step(I),
-		explanation(N, I),
+		planning(I),
 		I <= I1,
 		active_goal_activity(AN,I),
 		holds(in_progress_activity(AN),I1),
@@ -356,96 +385,96 @@ occurs(AA,I1) :- current_step(I),
 		not impossible(AA,I1),
 		#agent_action(AA).
 
-% (35)
-projected_success(AN,I) :- current_step(I),
-			explanation(N, I),
-			I < I1,
-		     	holds(active_activity(AN),I1),
-		     	activity_goal(AN,G),
- 			holds(G,I1).
 % (36)
+projected_success(AN,I) :- current_step(I),
+			planning(I),
+			I < I1,
+      holds(active_activity(AN),I1),
+      activity_goal(AN,G),
+ 			holds(G,I1).
+% (37)
 -projected_success(AN,I) :-  current_step(I),
-			explanation(N, I),
+			planning(I),
 			not projected_success(AN,I).
 
 
-%% (37)
+%% (38)
 intended_action(AA,I) :- current_step(I),
-			explanation(N, I),
-                        active_goal_activity(AN,I),
+			planning(I),
+      active_goal_activity(AN,I),
 			holds(next_action(AN,AA),I),
 			projected_success(AN,I),
 			#agent_action(AA).
 
-%% (38)
+%% (39)
 :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	active_goal_activity(AN,I),
 	-projected_success(AN,I),
 	not futile_activity(AN,I).
 
-%% (39)
+%% (40)
 futile_activity(AN,I) :+ current_step(I),
-	explanation(N, I),
-        active_goal_activity(AN,I),
+	planning(I),
+  active_goal_activity(AN,I),
 	-projected_success(AN,I).
 
-%% (40)
+%% (41)
 intended_action(stop(AN),I) :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	active_goal_activity(AN,I),
 	futile_activity(AN,I).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Creating a new activity by specifying its goal, activity_components and activity_length.%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% (41)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% (42)
 candidate(AN,I) :-  current_step(I),
-		explanation(N, I),
+		planning(I),
 		no_activity_for_goal(G,I),
 		holds(next_available_name(AN),I).
 
-%% (42)
+%% (43)
 activity_goal(AN,G) :-  current_step(I),
-		explanation(N, I),
-            	no_activity_for_goal(G,I),
+		planning(I),
+    no_activity_for_goal(G,I),
 		candidate(AN,I).
 
-%%  (43)
+%%  (44)
 impossible(start(AN),I) :-  current_step(I),
-			explanation(N, I),
-                        no_activity_for_goal(G,I),
-                        activity_goal(AN,G),
+			planning(I),
+      no_activity_for_goal(G,I),
+      activity_goal(AN,G),
 			occurs(start(AN1),I),
 	 		AN != AN1.
 
-%%  (44)
+%%  (45)
 occurs(start(AN),I) :- current_step(I),
-			explanation(N, I),
-         	     	no_activity_for_goal(G,I),
+			planning(I),
+      no_activity_for_goal(G,I),
 			candidate(AN,I),
-         	     	activity_goal(AN,G),
+      activity_goal(AN,G),
 			not impossible(start(AN),I).
 
-%% (48)
+%% (46)
 some_action_occurred(I1) :-  current_step(I),
-			explanation(N, I),
+			planning(I),
 			I <= I1,
 			occurs(A,I1).
 
-%% (49) original
+%% (47) original
 occurs(PAA,I1) :+ current_step(I),
-		explanation(N, I),
-                no_activity_for_goal(G,I),
+		planning(I),
+    no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
 		I < I1,
 		some_action_occurred(I1-1),
 		#physical_agent_action(PAA).
 
-% (50)
+% (48)
 activity_component(AN,I1-I,PAA) :- current_step(I),
-		explanation(N, I),
+		planning(I),
 		I < I1,
 		no_activity_for_goal(G,I),
 		candidate(AN,I),
@@ -453,9 +482,9 @@ activity_component(AN,I1-I,PAA) :- current_step(I),
 		occurs(PAA,I1),
 		#physical_agent_action(PAA).
 
-% (51)
+% (49)
 :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	no_activity_for_goal(G,I),
 	candidate(AN,I),
 	activity_component(AN,K,PAA1),
@@ -464,90 +493,134 @@ activity_component(AN,I1-I,PAA) :- current_step(I),
 	#physical_agent_action(PAA1),
 	#physical_agent_action(PAA2).
 
-% (52)
+% (50)
 has_component(AN,K) :- current_step(I),
-		explanation(N, I),
+		planning(I),
                 no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
 		activity_component(AN,K,C).
 
-% (53)
+% (51)
 activity_length(AN,K) :- current_step(I),
-		explanation(N, I),
-                no_activity_for_goal(G,I),
+		planning(I),
+    no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
 		has_component(AN,K),
-                not has_component(AN,K+1).
+    not has_component(AN,K+1).
 
-% (54)
+% (52)
 intended_action(start(AN),I) :- current_step(I),
-		explanation(N, I),
+		planning(I),
 		no_activity_for_goal(G,I),
 		candidate(AN,I),
 		occurs(start(AN),I),
 		projected_success(AN,I).
 
-%% latest addition
-selected_goal_holds(G,I) :- current_step(I),
-		holds(G,I),
-		occurs(select(G),I1),
-		I1 <= I.
-
-intended_action(finish,I) :- current_step(I),
-			explanation(N,I),
-			selected_goal_holds(G,I).
-
-%%%%%%%%%%%%
-%% Engine %%
-%%%%%%%%%%%%
-% (55)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% Engine %%%%%%%%%%%%%%%%
+% (53)
 has_intention(I) :- intended_action(A,I).
 :- current_step(I),
-	explanation(N, I),
+	planning(I),
 	0<I,
 	not has_intention(I).
 
+%%%%%%%%%%%
+%% Flags %%
+%%%%%%%%%%%
+finding_defaults(I) | planning(I) | diagnosing(I) :- current_step(I).
+current_step(I) :- finding_defaults(I).
+current_step(I) :- planning(I).
+current_step(I) :- diagnosing(I).
 
-%%%%%%%%%%%%%%%%
-%% Attributes.
-%%%%%%%%%%%%%%%%
-%% ATTRIBUTES GO HERE
+%%%%%%%%%%%%%%%%%
+%%Attributes:
+%%%%%%%%%%%%%%%%%%%
+next_to(office2,office1).
+next_to(office1,library).
 
+%%%%%%%%%%%%
+%% Defaults:
+%%%%%%%%%%%%
+holds(loc(B,office2),0):- #book(B), not ab_d2(B), finding_defaults(I), current_step(I).
+ab_d2(B) :+ #book(B), -holds(loc(B,office2),0), finding_defaults(I), current_step(I).
+defined_by_default(loc(B,office2)) :- holds(loc(B,office2),0), #book(B), not ab_d2(B), finding_defaults(I), current_step(I).
+
+holds(loc(B,office1),0):- #book(B), not ab_d1(B), finding_defaults(I), current_step(I).
+ab_d1(B) :+ #book(B), -holds(loc(B,office1),0), finding_defaults(I), current_step(I).
+defined_by_default(loc(B,office1)) :- holds(loc(B,office1),0), #book(B), not ab_d1(B), finding_defaults(I), current_step(I).
+
+%holds(loc(B,library),0):- #book(B), not ab_dL(B), finding_defaults(I), current_step(I).
+%ab_dL(B) :+ #book(B), -holds(loc(B,library),0), finding_defaults(I), current_step(I).
+%defined_by_default(loc(B,library)) :- holds(loc(B,library),0), #book(B), not ab_dL(B), finding_defaults(I), current_step(I).
+
+
+ab_d2(B) :- not ab_d1(B), #book(B).
+
+needed(I1) :+ ab_d1(B), unobserved(exo_move(B,office1),I1), obs(loc(B,office1),true,I2), I1<=I2,  finding_defaults(I), diagnosing(I).
+needed(I1) :+ ab_d2(B), unobserved(exo_move(B,office2),I1), obs(loc(B,office2),true,I2), I1<=I2,  finding_defaults(I), diagnosing(I).
+
+:- ab_d1(B), unobserved(exo_move(B,office1),I1), obs(loc(B,office1),true,I2), I1<=I2,  not needed(I1), finding_defaults(I), diagnosing(I).
+:- ab_d2(B), unobserved(exo_move(B,office2),I1), obs(loc(B,office2),true,I2), I1<=I2,  not needed(I1), finding_defaults(I), diagnosing(I).
+
+%% Initial choices of undetermined fluents.
+holds(loc(B,library),0)  | holds(loc(B,office1),0) | holds(loc(B,office2),0) :- #book(B).
 
 %%%%%%%%%
 %% Goal:
 %%%%%%%%%
 %% GOAL GOES HERE
-
+holds(my_goal,I) :-  holds(loc(book1,library),I), -holds(in_hand(rob1,book1),I).
 
 %%%%%%%%%%%%%%%%%
 %% Current Step:
 %%%%%%%%%%%%%%%%%
 %% CURRENT STEP GOES HERE
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initial State and history:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HISTORY GOES HERE
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+obs(locked(library),false,0).
+obs(loc(rob1,library),true,0).
+obs(loc(book1,library),false,0).
+obs(in_hand(rob1,book1),false,0).
+obs(loc(book2,library),false,0).
+hpd(select(my_goal), true,0).
+attempt(start(1),1).
+attempt(move(rob1,office1),2).
+obs(loc(rob1,office1),true,3).
+obs(loc(book1,office1),false,3).
+obs(loc(book2,office1),false,3).
+obs(in_hand(rob1,book1),false,3).
+activity_goal(1,my_goal).
+activity_length(1,4).
+activity_component(1,1,move(rob1,office1)).
+activity_component(1,2,pickup(rob1,book1)).
+activity_component(1,3,move(rob1,library)).
+activity_component(1,4,put_down(rob1,book1)).
+attempt(stop(1),3).
+attempt(start(2),4).
+attempt(move(rob1,office2),5).
+obs(loc(rob1,office2),true,6).
+obs(loc(book1,office2),false,6).
+obs(in_hand(rob1,book1),false,6).
+obs(loc(book2,office2),true,6).
+activity_length(2,5).
+activity_component(2,1,move(rob1,office2)).
+activity_component(2,2,pickup(rob1,book1)).
+activity_component(2,3,move(rob1,office1)).
+activity_component(2,4,move(rob1,library)).
+activity_component(2,5,put_down(rob1,book1)).
+finding_defaults(6).
+diagnosing(6).
+%%%%%%
 display
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-obs.
-hpd.
-attempt.
-activity_goal.
-activity_component.
-futile_activity.
-activity_length.
-intended_action.
-number_unobserved.
-selected_goal_holds.
+%%%%%%
+%defined_by_default.
+ab_d1.
+ab_d2.
 unobserved.
-holds(loc(A,B),0).
-holds(in_hand(R,B),0).
--holds(in_hand(R,B),0).
+needed.
